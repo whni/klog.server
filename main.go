@@ -7,36 +7,24 @@ import (
 	"golang.org/x/sys/unix"
 	"gopkg.in/natefinch/lumberjack.v2" // go get -u gopkg.in/natefinch/lumberjack.v2
 	"io"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"runtime/debug"
 	"time"
 )
 
-var counter uint64
-var startTime time.Time
+var serverStartTime time.Time
 
-const LOG_FILE_NAME string = "/tmp/vlog_server.log"
+const STD_LOG_FILE string = "/tmp/vlog_server.log"
+const CRASH_LOG_FILE string = "/tmp/vlog_crash.log"
 
 var LJ_LOGGER = &lumberjack.Logger{
-	Filename:   LOG_FILE_NAME,
+	Filename:   STD_LOG_FILE,
 	MaxSize:    80, // max file size is 80M
 	MaxBackups: 10,
 }
-var PROFILE_FILE_NAME string = "/tmp/cpuprofile"
-var flagCpuprofile = &PROFILE_FILE_NAME
-var MEMPROFILE_FILE_NAME string = "/tmp/memprofile"
-var EMPTY_STR string = ""
-var flagMemprofile = &EMPTY_STR
 
-func Wrap(h http.HandlerFunc) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		h(c.Writer, c.Request)
-	}
-}
-
-func checkFileSize(file string) int64 {
+func CheckFileSize(file string) int64 {
 	fi, e := os.Stat(file)
 	if e != nil {
 		return 0
@@ -46,8 +34,8 @@ func checkFileSize(file string) int64 {
 	return size
 }
 
-func initCrashLog(file string) {
-	if checkFileSize(file) > 1024*1024 {
+func InitCrashLog(file string) {
+	if CheckFileSize(file) > 1024*1024 {
 		os.Rename(file, file+".old")
 	}
 	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
@@ -66,23 +54,15 @@ func initCrashLog(file string) {
 }
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe(":6060", nil))
-	}()
 	// global serverConfig variable
-	if len(os.Args) == 1 {
-		serverConfig = ReadServerConfig("config.json")
-	} else {
-		serverConfig = ReadServerConfig("test.json")
-	}
-
+	serverConfig = ReadServerConfig("config.json")
 	InitDefServerConfig()
 
 	gin.SetMode(gin.DebugMode)
 	gin.DefaultWriter = LJ_LOGGER
-	initCrashLog("/tmp/fcl_crash.log")
+	InitCrashLog(CRASH_LOG_FILE)
 
-	startTime = time.Now()
+	serverStartTime = time.Now()
 	//r := gin.Default()
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -104,6 +84,11 @@ func main() {
 
 	debug.SetTraceback("crash")
 
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 	/*
 			for api, handler := range Api_maps {
 				func_map := handler
@@ -135,5 +120,5 @@ func main() {
 
 		DbInit()
 	*/
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

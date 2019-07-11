@@ -1,7 +1,0 @@
-{
- "ip": "127.0.0.1",
- "port": "8080",
- "redis": "127.0.0.1:6379",
- "recorders":[{"id": 123, "name": "frc1", "ipaddr": "172.30.144.6", "port": 8550, "ssl": false, "httpsport": 443, "enabled": true, "username": "admin", "password": "172.30.144.6"},
-   {"id": 456,"name": "frc2", "ipaddr": "172.30.144.175", "port": 8550, "ssl": false, "httpsport": 443, "enabled": false, "username": "admin", "password": "172.30.144.175"}]
-}
