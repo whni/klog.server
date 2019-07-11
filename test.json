@@ -1,0 +1,9 @@
+{
+    "RedisDBAddr": "127.0.0.1:6379",
+    "JWT": false,
+    "ImageTestStart": false,
+    "NginxRoot": "/media",
+    "NginxGUIPrefix": "mediaassets",
+    "FacePoseTestMethod": "mtcnn",
+    "FaceClusterCntLimit": 200
+}
