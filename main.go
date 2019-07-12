@@ -1,69 +1,45 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
-	"golang.org/x/sys/unix"
-	"gopkg.in/natefinch/lumberjack.v2" // go get -u gopkg.in/natefinch/lumberjack.v2
-	"io"
 	_ "net/http/pprof"
-	"os"
 	"runtime/debug"
 	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/natefinch/lumberjack.v2" // go get -u gopkg.in/natefinch/lumberjack.v2
 )
 
 var serverStartTime time.Time
 
-const STD_LOG_FILE string = "/tmp/vlog_server.log"
-const CRASH_LOG_FILE string = "/tmp/vlog_crash.log"
+const (
+	stdLogFile = "/tmp/vlog_server.log"
+	errLogFile = "/tmp/vlog_crash.log"
+)
 
-var LJ_LOGGER = &lumberjack.Logger{
-	Filename:   STD_LOG_FILE,
+var ljLogger = &lumberjack.Logger{
+	Filename:   stdLogFile,
 	MaxSize:    80, // max file size is 80M
 	MaxBackups: 10,
 }
 
-func CheckFileSize(file string) int64 {
-	fi, e := os.Stat(file)
-	if e != nil {
-		return 0
-	}
-	// get the size
-	size := fi.Size()
-	return size
-}
-
-func InitCrashLog(file string) {
-	if CheckFileSize(file) > 1024*1024 {
-		os.Rename(file, file+".old")
-	}
-	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
-	if err != nil {
-		log.Fatalf("Failed to open log file: %v", err)
-	}
-	_, err = f.Seek(0, io.SeekEnd)
-	if err != nil {
-		log.Errorf("Failed to seek log file to end: %v", err)
-	}
-	// redirect stderr
-	err = unix.Dup2(int(f.Fd()), int(os.Stderr.Fd()))
-	if err != nil {
-		log.Fatalf("Failed to redirect stderr to file: %v", err)
-	}
+var ljErrLogger = &lumberjack.Logger{
+	Filename:   errLogFile,
+	MaxSize:    80, // max file size is 80M
+	MaxBackups: 10,
 }
 
 func main() {
+	serverStartTime = time.Now()
+
 	// global serverConfig variable
 	serverConfig = ReadServerConfig("config.json")
 	InitDefServerConfig()
 
 	gin.SetMode(gin.DebugMode)
-	gin.DefaultWriter = LJ_LOGGER
-	InitCrashLog(CRASH_LOG_FILE)
+	gin.DefaultWriter = ljLogger
+	gin.DefaultErrorWriter = ljErrLogger
 
-	serverStartTime = time.Now()
-	//r := gin.Default()
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
@@ -120,5 +96,6 @@ func main() {
 
 		DbInit()
 	*/
+
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

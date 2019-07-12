@@ -8,36 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type TestConfig struct {
-	IP         string `json:"ip"`
-	Port       string `json:"port"`
-	RDS        string `json:"redis"`
-	test_token string
-	baseurl    string
-	url        string
-}
-
-var testConfig TestConfig
-
-func ReadtestConfig(ConfigFile string) {
-	configHandle, err := os.Open(ConfigFile)
-	if err != nil {
-		log.Printlnml(log.InfoLevel, log.ServerConfigModule, "Config File Open Error:", err)
-		return
-	}
-	defer configHandle.Close()
-	configBytes, err := ioutil.ReadAll(configHandle)
-	if err != nil {
-		log.Printlnml(log.InfoLevel, log.ServerConfigModule, "Config File Read Error:", err)
-		return
-	}
-	if err = json.Unmarshal(configBytes, &testConfig); err != nil {
-		log.Printlnml(log.InfoLevel, log.ServerConfigModule, "Config File Content format Error:", err)
-		return
-	}
-	return
-}
-
 type ServerConfig struct {
 	RedisDBAddr         string  `json:"RedisDBAddr"`
 	JWT                 bool    `json:"JWT"`
@@ -58,12 +28,12 @@ var serverConfig ServerConfig
 func ReadServerConfig(ConfigFile string) ServerConfig {
 	configHandle, err := os.Open(ConfigFile)
 	if err != nil {
-		log.Printlnml(log.InfoLevel, log.ServerConfigModule, "Config File Open Error:", err)
+		log.Println(log.InfoLevel, "Config File Open Error:", err)
 	}
 	defer configHandle.Close()
 	configBytes, err := ioutil.ReadAll(configHandle)
 	if err != nil {
-		log.Printlnml(log.InfoLevel, log.ServerConfigModule, "Config File Read Error:", err)
+		log.Println(log.InfoLevel, "Config File Read Error:", err)
 	}
 	var serverconfig ServerConfig
 	if err = json.Unmarshal(configBytes, &serverconfig); err != nil {
