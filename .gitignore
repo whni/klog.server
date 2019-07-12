@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+bird.vlog
 
 # Test binary, build with `go test -c`
 *.test
