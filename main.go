@@ -19,11 +19,12 @@ func main() {
 
 	// logging setup
 	logging = loggingInitSetup(serverConfig)
+	loggingErrRedirect(errLogFile)
 
 	// gin web framework
 	gin.SetMode(gin.DebugMode)
 	gin.DefaultWriter = ljGinLogger
-	gin.DefaultErrorWriter = ljCrashLogger
+	//gin.DefaultErrorWriter = ljErrLogger
 
 	r := gin.New()
 	r.Use(gin.Logger())
