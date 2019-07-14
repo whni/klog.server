@@ -1,50 +1,33 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	_ "net/http/pprof"
 	"runtime/debug"
 	"time"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"gopkg.in/natefinch/lumberjack.v2" // go get -u gopkg.in/natefinch/lumberjack.v2
 )
 
 var serverStartTime time.Time
-
-const (
-	stdLogFile = "/tmp/vlog_server.log"
-	errLogFile = "/tmp/vlog_crash.log"
-)
-
-var ljLogger = &lumberjack.Logger{
-	Filename:   stdLogFile,
-	MaxSize:    80, // max file size is 80M
-	MaxBackups: 10,
-}
-
-var ljErrLogger = &lumberjack.Logger{
-	Filename:   errLogFile,
-	MaxSize:    80, // max file size is 80M
-	MaxBackups: 10,
-}
 
 func main() {
 	serverStartTime = time.Now()
 
 	// global serverConfig variable
-	serverConfig = ReadServerConfig("config.json")
-	InitDefServerConfig()
+	serverConfig = readServerConfig("config.json")
+	initDefaultServerConfig(serverConfig)
 
+	// logging setup
+	logging = loggingInitSetup(serverConfig)
+
+	// gin web framework
 	gin.SetMode(gin.DebugMode)
-	gin.DefaultWriter = ljLogger
-	gin.DefaultErrorWriter = ljErrLogger
+	gin.DefaultWriter = ljGinLogger
+	gin.DefaultErrorWriter = ljCrashLogger
 
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	//	log.SetOutput(gin.DefaultWriter)
-	//	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// CORS middleware
 	r.Use(cors.New(cors.Config{

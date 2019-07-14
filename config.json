@@ -1,14 +1,4 @@
 {
-    "RedisDBAddr": "127.0.0.1:6379",
-    "JWT": true,
-    "ImageTestStart": false,
-    "NginxRoot": "/media",
-    "NginxGUIPrefix": "mediaassets",
-    "FacePoseTestMethod": "mtcnn",
-    "FaceClusterCntLimit": 200,
-    "HistoryStreamLimit" :10,
-    "DiskUsageLimit": 0.95,
-  	"GUIVideoDiskLimit"  :10240,
-  	"AIVideoDiskLimit"   :10240,
-  	"AIPictureDiskLimit" :10240
+    "loggingReleaseMode": false,
+    "loggingLevel": "debug"
 }

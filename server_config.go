@@ -4,28 +4,20 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
 
+// ServerConfig global server config
 type ServerConfig struct {
-	RedisDBAddr         string  `json:"RedisDBAddr"`
-	JWT                 bool    `json:"JWT"`
-	ImageTestStart      bool    `json:"ImageTestStart"`
-	NginxRoot           string  `json:"NginxRoot"`
-	NginxGUIPrefix      string  `json:"NginxGUIPrefix"`
-	FacePoseTestMethod  string  `json:"FacePoseTestMethod"`
-	FaceClusterCntLimit int     `json:FaceClusterCntLimit`
-	HistoryStreamLimit  uint32  `json:"HistoryStreamLimit"`
-	DiskUsageLimit      float64 `json:"DiskUsageLimit"`
-	GUIVideoDiskLimit   uint64  `json:"GUIVideoDiskLimit"`
-	AIVideoDiskLimit    uint64  `json:"AIVideoDiskLimit"`
-	AIPictureDiskLimit  uint64  `json:"AIPictureDiskLimit"`
+	LoggingReleaseMode bool   `json:"loggingReleaseMode"`
+	LoggingLevel       string `json:"loggingLevel"`
 }
 
-var serverConfig ServerConfig
+var serverConfig *ServerConfig
 
-func ReadServerConfig(ConfigFile string) ServerConfig {
+func readServerConfig(ConfigFile string) *ServerConfig {
 	configHandle, err := os.Open(ConfigFile)
 	if err != nil {
 		log.Println(log.InfoLevel, "Config File Open Error:", err)
@@ -39,25 +31,12 @@ func ReadServerConfig(ConfigFile string) ServerConfig {
 	if err = json.Unmarshal(configBytes, &serverconfig); err != nil {
 		panic(err)
 	}
-	return serverconfig
+	return &serverconfig
 }
 
-func InitDefServerConfig() {
-	// setup global nginx directories
-	if serverConfig.NginxRoot == "" {
-		serverConfig.NginxRoot = "/media"
-	}
-	if serverConfig.NginxGUIPrefix == "" {
-		serverConfig.NginxGUIPrefix = "mediaassets"
-	}
-	if serverConfig.FaceClusterCntLimit == 0 {
-		serverConfig.FaceClusterCntLimit = 200
-	}
-
-	if serverConfig.HistoryStreamLimit == 0 {
-		serverConfig.HistoryStreamLimit = 10
-	}
-	if serverConfig.DiskUsageLimit == 0 {
-		serverConfig.DiskUsageLimit = 0.95
+func initDefaultServerConfig(sc *ServerConfig) {
+	sc.LoggingLevel = strings.ToLower(sc.LoggingLevel)
+	if sc.LoggingLevel == "" {
+		sc.LoggingLevel = "debug"
 	}
 }
