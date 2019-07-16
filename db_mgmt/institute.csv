@@ -1,0 +1,3 @@
+db_id,institute_id,institute_name,address,country_code
+NULL,"ins-1001","Institute No 1","180 Elm Ct, Apt 703, 94086, CA","USA"
+NULL,"ins-1002","Institute No 2","10 Xitucheng Rd, Haidian Dist, 100876, Beijing","CHN"

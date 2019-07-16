@@ -1,5 +1,4 @@
 DROP DATABASE IF EXISTS vlog;
-
 CREATE DATABASE vlog;
 USE vlog;
 
@@ -12,7 +11,10 @@ CREATE TABLE institute  (
     country_code VARCHAR(3),
     PRIMARY KEY (db_id)
 ) ENGINE InnoDB;
-ALTER TABLE institute AUTO_INCREMENT=1000;
+ALTER TABLE institute AUTO_INCREMENT=1001;
+LOAD DATA LOCAL INFILE './institute.csv' INTO TABLE institute
+FIELDS ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
 /* table for class info */
 CREATE TABLE class (
@@ -26,7 +28,11 @@ CREATE TABLE class (
     ON UPDATE CASCADE
     ON DELETE SET NULL
 ) ENGINE InnoDB;
-ALTER TABLE class AUTO_INCREMENT=1000;
+ALTER TABLE class AUTO_INCREMENT=1001;
+ALTER TABLE class AUTO_INCREMENT=1001;
+LOAD DATA LOCAL INFILE './class.csv' INTO TABLE class
+FIELDS ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
 /* table for teacher info */
 CREATE TABLE teacher (
@@ -40,7 +46,7 @@ CREATE TABLE teacher (
     email VARCHAR(127),
     PRIMARY KEY (db_id)
 ) ENGINE InnoDB;
-ALTER TABLE teacher AUTO_INCREMENT=1000;
+ALTER TABLE teacher AUTO_INCREMENT=1001;
 
 /* table for class-teacher relationship info */
 CREATE TABLE class_teacher (
@@ -55,7 +61,7 @@ CREATE TABLE class_teacher (
     ON UPDATE CASCADE
     ON DELETE CASCADE
 ) ENGINE InnoDB;
-ALTER TABLE class_teacher AUTO_INCREMENT=1000;
+ALTER TABLE class_teacher AUTO_INCREMENT=1001;
 
 /* table for student info */
 CREATE TABLE student (
@@ -71,7 +77,7 @@ CREATE TABLE student (
     ON UPDATE CASCADE
     ON DELETE SET NULL
 ) ENGINE InnoDB;
-ALTER TABLE student AUTO_INCREMENT=1000;
+ALTER TABLE student AUTO_INCREMENT=1001;
 
 /* table for parent info */
 CREATE TABLE parent (
@@ -86,7 +92,7 @@ CREATE TABLE parent (
     email VARCHAR(127),
     PRIMARY KEY (db_id)
 ) ENGINE InnoDB;
-ALTER TABLE parent AUTO_INCREMENT=1000;
+ALTER TABLE parent AUTO_INCREMENT=1001;
 
 /* table for student-parent relationship info */
 CREATE TABLE student_parent (
@@ -101,4 +107,4 @@ CREATE TABLE student_parent (
     ON UPDATE CASCADE
     ON DELETE CASCADE
 ) ENGINE InnoDB;
-ALTER TABLE student_parent AUTO_INCREMENT=1000;
+ALTER TABLE student_parent AUTO_INCREMENT=1001;
