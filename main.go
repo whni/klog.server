@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	_ "net/http/pprof"
 	"runtime/debug"
 	"time"
@@ -44,10 +45,17 @@ func main() {
 
 	debug.SetTraceback("crash")
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+	r.POST("/ping", func(c *gin.Context) {
+		var response = GinResponse{
+			Status: http.StatusOK,
+		}
+		defer func() {
+			ginContextProcessResponse(c, &response)
+		}()
+
+		var params = ginContextRequestParameter(c)
+		response.Payload = params
+		logging.Infoln(params)
 	})
 	/*
 			for api, handler := range Api_maps {
