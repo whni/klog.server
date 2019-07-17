@@ -1,0 +1,5 @@
+db_id,parent_id,first_name,last_name,@date_of_birth,address,phone_number,email,occupation
+NULL,"parent-101","Ed","Sheeran","07/11/1987","987 Valley Green, 94088, CA, USA","123-456-9821","parent101@bird.com", "engineer"
+NULL,"parent-102","Madison","Beer","06/17/1980","333 Valley Parkway, 91233, NY, USA","832-321-1888","parent102@bird.com", "singer"
+NULL,"parent-201","Skylar","Grey","04/28/1988","7498 Apple Park, 91123, CA, USA","NA","parent201@bird.com", "salesman"
+NULL,"parent-202","Autumn","Mendes","08/03/1979","7342 Infinite Loop, 23452, CA, USA","238-853-2347","parent202@bird.com", "CEO"

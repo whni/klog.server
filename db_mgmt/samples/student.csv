@@ -1,0 +1,5 @@
+db_id,student_id,first_name,last_name,@date_of_birth,media_location,class_id
+NULL,"student-101","Thomas","Hu","03/29/1998","mediaasset/thomas_loc","class-100101"
+NULL,"student-102","Bruce","Wang","01/30/1999","mediaasset/bruce_loc","class-100102"
+NULL,"student-201","Tiffiny","Shawn","12/15/2002","mediaasset/tiffiny_loc","class-100201"
+NULL,"student-202","Gintama","Y.","05/22/2000","mediaasset/gintama_loc","class-100202"

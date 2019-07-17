@@ -1,0 +1,5 @@
+db_id,student_id,parent_id
+NULL,"student-101","parent-101"
+NULL,"student-102","parent-102"
+NULL,"student-201","parent-201"
+NULL,"student-202","parent-202"

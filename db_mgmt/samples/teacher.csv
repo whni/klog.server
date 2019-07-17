@@ -1,0 +1,5 @@
+db_id,teacher_id,first_name,last_name,date_of_birth,address,phone_number,email
+NULL,"teacher1","Nicole","Taylor","07/11/1987","1234 Heaven St, 95123, CA, USA","123-456-9821","teacher1@bird.com"
+NULL,"teacher2","Wayne","Grace","03/04/1990","555 Pride Rd, 56245, NY, USA","NA","teacher2@bird.com"
+NULL,"teacher3","Fantasy","Good","08/23/1970","3924 Main St, 94088, CA, USA","352-654-1390","teacher3@bird.com"
+NULL,"teacher4","Summer","Season","11/01/1986","154 Waterfront Blvd, 86742, CA, USA","234-853-2538","teacher4@bird.com"
