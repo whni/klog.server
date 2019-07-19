@@ -5,55 +5,68 @@ USE vlog;
 
 
 /* table for institute info */
-CREATE TABLE institute  (
-	db_id INT NOT NULL AUTO_INCREMENT,
-	institute_id VARCHAR(63) NOT NULL UNIQUE,
-    institute_name VARCHAR(63) NOT NULL UNIQUE,
+CREATE TABLE institute (
+	pid INT NOT NULL AUTO_INCREMENT,
+    institute_uid VARCHAR(63) NOT NULL,
+    institute_name VARCHAR(63) NOT NULL,
     address VARCHAR(255),
     country_code VARCHAR(3),
-    PRIMARY KEY (db_id)
+    create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (pid),
+    UNIQUE (institute_uid)
 ) ENGINE InnoDB;
 ALTER TABLE institute AUTO_INCREMENT=1001;
 
 /* table for class info */
 CREATE TABLE class (
-	db_id INT NOT NULL AUTO_INCREMENT,
-	class_id VARCHAR(63) NOT NULL UNIQUE,
+	pid INT NOT NULL AUTO_INCREMENT,
+	class_uid VARCHAR(63) NOT NULL,
     class_name VARCHAR(63) NOT NULL,
     location VARCHAR(255),
-    institute_id VARCHAR(63),
-    PRIMARY KEY (db_id),
-    FOREIGN KEY (institute_id) REFERENCES institute(institute_id)
+    institute_pid INT NOT NULL,
+    create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (pid),
+    UNIQUE (class_uid),
+    FOREIGN KEY (institute_pid) REFERENCES institute(pid)
     ON UPDATE CASCADE
-    ON DELETE SET NULL
+    ON DELETE RESTRICT
 ) ENGINE InnoDB;
 ALTER TABLE class AUTO_INCREMENT=1001;
 
 /* table for teacher info */
 CREATE TABLE teacher (
-	db_id INT NOT NULL AUTO_INCREMENT,
-	teacher_id VARCHAR(63) NOT NULL UNIQUE,
+	pid INT NOT NULL AUTO_INCREMENT,
+	teacher_uid VARCHAR(63) NOT NULL,
     first_name VARCHAR(63) NOT NULL,
     last_name VARCHAR(63) NOT NULL,
     date_of_birth DATE,
     address VARCHAR(255),
     phone_number VARCHAR(31),
     email VARCHAR(127),
-    PRIMARY KEY (db_id)
+    institute_pid INT NOT NULL,
+    create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (pid),
+    UNIQUE (teacher_uid),
+    FOREIGN KEY (institute_pid) REFERENCES institute(pid)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT
 ) ENGINE InnoDB;
 ALTER TABLE teacher AUTO_INCREMENT=1001;
 
 /* table for class-teacher relationship info */
 CREATE TABLE class_teacher (
-	db_id INT NOT NULL AUTO_INCREMENT,
-    class_id VARCHAR(63) NOT NULL,
-    teacher_id VARCHAR(63) NOT NULL,
-    PRIMARY KEY (db_id),
-    UNIQUE (class_id,teacher_id),
-    FOREIGN KEY (class_id) REFERENCES class(class_id)
+	pid INT NOT NULL AUTO_INCREMENT,
+    class_pid INT NOT NULL,
+    teacher_pid INT NOT NULL,
+    PRIMARY KEY (pid),
+    UNIQUE (class_pid, teacher_pid),
+    FOREIGN KEY (class_pid) REFERENCES class(pid)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES teacher(teacher_id)
+    FOREIGN KEY (teacher_pid) REFERENCES teacher(pid)
     ON UPDATE CASCADE
     ON DELETE CASCADE
 ) ENGINE InnoDB;
@@ -61,24 +74,27 @@ ALTER TABLE class_teacher AUTO_INCREMENT=1001;
 
 /* table for student info */
 CREATE TABLE student (
-	db_id INT NOT NULL AUTO_INCREMENT,
-	student_id VARCHAR(63) NOT NULL UNIQUE,
+	pid INT NOT NULL AUTO_INCREMENT,
+	student_uid VARCHAR(63) NOT NULL,
     first_name VARCHAR(63) NOT NULL,
     last_name VARCHAR(63) NOT NULL,
     date_of_birth DATE NOT NULL,
     media_location VARCHAR(255),
-    class_id VARCHAR(63),
-    PRIMARY KEY (db_id),
-    FOREIGN KEY (class_id) REFERENCES class(class_id)
+    class_pid INT NOT NULL,
+    create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (pid),
+    UNIQUE (student_uid),
+    FOREIGN KEY (class_pid) REFERENCES class(pid)
     ON UPDATE CASCADE
-    ON DELETE SET NULL
+    ON DELETE RESTRICT
 ) ENGINE InnoDB;
 ALTER TABLE student AUTO_INCREMENT=1001;
 
 /* table for parent info */
 CREATE TABLE parent (
-	db_id INT NOT NULL AUTO_INCREMENT,
-	parent_id VARCHAR(63) NOT NULL UNIQUE,
+	pid INT NOT NULL AUTO_INCREMENT,
+	parent_uid VARCHAR(63) NOT NULL,
     first_name VARCHAR(63) NOT NULL,
     last_name VARCHAR(63) NOT NULL,
     date_of_birth DATE,
@@ -86,21 +102,24 @@ CREATE TABLE parent (
 	phone_number VARCHAR(31),
     email VARCHAR(127),
     occupation VARCHAR(31),
-    PRIMARY KEY (db_id)
+    create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (pid),
+    UNIQUE (parent_uid)
 ) ENGINE InnoDB;
 ALTER TABLE parent AUTO_INCREMENT=1001;
 
 /* table for student-parent relationship info */
 CREATE TABLE student_parent (
-	db_id INT NOT NULL AUTO_INCREMENT,
-    student_id VARCHAR(63) NOT NULL,
-    parent_id VARCHAR(63) NOT NULL,
-    PRIMARY KEY (db_id),
-    UNIQUE (student_id, parent_id),
-    FOREIGN KEY (student_id) REFERENCES student(student_id)
+	pid INT NOT NULL AUTO_INCREMENT,
+    student_pid INT NOT NULL,
+    parent_pid INT NOT NULL,
+    PRIMARY KEY (pid),
+    UNIQUE (student_pid, parent_pid),
+    FOREIGN KEY (student_pid) REFERENCES student(pid)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    FOREIGN KEY (parent_id) REFERENCES parent(parent_id)
+    FOREIGN KEY (parent_pid) REFERENCES parent(pid)
     ON UPDATE CASCADE
     ON DELETE CASCADE
 ) ENGINE InnoDB;
@@ -119,7 +138,7 @@ IGNORE 1 ROWS;
 LOAD DATA LOCAL INFILE './samples/teacher.csv' INTO TABLE teacher
 FIELDS ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(db_id,teacher_id,first_name,last_name,@date_of_birth,address,phone_number,email)
+(pid,teacher_uid,first_name,last_name,@date_of_birth,address,phone_number,email,institute_pid,create_ts,modify_ts)
 SET date_of_birth = STR_TO_DATE(@date_of_birth, '%m/%d/%Y');
 
 LOAD DATA LOCAL INFILE './samples/class_teacher.csv' INTO TABLE class_teacher
@@ -129,13 +148,13 @@ IGNORE 1 ROWS;
 LOAD DATA LOCAL INFILE './samples/student.csv' INTO TABLE student
 FIELDS ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(db_id,student_id,first_name,last_name,@date_of_birth,media_location,class_id)
+(pid,student_uid,first_name,last_name,@date_of_birth,media_location,class_pid,create_ts,modify_ts)
 SET date_of_birth = STR_TO_DATE(@date_of_birth, '%m/%d/%Y');
 
 LOAD DATA LOCAL INFILE './samples/parent.csv' INTO TABLE parent
 FIELDS ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(db_id,parent_id,first_name,last_name,@date_of_birth,address,phone_number,email,occupation)
+(pid,parent_uid,first_name,last_name,@date_of_birth,address,phone_number,email,occupation,create_ts,modify_ts)
 SET date_of_birth = STR_TO_DATE(@date_of_birth, '%m/%d/%Y');
 
 LOAD DATA LOCAL INFILE './samples/student_parent.csv' INTO TABLE student_parent

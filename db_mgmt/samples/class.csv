@@ -1,5 +1,5 @@
-db_id,class_id,class_name,location,institute_id
-NULL,"class-100101","Class No 1","Floor 1, Room 101","ins-1001"
-NULL,"class-100102","Class No 2","Floor 1, Room 102","ins-1001"
-NULL,"class-100201","Class No 3","Floor 2, Room 102","ins-1002"
-NULL,"class-100202","Class No 4","Floor 2, Room 102","ins-1002"
+pid,class_uid,class_name,location,institute_pid,create_ts,modify_ts
+1001,"class-1001","Class No 1","Floor 1, Room 101",1001,NULL,NULL
+1002,"class-1002","Class No 2","Floor 1, Room 102",1001,NULL,NULL
+1003,"class-1003","Class No 3","Floor 2, Room 102",1002,NULL,NULL
+1004,"class-1004","Class No 4","Floor 2, Room 102",1002,NULL,NULL

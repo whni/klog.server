@@ -1,5 +1,5 @@
-db_id,student_id,parent_id
-NULL,"student-101","parent-101"
-NULL,"student-102","parent-102"
-NULL,"student-201","parent-201"
-NULL,"student-202","parent-202"
+pid,student_pid,parent_pid
+1001,1001,1001
+1002,1002,1002
+1003,1003,1003
+1004,1004,1004
