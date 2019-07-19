@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"encoding/json"
 	"io/ioutil"
@@ -16,3 +17,5 @@ var studentHandlerMap = map[string]gin.HandlerFunc{
 	"post":   studentPost,
 	"delete": studentDelete,
 }
+
+*/

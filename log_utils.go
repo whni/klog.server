@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
+	"logrus"
 	"os"
 	"path"
 	"runtime"
@@ -39,6 +39,11 @@ var ljGinLogger = &lumberjack.Logger{
 	MaxSize:    logFileMaxSize,
 	MaxBackups: logFileMaxbackup,
 }
+
+const (
+	logModuleTest = "test"
+	logModuleMain = "main"
+)
 
 // Logging global customized logging module
 var logging *logrus.Logger
@@ -80,10 +85,16 @@ func loggingInitSetup(sc *ServerConfig) *logrus.Logger {
 	return logging
 }
 
+func loggingRegisterModules(moduleTable map[string]bool) {
+	for module, enabled := range moduleTable {
+		logging.RegisterModule(module, enabled)
+	}
+}
+
 func loggingErrRedirect(errFile string) {
 	// rotate error log file
 	var errFileSize int64 = 0
-	if fs, err := os.Stat(errFile); err != nil {
+	if fs, err := os.Stat(errFile); err == nil {
 		errFileSize = fs.Size()
 	}
 	if errFileSize > logFileMaxSize*1024*1024 {

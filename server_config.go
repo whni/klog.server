@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // ServerConfig global server config
@@ -20,12 +18,12 @@ var serverConfig *ServerConfig
 func readServerConfig(ConfigFile string) *ServerConfig {
 	configHandle, err := os.Open(ConfigFile)
 	if err != nil {
-		log.Println(log.InfoLevel, "Config File Open Error:", err)
+		logging.Debugln("Config File Open Error:", err)
 	}
 	defer configHandle.Close()
 	configBytes, err := ioutil.ReadAll(configHandle)
 	if err != nil {
-		log.Println(log.InfoLevel, "Config File Read Error:", err)
+		logging.Debugln("Config File Read Error:", err)
 	}
 	var serverconfig ServerConfig
 	if err = json.Unmarshal(configBytes, &serverconfig); err != nil {

@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/mgutz/ansi"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
+	"logrus"
 )
 
 const defaultTimestampFormat = time.RFC3339
