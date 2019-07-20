@@ -11,6 +11,7 @@ import (
 type ServerConfig struct {
 	LoggingReleaseMode bool   `json:"loggingReleaseMode"`
 	LoggingLevel       string `json:"loggingLevel"`
+	LoggingWithStdout  bool   `json:"loggingWithStdout"`
 }
 
 var serverConfig *ServerConfig

@@ -41,9 +41,14 @@ var ljGinLogger = &lumberjack.Logger{
 }
 
 const (
-	logModuleTest = "test"
-	logModuleMain = "main"
+	logModMain       = "MainModule"
+	logModGinContext = "GinContext"
 )
+
+var logModEnabledTable = map[string]bool{
+	logModMain:       true,
+	logModGinContext: true,
+}
 
 // Logging global customized logging module
 var logging *logrus.Logger
@@ -58,8 +63,12 @@ func loggingInitSetup(sc *ServerConfig) *logrus.Logger {
 	var logging = logrus.New()
 
 	// output location
-	var mwriter = io.MultiWriter(ljStdLogger, os.Stdout)
-	logging.SetOutput(mwriter)
+	if sc.LoggingWithStdout {
+		var mwriter = io.MultiWriter(ljStdLogger, os.Stdout)
+		logging.SetOutput(mwriter)
+	} else {
+		logging.SetOutput(ljStdLogger)
+	}
 
 	// logging level
 	var loggingLevel = logrus.DebugLevel

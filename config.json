@@ -1,4 +1,5 @@
 {
     "loggingReleaseMode": false,
-    "loggingLevel": "debug"
+    "loggingLevel": "debug",
+    "loggingWithStdout": true
 }

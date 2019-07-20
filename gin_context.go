@@ -35,7 +35,7 @@ func ginContextRequestParameter(ctx *gin.Context) *GinParameter {
 	switch strings.ToLower(ctx.Request.Method) {
 	case "post", "put":
 		if reqBuffer, err := ioutil.ReadAll(ctx.Request.Body); err != nil {
-			logging.Warnf("Http request body read err: %v\n", err.Error())
+			logging.Warnmf(logModGinContext, "Http request body read err: %v\n", err.Error())
 		} else {
 			bodyData = reqBuffer
 		}

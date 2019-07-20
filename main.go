@@ -20,6 +20,7 @@ func main() {
 
 	// logging setup
 	logging = loggingInitSetup(serverConfig)
+	loggingRegisterModules(logModEnabledTable)
 	loggingErrRedirect(errLogFile)
 
 	// gin web framework
