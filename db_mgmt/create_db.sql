@@ -1,7 +1,7 @@
-/* create vlog db */
-DROP DATABASE IF EXISTS vlog;
-CREATE DATABASE vlog;
-USE vlog;
+/* create klog business model db */
+DROP DATABASE IF EXISTS klog_business;
+CREATE DATABASE klog_business;
+USE klog_business;
 
 
 /* table for institute info */

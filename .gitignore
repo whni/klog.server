@@ -5,7 +5,7 @@
 *.so
 *.dylib
 *.code-workspace
-bird.vlog
+klog.server
 
 # Test binary, build with `go test -c`
 *.test

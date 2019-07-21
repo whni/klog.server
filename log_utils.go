@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"golang.org/x/sys/unix"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
@@ -21,9 +22,10 @@ var loggingLevelMap = map[string]logrus.Level{
 }
 
 const (
-	stdLogFile       = "/tmp/vlog_server.log"
-	ginLogFile       = "/tmp/vlog_gin.log"
-	errLogFile       = "/tmp/vlog_error.log"
+	logFilePrefix    = "klog"
+	stdLogFile       = "/tmp/" + logFilePrefix + "_server.log"
+	ginLogFile       = "/tmp/" + logFilePrefix + "_gin.log"
+	errLogFile       = "/tmp/" + logFilePrefix + "_error.log"
 	logFileMaxSize   = 80
 	logFileMaxbackup = 10
 )
@@ -63,22 +65,25 @@ func loggingInitSetup(sc *ServerConfig) *logrus.Logger {
 	var logging = logrus.New()
 
 	// output location
-	if sc.LoggingWithStdout {
+	if sc.LoggingDestination == "stdout+file" || sc.LoggingDestination == "file+stdout" {
 		var mwriter = io.MultiWriter(ljStdLogger, os.Stdout)
 		logging.SetOutput(mwriter)
-	} else {
+	} else if sc.LoggingDestination == "file" {
 		logging.SetOutput(ljStdLogger)
+	} else {
+		// sc.LoggingDestination == "stdout" or other
+		logging.SetOutput(os.Stdout)
 	}
 
 	// logging level
 	var loggingLevel = logrus.DebugLevel
-	if _, ok := loggingLevelMap[serverConfig.LoggingLevel]; ok {
-		loggingLevel = loggingLevelMap[serverConfig.LoggingLevel]
+	if _, ok := loggingLevelMap[sc.LoggingLevel]; ok {
+		loggingLevel = loggingLevelMap[sc.LoggingLevel]
 	}
 	logging.SetLevel(loggingLevel)
 
 	// logging format based on release mode
-	if serverConfig.LoggingReleaseMode == true {
+	if sc.LoggingReleaseMode == true {
 		logging.SetReportCaller(true)
 		logging.SetFormatter(&logrus.JSONFormatter{
 			CallerPrettyfier: loggingCallerBeautifier,
@@ -94,13 +99,16 @@ func loggingInitSetup(sc *ServerConfig) *logrus.Logger {
 	return logging
 }
 
-func loggingRegisterModules(moduleTable map[string]bool) {
+func loggingRegisterModules(moduleTable map[string]bool) error {
 	for module, enabled := range moduleTable {
-		logging.RegisterModule(module, enabled)
+		if err := logging.RegisterModule(module, enabled); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func loggingErrRedirect(errFile string) {
+func loggingErrRedirect(errFile string) error {
 	// rotate error log file
 	var errFileSize int64 = 0
 	if fs, err := os.Stat(errFile); err == nil {
@@ -112,12 +120,14 @@ func loggingErrRedirect(errFile string) {
 
 	f, err := os.OpenFile(errFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
-		logging.Fatalf("Failed to open error log file: %v", err)
+		return fmt.Errorf("Failed to open error log file: %v", err.Error())
 	}
 
 	// redirect stderr
 	err = unix.Dup2(int(f.Fd()), int(os.Stderr.Fd()))
 	if err != nil {
-		logging.Fatalf("Failed to redirect stderr to error file: %v", err)
+		return fmt.Errorf("Failed to redirect stderr to error file: %v", err.Error())
 	}
+
+	return nil
 }

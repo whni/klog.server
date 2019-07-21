@@ -6,7 +6,7 @@ import (
 
 // Student struct for student
 type Student struct {
-	DBID          int64     `json:"DBID,string"`
+	PID           int64     `json:"DBID,string"`
 	StudentID     string    `json:"studentID"`
 	FirstName     string    `json:"firstName"`
 	LastName      string    `json:"lastName"`

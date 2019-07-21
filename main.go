@@ -15,13 +15,23 @@ func main() {
 	serverStartTime = time.Now()
 
 	// global serverConfig variable
-	serverConfig = readServerConfig("config.json")
+	var scErr error = nil
+	serverConfig, scErr = readServerConfig("config.json")
+	if scErr != nil {
+		panic(scErr)
+	}
 	initDefaultServerConfig(serverConfig)
 
 	// logging setup
+	var loggingErr error = nil
 	logging = loggingInitSetup(serverConfig)
-	loggingRegisterModules(logModEnabledTable)
-	loggingErrRedirect(errLogFile)
+	if loggingErr = loggingRegisterModules(logModEnabledTable); loggingErr != nil {
+		panic(loggingErr)
+	}
+	if loggingErr = loggingErrRedirect(errLogFile); loggingErr != nil {
+		panic(loggingErr)
+	}
+	logging.Infomln(logModMain, "Logging module loaded.")
 
 	// gin web framework
 	gin.SetMode(gin.DebugMode)
@@ -90,5 +100,7 @@ func main() {
 		DbInit()
 	*/
 
+	logging.Infomln(logModMain, "Server is listening and serving on 0.0.0.0:8080")
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
+	logging.Infomln(logModMain, "Server existed unexpectedly :(")
 }
