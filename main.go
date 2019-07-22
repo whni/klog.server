@@ -102,5 +102,5 @@ func main() {
 
 	logging.Infomln(logModMain, "Server is listening and serving on 0.0.0.0:8080")
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
-	logging.Infomln(logModMain, "Server existed unexpectedly :(")
+	logging.Warnmln(logModMain, "Server existed unexpectedly :(")
 }
