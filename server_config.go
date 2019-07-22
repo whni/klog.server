@@ -13,6 +13,10 @@ type ServerConfig struct {
 	LoggingReleaseMode bool   `json:"loggingReleaseMode"`
 	LoggingLevel       string `json:"loggingLevel"`
 	LoggingDestination string `json:"loggingDestination"`
+	DBHostAddress      string `json:"DBHostAddress"`
+	DBName             string `json:"DBName"`
+	DBUsername         string `json:"DBUsername"`
+	DBPassword         string `json:"DBPassword"`
 }
 
 var serverConfig *ServerConfig

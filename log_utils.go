@@ -99,9 +99,9 @@ func loggingInitSetup(sc *ServerConfig) *logrus.Logger {
 	return logging
 }
 
-func loggingRegisterModules(moduleTable map[string]bool) error {
+func loggingRegisterModules(l *logrus.Logger, moduleTable map[string]bool) error {
 	for module, enabled := range moduleTable {
-		if err := logging.RegisterModule(module, enabled); err != nil {
+		if err := l.RegisterModule(module, enabled); err != nil {
 			return err
 		}
 	}

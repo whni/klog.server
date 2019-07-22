@@ -1,5 +1,9 @@
 {
     "loggingReleaseMode": false,
     "loggingLevel": "debug",
-    "loggingDestination": "stdout+file"
+    "loggingDestination": "stdout+file",
+	"DBHostAddress": "127.0.0.1:3306",
+    "DBName": "klog_business",
+    "DBUsername": "kloguser",
+    "DBPassword": "kloguser"
 }

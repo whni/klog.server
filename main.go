@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,6 +19,7 @@ func main() {
 	var scErr error = nil
 	serverConfig, scErr = readServerConfig("config.json")
 	if scErr != nil {
+		fmt.Printf("Could not load server configuration\n")
 		panic(scErr)
 	}
 	initDefaultServerConfig(serverConfig)
@@ -25,13 +27,22 @@ func main() {
 	// logging setup
 	var loggingErr error = nil
 	logging = loggingInitSetup(serverConfig)
-	if loggingErr = loggingRegisterModules(logModEnabledTable); loggingErr != nil {
+	if loggingErr = loggingRegisterModules(logging, logModEnabledTable); loggingErr != nil {
+		fmt.Printf("Could not register logging modules\n")
 		panic(loggingErr)
 	}
 	if loggingErr = loggingErrRedirect(errLogFile); loggingErr != nil {
+		fmt.Printf("Could not redirect logging error to %s\n", errLogFile)
 		panic(loggingErr)
 	}
 	logging.Infomln(logModMain, "Logging module loaded.")
+
+	// db setup
+	var dbErr error = nil
+	dbPool, dbErr = dbPoolInit(serverConfig)
+	if dbErr != nil {
+		logging.Fatalmf(logModMain, "Unable to load DB - Error msg: %s", dbErr.Error())
+	}
 
 	// gin web framework
 	gin.SetMode(gin.DebugMode)
