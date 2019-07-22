@@ -11,6 +11,7 @@ type Institute struct {
 	InstituteName string `json:"instituteName"`
 	Address       string `json:"address"`
 	CountryCode   string `json:"countryCode"`
+	ClassPIDs     []int  `json:"classPIDs"`
 	CreateTS      string `json:"createTS"`
 	ModifyTS      string `json:"modifyTS"`
 }
@@ -22,35 +23,54 @@ type Class struct {
 	ClassName    string `json:"className"`
 	Location     string `json:"location"`
 	InstitutePID int    `json:"institutePID"`
+	TeacherPIDs  []int  `json:"teacherPIDs"`
+	StudentPIDs  []int  `json:"studentPIDs"`
 	CreateTS     string `json:"createTS"`
 	ModifyTS     string `json:"modifyTS"`
 }
 
-struct Parent struct {
-	
+// Teacher struct
+type Teacher struct {
+	PID          int       `json:"PID"`
+	TeacherUID   string    `json:"teacherUID"`
+	FirstName    string    `json:"firstName"`
+	LastName     string    `json:"lastName"`
+	DateOfBirth  time.Time `json:"dateOfBirth"`
+	Address      string    `json:"address"`
+	PhoneNumber  string    `json:"phoneNumber"`
+	Email        string    `json:"email"`
+	InstitutePID int       `json:"institutePID"`
+	ClassPIDs    []int     `json:"ClassPIDs"`
+	CreateTS     string    `json:"createTS"`
+	ModifyTS     string    `json:"modifyTS"`
 }
 
 // Student struct
 type Student struct {
-	pid           int64     `json:"DBID,string"`
-	StudentID     string    `json:"studentID"`
+	PID           int       `json:"PID"`
+	StudentUID    string    `json:"studentUID"`
 	FirstName     string    `json:"firstName"`
 	LastName      string    `json:"lastName"`
 	DateOfBirth   time.Time `json:"dateOfBirth"`
-	ClassID       string    `json:"classID"`
-	ParentIDs     []string  `json:"parentIDs"`
 	MediaLocation string    `json:"mediaLocation"`
+	ClassPID      int       `json:"classPID"`
+	ParentPIDs    []int     `json:"parentPIDs"`
+	CreateTS      string    `json:"createTS"`
+	ModifyTS      string    `json:"modifyTS"`
 }
 
 // Parent struct for parent
 type Parent struct {
-	DBID        int64     `json:"DBID,string"`
-	ParentID    string    `json:"parentID"`
+	PID         int       `json:"PID"`
+	ParentUID   string    `json:"parentUID"`
 	FirstName   string    `json:"firstName"`
 	LastName    string    `json:"lastName"`
 	DateOfBirth time.Time `json:"dateOfBirth"`
-	StudentIDs  []string  `json:"studentIDs"`
 	Address     string    `json:"address"`
 	PhoneNumber string    `json:"phoneNumber"`
 	Email       string    `json:"email"`
+	Occupation  string    `json:"occupation"`
+	StudentIDs  []string  `json:"studentPIDs"`
+	CreateTS    string    `json:"createTS"`
+	ModifyTS    string    `json:"modifyTS"`
 }
