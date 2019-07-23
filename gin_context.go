@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -60,6 +61,102 @@ func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {
 		reponseContent["message"] = response.Message
 	}
 	ctx.JSON(response.Status, reponseContent)
+}
+
+/* input struct check */
+func isInputStructValid(input interface{}) bool {
+	val := reflect.ValueOf(input)
+	if val.Kind() == reflect.Ptr {
+		val = reflect.Indirect(val)
+	}
+
+	if val.Kind() != reflect.Struct {
+		logging.Errormf(logModGinContext, "unexpected type - struct required")
+		return false
+	}
+	structType := val.Type()
+
+	for i := 0; i < structType.NumField(); i++ {
+		field := structType.Field(i)
+		fieldName := field.Name
+
+		switch fieldName {
+		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
+			"Name", "InstituteName", "ClassName", "FirstName", "LastName",
+			"Address", "CountryCode", "Location", "MediaLocation",
+			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
+			if len(val.FieldByName(fieldName).Interface().(string)) < 1 {
+				return false
+			}
+			break
+		case "Password":
+			if len(val.FieldByName(fieldName).Interface().(string)) < 5 {
+				return false
+			}
+			break
+		case "InstitutePID":
+			pid := val.FieldByName(fieldName).Interface().(int)
+			if institutes, err := findInstitute(pid); err != nil || len(institutes) == 0 {
+				return false
+			}
+			break
+		}
+	}
+	return true
+}
+
+func isInputStructEqual(x, y interface{}) bool {
+	valx := reflect.ValueOf(x)
+	if valx.Kind() == reflect.Ptr {
+		valx = reflect.Indirect(valx)
+	}
+
+	valy := reflect.ValueOf(y)
+	if valy.Kind() == reflect.Ptr {
+		valy = reflect.Indirect(valy)
+	}
+
+	if valx.Kind() != reflect.Struct || valy.Kind() != reflect.Struct {
+		logging.Errormf(logModGinContext, "unexpected type - struct required")
+		return false
+	}
+	structTypex := valx.Type()
+	structTypey := valy.Type()
+
+	if structTypex.Name() != structTypey.Name() {
+		return false
+	}
+
+	for i := 0; i < structTypex.NumField(); i++ {
+		field := structTypex.Field(i)
+		fieldName := field.Name
+		switch fieldName {
+		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
+			"Name", "InstituteName", "ClassName", "FirstName", "LastName",
+			"Address", "CountryCode", "Location", "MediaLocation",
+			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
+			if valx.FieldByName(fieldName).Interface().(string) != valy.FieldByName(fieldName).Interface().(string) {
+				return false
+			}
+			break
+		case "PID", "InstitutePID", "ClassPID", "TeacherPID", "StudentPID", "ParentPID":
+			if valx.FieldByName(fieldName).Interface().(int) != valy.FieldByName(fieldName).Interface().(int) {
+				return false
+			}
+			break
+		case "Enabled":
+			if valx.FieldByName(fieldName).Interface().(bool) != valy.FieldByName(fieldName).Interface().(bool) {
+				return false
+			}
+			break
+		case "PIDs":
+			if !isIntListEqual(valx.FieldByName(fieldName).Interface().([]int), valy.FieldByName(fieldName).Interface().([]int)) {
+				return false
+			}
+			break
+		}
+	}
+	return true
 }
 
 var ginAPITable = map[string]map[string]gin.HandlerFunc{

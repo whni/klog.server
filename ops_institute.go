@@ -67,7 +67,7 @@ func findInstitute(pid int) ([]*Institute, error) {
 	} else if pid > 0 {
 		rows, err = dbPool.Query(dbQuery+" WHERE pid = ?", pid)
 	} else {
-		err = fmt.Errorf("Invalid institute PID (%d) given!", pid)
+		err = fmt.Errorf("invalid institute PID (%d) given", pid)
 		logging.Errormf(logModInstituteHandler, err.Error())
 		return nil, err
 	}
@@ -95,4 +95,9 @@ func findInstitute(pid int) ([]*Institute, error) {
 	}
 
 	return institutes, nil
+}
+
+func createInstitute(institute *Institute) error {
+
+	return nil
 }
