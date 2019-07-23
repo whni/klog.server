@@ -41,7 +41,7 @@ func main() {
 	var dbErr error = nil
 	dbPool, dbErr = dbPoolInit(serverConfig)
 	if dbErr != nil {
-		logging.Fatalmf(logModMain, "Unable to load DB - Error msg: %s", dbErr.Error())
+		logging.Panicmf(logModMain, "Unable to load DB - Error msg: %s", dbErr.Error())
 	}
 
 	// gin web framework

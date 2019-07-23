@@ -45,11 +45,13 @@ var ljGinLogger = &lumberjack.Logger{
 const (
 	logModMain       = "MainModule"
 	logModGinContext = "GinContext"
+	logModDBControl  = "DBControl"
 )
 
 var logModEnabledTable = map[string]bool{
 	logModMain:       true,
 	logModGinContext: true,
+	logModDBControl:  true,
 }
 
 // Logging global customized logging module
