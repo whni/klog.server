@@ -61,3 +61,7 @@ func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {
 	}
 	ctx.JSON(response.Status, reponseContent)
 }
+
+var ginAPITable = map[string]map[string]gin.HandlerFunc{
+	"/api/0/config/institute": instituteHandlerTable,
+}

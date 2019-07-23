@@ -15,7 +15,6 @@ func dbPoolInit(sc *ServerConfig) (*sql.DB, error) {
 	if dbErr != nil {
 		return nil, dbErr
 	}
-	defer db.Close()
 
 	// setup db pool
 	db.SetMaxOpenConns(0)

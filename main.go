@@ -79,37 +79,13 @@ func main() {
 		response.Payload = params
 		logging.Infoln(params)
 	})
-	/*
-			for api, handler := range Api_maps {
-				func_map := handler
-				r.POST(api, func_map["Append"])
-				r.GET(api, func_map["Get"])
-				r.PUT(api, func_map["Change"])
-				r.DELETE(api, func_map["Delete"])
-			}
 
-			for api, handler := range Api_controller_post {
-				r.POST(api, handler)
-			}
-
-			for api, handler := range Api_history_post {
-				r.POST(api, handler)
-			}
-
-			for api, handler := range Api_cwconf_post {
-				r.POST(api, handler)
-			}
-
-			for api, handler := range Api_status_get {
-				r.GET(api, handler)
-			}
-
-			for api, handler := range Api_sys_get {
-				r.GET(api, handler)
-			}
-
-		DbInit()
-	*/
+	for apiUrl, apiHandlerTable := range ginAPITable {
+		r.GET(apiUrl, apiHandlerTable["get"])
+		r.POST(apiUrl, apiHandlerTable["post"])
+		r.PUT(apiUrl, apiHandlerTable["put"])
+		r.DELETE(apiUrl, apiHandlerTable["delete"])
+	}
 
 	logging.Infomln(logModMain, "Server is listening and serving on 0.0.0.0:8080")
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
