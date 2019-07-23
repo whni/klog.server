@@ -282,15 +282,15 @@ func (f *ColorTextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, 
 		if entry.Caller != nil {
 			var funcName = entry.Caller.Function
 			var fileName = path.Base(entry.Caller.File) + ":" + strconv.Itoa(entry.Caller.Line)
-			fmt.Fprintf(b, "%s %s [%s-%s]%s "+messageFormat, colorScheme.TimestampColor(timestamp), level, funcName, fileName, prefix, message)
+			fmt.Fprintf(b, "%s %s: %s "+messageFormat+" -- %s-%s", colorScheme.TimestampColor(timestamp), level, prefix, message, funcName, fileName)
 		} else {
-			fmt.Fprintf(b, "%s %s |%s "+messageFormat, colorScheme.TimestampColor(timestamp), level, prefix, message)
+			fmt.Fprintf(b, "%s %s: %s "+messageFormat, colorScheme.TimestampColor(timestamp), level, prefix, message)
 		}
 	}
 	for _, k := range keys {
 		if k != "prefix" {
 			v := entry.Data[k]
-			fmt.Fprintf(b, " %s=%+v", levelColor(k), v)
+			fmt.Fprintf(b, " [%s=%+v]", levelColor(k), v)
 		}
 	}
 }

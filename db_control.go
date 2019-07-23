@@ -10,7 +10,7 @@ var dbPool *sql.DB
 
 func dbPoolInit(sc *ServerConfig) (*sql.DB, error) {
 	// open a db pool
-	dbDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s", sc.DBUsername, sc.DBPassword, sc.DBHostAddress, sc.DBName)
+	dbDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", sc.DBUsername, sc.DBPassword, sc.DBHostAddress, sc.DBName)
 	db, dbErr := sql.Open("mysql", dbDSN)
 	if dbErr != nil {
 		return nil, dbErr

@@ -11,13 +11,14 @@ import (
 )
 
 var serverStartTime time.Time
+var serverConfigFile = "server_config.json"
 
 func main() {
 	serverStartTime = time.Now()
 
 	// global serverConfig variable
 	var scErr error = nil
-	serverConfig, scErr = readServerConfig("config.json")
+	serverConfig, scErr = readServerConfig(serverConfigFile)
 	if scErr != nil {
 		fmt.Printf("Could not load server configuration\n")
 		panic(scErr)

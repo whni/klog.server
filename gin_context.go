@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+var ginAPITable = map[string]map[string]gin.HandlerFunc{
+	"/api/0/config/institute": instituteHandlerTable,
+}
+
 // GinParameter a generic paramter wrapper for gin web framework handler
 type GinParameter struct {
 	Token string
@@ -63,15 +67,15 @@ func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {
 	ctx.JSON(response.Status, reponseContent)
 }
 
-/* input struct check */
-func isInputStructValid(input interface{}) bool {
+/* gin input struct check */
+func ginInputStructValid(input interface{}) bool {
 	val := reflect.ValueOf(input)
 	if val.Kind() == reflect.Ptr {
 		val = reflect.Indirect(val)
 	}
 
 	if val.Kind() != reflect.Struct {
-		logging.Errormf(logModGinContext, "unexpected type - struct required")
+		logging.Errormf(logModGinContext, "unexpected type (%s) - struct required", val.Type().Name())
 		return false
 	}
 	structType := val.Type()
@@ -105,7 +109,7 @@ func isInputStructValid(input interface{}) bool {
 	return true
 }
 
-func isInputStructEqual(x, y interface{}) bool {
+func ginInputStructEqual(x, y interface{}) bool {
 	valx := reflect.ValueOf(x)
 	if valx.Kind() == reflect.Ptr {
 		valx = reflect.Indirect(valx)
@@ -117,7 +121,7 @@ func isInputStructEqual(x, y interface{}) bool {
 	}
 
 	if valx.Kind() != reflect.Struct || valy.Kind() != reflect.Struct {
-		logging.Errormf(logModGinContext, "unexpected type - struct required")
+		logging.Errormf(logModGinContext, "unexpected type (x-%s, y-%s) - struct required", valx.Type().Name(), valy.Type().Name())
 		return false
 	}
 	structTypex := valx.Type()
@@ -157,8 +161,4 @@ func isInputStructEqual(x, y interface{}) bool {
 		}
 	}
 	return true
-}
-
-var ginAPITable = map[string]map[string]gin.HandlerFunc{
-	"/api/0/config/institute": instituteHandlerTable,
 }
