@@ -100,7 +100,7 @@ func ginInputStructValid(input interface{}) bool {
 			break
 		case "InstitutePID":
 			pid := val.FieldByName(fieldName).Interface().(int)
-			if institutes, err := findInstitute(pid); err != nil || len(institutes) == 0 {
+			if institutes, errCode := findInstitute(pid); errCode > seNoError || len(institutes) == 0 {
 				return false
 			}
 			break

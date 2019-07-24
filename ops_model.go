@@ -17,13 +17,13 @@ type Institute struct {
 
 // Class struct
 type Class struct {
-	PID          int    `json:"PID"`
-	ClassUID     string `json:"classUID"`
-	ClassName    string `json:"className"`
-	Location     string `json:"location"`
-	InstitutePID int    `json:"institutePID"`
-	CreateTS     string `json:"createTS"`
-	ModifyTS     string `json:"modifyTS"`
+	PID          int       `json:"PID"`
+	ClassUID     string    `json:"classUID"`
+	ClassName    string    `json:"className"`
+	Location     string    `json:"location"`
+	InstitutePID int       `json:"institutePID"`
+	CreateTS     time.Time `json:"createTS"`
+	ModifyTS     time.Time `json:"modifyTS"`
 }
 
 // Teacher struct
@@ -37,8 +37,8 @@ type Teacher struct {
 	PhoneNumber  string    `json:"phoneNumber"`
 	Email        string    `json:"email"`
 	InstitutePID int       `json:"institutePID"`
-	CreateTS     string    `json:"createTS"`
-	ModifyTS     string    `json:"modifyTS"`
+	CreateTS     time.Time `json:"createTS"`
+	ModifyTS     time.Time `json:"modifyTS"`
 }
 
 // Student struct
@@ -50,8 +50,8 @@ type Student struct {
 	DateOfBirth   time.Time `json:"dateOfBirth"`
 	MediaLocation string    `json:"mediaLocation"`
 	ClassPID      int       `json:"classPID"`
-	CreateTS      string    `json:"createTS"`
-	ModifyTS      string    `json:"modifyTS"`
+	CreateTS      time.Time `json:"createTS"`
+	ModifyTS      time.Time `json:"modifyTS"`
 }
 
 // Parent struct for parent
@@ -65,6 +65,6 @@ type Parent struct {
 	PhoneNumber string    `json:"phoneNumber"`
 	Email       string    `json:"email"`
 	Occupation  string    `json:"occupation"`
-	CreateTS    string    `json:"createTS"`
-	ModifyTS    string    `json:"modifyTS"`
+	CreateTS    time.Time `json:"createTS"`
+	ModifyTS    time.Time `json:"modifyTS"`
 }

@@ -1,25 +1,27 @@
 package main
 
 const (
-	serrClientNotReady    = iota
-	serrInputNotValid     = iota
-	serrResourceNotFound  = iota
-	serrDefaultIndex      = iota
-	serrDuplicateResource = iota
-	serResourceValidation = iota
-	serrResourceNoChange  = iota
-	serrDependencyIssue   = iota
-	serrAPINotSupport     = iota
+	seNoError             = iota // 0, reserverd for no error
+	seInputParamNotValid  = iota
+	seInputSchemaNotValid = iota
+	seDBResourceQuery     = iota
+	seResourceNotFound    = iota
+	seResourceDuplicated  = iota
+	seResourceNotChange   = iota
+	seDefaultIndex        = iota
+	seDependencyIssue     = iota
+	seAPINotSupport       = iota
 )
 
 var serverErrorMessages = map[int]string{
-	serrClientNotReady:    "The record client is not ready yet, please wait and retry again later",
-	serrInputNotValid:     "The input parameter is not valid.",
-	serrResourceNotFound:  "Could not find %s by PID!",
-	serrDefaultIndex:      "Could not create new %s with default index",
-	serrDuplicateResource: "Could not create duplicated %s",
-	serResourceValidation: "Could not create %s with unvalidated input schema",
-	serrResourceNoChange:  "Could not edit resource %s since no field has been changed",
-	serrDependencyIssue:   "Could not remove %s with resource dependency issue",
-	serrAPINotSupport:     "API is not supported yet.",
+	seNoError:             "No error",
+	seInputParamNotValid:  "The input parameter is not valid",
+	seInputSchemaNotValid: "The input schema is not valid",
+	seDBResourceQuery:     "Internal DB query error occurs",
+	seResourceNotFound:    "Could not find <%s> by PID",
+	seResourceDuplicated:  "Could not create duplicated <%s>",
+	seResourceNotChange:   "Could not edit resource <%s> since no field has been changed",
+	seDefaultIndex:        "Could not create new <%s> with default index",
+	seDependencyIssue:     "Could not remove <%s> with resource dependency issue",
+	seAPINotSupport:       "API is not supported yet.",
 }
