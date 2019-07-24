@@ -14,10 +14,10 @@ var ginAPITable = map[string]map[string]gin.HandlerFunc{
 
 // GinParameter a generic paramter wrapper for gin web framework handler
 type GinParameter struct {
-	Token string
-	Pkey  string
-	Skey  string
-	Data  []byte
+	Token string // auth token
+	PID   string // primary id
+	SID   string // secondary id
+	Data  []byte // data content
 }
 
 // GinResponse a generic response struct for gin web framework handler
@@ -33,8 +33,8 @@ func ginContextRequestParameter(ctx *gin.Context) *GinParameter {
 		tokenString = token.(string)
 	}
 
-	var primaryKey = ctx.Request.URL.Query().Get("pkey")
-	var secondarykey = ctx.Request.URL.Query().Get("skey")
+	var primaryKey = ctx.Request.URL.Query().Get("pid")
+	var secondarykey = ctx.Request.URL.Query().Get("sid")
 
 	var bodyData []byte = nil
 	switch strings.ToLower(ctx.Request.Method) {
@@ -83,6 +83,7 @@ func ginInputStructValid(input interface{}) bool {
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
 		fieldName := field.Name
+		logging.Tracemf(logModGinContext, "check struct [%s]: field [%s]", val.Type().Name(), fieldName)
 
 		switch fieldName {
 		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
@@ -134,6 +135,8 @@ func ginInputStructEqual(x, y interface{}) bool {
 	for i := 0; i < structTypex.NumField(); i++ {
 		field := structTypex.Field(i)
 		fieldName := field.Name
+		logging.Tracemf(logModGinContext, "compare struct [%s]: field [%s]", valx.Type().Name(), fieldName)
+
 		switch fieldName {
 		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
 			"Name", "InstituteName", "ClassName", "FirstName", "LastName",

@@ -1,6 +1,6 @@
 {
     "loggingReleaseMode": false,
-    "loggingLevel": "debug",
+    "loggingLevel": "trace",
     "loggingDestination": "stdout",
 	"DBHostAddress": "127.0.0.1:3306",
     "DBName": "klog_business",
