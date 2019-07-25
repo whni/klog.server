@@ -144,22 +144,22 @@ func ginStructEqualCheck(x, y interface{}) error {
 			"Address", "CountryCode", "Location", "MediaLocation",
 			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
 			if valx.FieldByName(fieldName).Interface().(string) != valy.FieldByName(fieldName).Interface().(string) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
 			}
 			break
 		case "PID", "InstitutePID", "ClassPID", "TeacherPID", "StudentPID", "ParentPID":
 			if valx.FieldByName(fieldName).Interface().(int) != valy.FieldByName(fieldName).Interface().(int) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
 			}
 			break
 		case "Enabled":
 			if valx.FieldByName(fieldName).Interface().(bool) != valy.FieldByName(fieldName).Interface().(bool) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
 			}
 			break
 		case "PIDs":
 			if !isIntListEqual(valx.FieldByName(fieldName).Interface().([]int), valy.FieldByName(fieldName).Interface().([]int)) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
 			}
 			break
 		}
