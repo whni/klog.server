@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
@@ -24,12 +25,12 @@ func instituteGetHandler(ctx *gin.Context) {
 	}()
 
 	var institutes []*Institute
-	var errCode int = seNoError
+	var err error
 	if params.PID == "all" {
-		institutes, errCode = findInstitute(0)
-		if errCode < seNoError {
+		institutes, err = findInstitute(0)
+		if err != nil {
 			response.Status = http.StatusConflict
-			response.Message = serverErrorMessages[errCode]
+			response.Message = err.Error()
 			return
 		}
 		response.Payload = institutes
@@ -39,19 +40,19 @@ func instituteGetHandler(ctx *gin.Context) {
 	pid, err := strconv.Atoi(params.PID)
 	if err != nil || pid <= 0 {
 		response.Status = http.StatusBadRequest
-		response.Message = serverErrorMessages[seInputParamNotValid] + " - Please specifiy a valid institute PID (pkey > 0)."
+		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid > 0)", serverErrorMessages[seInputParamNotValid])
 		return
 	}
 
-	institutes, errCode = findInstitute(pid)
-	if errCode < seNoError {
+	institutes, err = findInstitute(pid)
+	if err != nil {
 		response.Status = http.StatusConflict
-		response.Message = serverErrorMessages[errCode]
+		response.Message = err.Error()
 		return
 	}
 	if len(institutes) == 0 {
 		response.Status = http.StatusNotFound
-		response.Message = serverErrorMessages[seResourceNotFound]
+		response.Message = fmt.Sprintf("[%s] - No institute found (PID = %d)", serverErrorMessages[seResourceNotFound], pid)
 	} else {
 		response.Payload = institutes[0]
 	}
@@ -68,42 +69,47 @@ func institutePostHandler(ctx *gin.Context) {
 
 	var institute Institute
 	var institutePID int = 0
-	var errCode int = seNoError
+	var err error
 
-	if err := json.Unmarshal(params.Data, &institute); err != nil {
+	if err = json.Unmarshal(params.Data, &institute); err != nil {
 		response.Status = http.StatusBadRequest
-		response.Message = serverErrorMessages[seInputJSONNotValid]
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	institutePID, errCode = createInstitute(&institute)
-	if errCode < seNoError {
+	institutePID, err = createInstitute(&institute)
+	if err != nil {
 		response.Status = http.StatusConflict
-		response.Message = serverErrorMessages[errCode]
+		response.Message = err.Error()
 	} else {
 		response.Payload = institutePID
 	}
 	return
 }
 
-// find institute, return institute ptr, errCode
-func findInstitute(pid int) ([]*Institute, int) {
+// find institute, return institute ptr, error
+func findInstitute(pid int) ([]*Institute, error) {
 	var institutes []*Institute
 	var rows *sql.Rows
 	var err error
-	var dbQuery = "SELECT pid, institute_uid, institute_name, address, country_code, create_ts, modify_ts FROM institute"
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModInstituteHandler, err.Error())
+		}
+	}()
 
+	var dbQuery = "SELECT pid, institute_uid, institute_name, address, country_code, create_ts, modify_ts FROM institute"
 	if pid == 0 {
 		rows, err = dbPool.Query(dbQuery)
 	} else if pid > 0 {
 		rows, err = dbPool.Query(dbQuery+" WHERE pid = ?", pid)
 	} else {
-		logging.Errormf(logModInstituteHandler, serverErrorMessages[seInputParamNotValid]+" (PID not valid)")
-		return nil, seInputParamNotValid
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], pid)
+		return nil, err
 	}
 	if err != nil {
-		logging.Errormf(logModInstituteHandler, "Could not query DB rows - Error msg: %s", err.Error())
-		return nil, seDBResourceQuery
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -112,52 +118,60 @@ func findInstitute(pid int) ([]*Institute, int) {
 		err = rows.Scan(&institute.PID, &institute.InstituteUID, &institute.InstituteName, &institute.Address,
 			&institute.CountryCode, &institute.CreateTS, &institute.ModifyTS)
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, "Could not retrieve data from DB rows - Error msg: %s", err.Error())
-			return nil, seDBResourceQuery
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return nil, err
 		}
 		institutes = append(institutes, &institute)
 	}
 
 	err = rows.Err()
 	if err != nil {
-		logging.Errormf(logModInstituteHandler, "DB rows processing error occurs - Error msg: %s", err.Error())
-		return nil, seDBResourceQuery
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
 	}
 
 	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%d)", len(institutes), pid)
-	return institutes, seNoError
+	return institutes, nil
 }
 
-// create institute, return PID, errCode
-func createInstitute(institute *Institute) (int, int) {
+// create institute, return PID, error
+func createInstitute(institute *Institute) (int, error) {
 	var err error
 	var result sql.Result
-	var dbQuery = "INSERT INTO institute(institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?)"
 	var createWithPID = false
 
-	if !ginInputStructValid(institute) {
-		return 0, seInputSchemaNotValid
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModInstituteHandler, err.Error())
+		}
+	}()
+
+	if err = ginStructValidCheck(institute); err != nil {
+		return 0, err
 	}
 
 	if institute.PID > 0 {
-		if institutes, errCode := findInstitute(institute.PID); errCode == seNoError && len(institutes) > 0 {
-			return 0, seResourceDuplicated
+		if institutes, errExist := findInstitute(institute.PID); errExist == nil && len(institutes) > 0 {
+			err = fmt.Errorf("[%s] - Institute (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], institute.PID)
+			return 0, err
 		}
 		createWithPID = true
-		dbQuery = "INSERT INTO institute(pid, institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?, ?)"
 	} else if institute.PID < 0 {
-		logging.Errormf(logModInstituteHandler, serverErrorMessages[seInputParamNotValid]+" (PID not valid)")
-		return 0, seInputSchemaNotValid
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
+		return 0, err
 	}
 
+	var dbQuery = ""
 	if createWithPID == true {
+		dbQuery = "INSERT INTO institute(pid, institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?, ?)"
 		result, err = dbPool.Exec(dbQuery, institute.PID, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
 	} else {
+		dbQuery = "INSERT INTO institute(institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?)"
 		result, err = dbPool.Exec(dbQuery, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
 	}
 	if err != nil {
-		logging.Errormf(logModInstituteHandler, "Could not execute DB query correctly - Error msg: %s", err.Error())
-		return 0, seDBResourceQuery
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return 0, err
 	}
 
 	lastInsertID, err := result.LastInsertId()
@@ -165,6 +179,6 @@ func createInstitute(institute *Institute) (int, int) {
 		lastInsertID = -1
 		logging.Warnmf(logModInstituteHandler, "Cound not retrieve created institute PID")
 	}
-	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertId=%v)", lastInsertID)
-	return int(lastInsertID), seNoError
+	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertId,PID=%v)", lastInsertID)
+	return int(lastInsertID), nil
 }

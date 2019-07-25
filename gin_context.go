@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
@@ -51,39 +52,40 @@ func ginContextRequestParameter(ctx *gin.Context) *GinParameter {
 }
 
 func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {
-	reponseContent := gin.H{}
+	responseContent := gin.H{}
 	if response.Status == http.StatusOK {
 		if response.Payload != nil {
-			reponseContent["payload"] = response.Payload
+			responseContent["payload"] = response.Payload
 		} else {
-			reponseContent["payload"] = nil
+			// payload should exist with http status ok ==> internal error occurs
+			response.Status = http.StatusInternalServerError
+			responseContent["message"] = fmt.Sprintf("[%s] - Please check error log", serverErrorMessages[seUnresolvedError])
 		}
 		if len(response.Message) > 0 {
-			reponseContent["message"] = response.Message
+			responseContent["message"] = response.Message
 		}
 	} else {
-		reponseContent["message"] = response.Message
+		responseContent["message"] = response.Message
 	}
-	ctx.JSON(response.Status, reponseContent)
+	ctx.JSON(response.Status, responseContent)
 }
 
 /* gin input struct check */
-func ginInputStructValid(input interface{}) bool {
+func ginStructValidCheck(input interface{}) error {
 	val := reflect.ValueOf(input)
 	if val.Kind() == reflect.Ptr {
 		val = reflect.Indirect(val)
 	}
 
 	if val.Kind() != reflect.Struct {
-		logging.Errormf(logModGinContext, "unexpected type (%s) - struct required", val.Type().Name())
-		return false
+		return fmt.Errorf("[%s] - unexpected type (%s) - struct required", serverErrorMessages[seInputSchemaNotValid], val.Type().Name())
 	}
 	structType := val.Type()
 
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
 		fieldName := field.Name
-		logging.Tracemf(logModGinContext, "check struct [%s]: field [%s]", val.Type().Name(), fieldName)
+		logging.Tracemf(logModGinContext, "check struct (%s) field: %s", val.Type().Name(), fieldName)
 
 		switch fieldName {
 		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
@@ -91,26 +93,26 @@ func ginInputStructValid(input interface{}) bool {
 			"Address", "CountryCode", "Location", "MediaLocation",
 			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
 			if len(val.FieldByName(fieldName).Interface().(string)) < 1 {
-				return false
+				return fmt.Errorf("[%s] - invalid struct (%s) field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
 		case "Password":
 			if len(val.FieldByName(fieldName).Interface().(string)) < 5 {
-				return false
+				return fmt.Errorf("[%s] - invalid struct (%s) field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
 		case "InstitutePID":
 			pid := val.FieldByName(fieldName).Interface().(int)
-			if institutes, errCode := findInstitute(pid); errCode > seNoError || len(institutes) == 0 {
-				return false
+			if institutes, err := findInstitute(pid); err != nil || len(institutes) == 0 {
+				return fmt.Errorf("[%s] - not-found struct (%s) PID field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
 		}
 	}
-	return true
+	return nil
 }
 
-func ginInputStructEqual(x, y interface{}) bool {
+func ginStructEqualCheck(x, y interface{}) error {
 	valx := reflect.ValueOf(x)
 	if valx.Kind() == reflect.Ptr {
 		valx = reflect.Indirect(valx)
@@ -122,14 +124,13 @@ func ginInputStructEqual(x, y interface{}) bool {
 	}
 
 	if valx.Kind() != reflect.Struct || valy.Kind() != reflect.Struct {
-		logging.Errormf(logModGinContext, "unexpected type (x-%s, y-%s) - struct required", valx.Type().Name(), valy.Type().Name())
-		return false
+		return fmt.Errorf("[%s] - unexpected type (%s, %s) - struct required", serverErrorMessages[seInputSchemaNotValid], valx.Type().Name(), valy.Type().Name())
 	}
 	structTypex := valx.Type()
 	structTypey := valy.Type()
 
 	if structTypex.Name() != structTypey.Name() {
-		return false
+		return fmt.Errorf("[%s] - inconsistent type (%s != %s) ", serverErrorMessages[seInputSchemaNotValid], valx.Type().Name(), valy.Type().Name())
 	}
 
 	for i := 0; i < structTypex.NumField(); i++ {
@@ -143,25 +144,25 @@ func ginInputStructEqual(x, y interface{}) bool {
 			"Address", "CountryCode", "Location", "MediaLocation",
 			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
 			if valx.FieldByName(fieldName).Interface().(string) != valy.FieldByName(fieldName).Interface().(string) {
-				return false
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
 			}
 			break
 		case "PID", "InstitutePID", "ClassPID", "TeacherPID", "StudentPID", "ParentPID":
 			if valx.FieldByName(fieldName).Interface().(int) != valy.FieldByName(fieldName).Interface().(int) {
-				return false
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
 			}
 			break
 		case "Enabled":
 			if valx.FieldByName(fieldName).Interface().(bool) != valy.FieldByName(fieldName).Interface().(bool) {
-				return false
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
 			}
 			break
 		case "PIDs":
 			if !isIntListEqual(valx.FieldByName(fieldName).Interface().([]int), valy.FieldByName(fieldName).Interface().([]int)) {
-				return false
+				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s, %s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name(), valy.Type().Name())
 			}
 			break
 		}
 	}
-	return true
+	return nil
 }

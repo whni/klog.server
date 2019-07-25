@@ -9,21 +9,21 @@ const (
 	seResourceNotFound    = -iota
 	seResourceDuplicated  = -iota
 	seResourceNotChange   = -iota
-	seDefaultIndex        = -iota
 	seDependencyIssue     = -iota
+	seUnresolvedError     = -iota
 	seAPINotSupport       = -iota
 )
 
 var serverErrorMessages = map[int]string{
 	seNoError:             "No error",
-	seInputParamNotValid:  "The input parameter is not valid",
-	seInputSchemaNotValid: "The input schema is not valid",
-	seInputJSONNotValid:   "The input json format is not valid",
-	seDBResourceQuery:     "Internal DB query error occurs",
-	seResourceNotFound:    "Could not find resource by PID",
-	seResourceDuplicated:  "Could not create duplicated resource (Please check PID)",
-	seResourceNotChange:   "Could not edit resource since no field has been changed",
-	seDefaultIndex:        "Could not create new resource with default index",
-	seDependencyIssue:     "Could not remove resource with resource dependency issue",
-	seAPINotSupport:       "API is not supported yet.",
+	seInputParamNotValid:  "Invalid input parameter",
+	seInputSchemaNotValid: "Invalid input schema",
+	seInputJSONNotValid:   "Invalid input JSON format",
+	seDBResourceQuery:     "DB resource query error",
+	seResourceNotFound:    "Resource not found",
+	seResourceDuplicated:  "Resource duplicated",
+	seResourceNotChange:   "Resource not changed",
+	seDependencyIssue:     "Dependency not resolved",
+	seUnresolvedError:     "Unresolved server error",
+	seAPINotSupport:       "API not supported",
 }
