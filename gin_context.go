@@ -14,6 +14,7 @@ var ginAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/institute": instituteHandlerTable,
 	"/api/0/config/class":     classHandlerTable,
 	"/api/0/config/teacher":   teacherHandlerTable,
+	"/api/0/config/student":   studentHandlerTable,
 }
 
 // GinParameter a generic paramter wrapper for gin web framework handler
