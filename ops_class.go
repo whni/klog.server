@@ -10,14 +10,14 @@ import (
 	"strconv"
 )
 
-var instituteHandlerTable = map[string]gin.HandlerFunc{
-	"get":    instituteGetHandler,
-	"post":   institutePostHandler,
-	"put":    institutePutHandler,
-	"delete": instituteDeleteHandler,
+var classHandlerTable = map[string]gin.HandlerFunc{
+	"get":    classGetHandler,
+	"post":   classPostHandler,
+	"put":    classPutHandler,
+	"delete": classDeleteHandler,
 }
 
-func instituteGetHandler(ctx *gin.Context) {
+func classGetHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -26,7 +26,7 @@ func instituteGetHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var institutes []*Institute
+	var classes []*Class
 	var err error
 	var pid int
 	pid, err = strconv.Atoi(params.PID)
@@ -37,17 +37,17 @@ func instituteGetHandler(ctx *gin.Context) {
 	}
 
 	// pid: 0 for all, > 0 for specified one
-	institutes, err = findInstitute(pid)
+	classes, err = findClass(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 		return
 	}
-	response.Payload = institutes
+	response.Payload = classes
 	return
 }
 
-func institutePostHandler(ctx *gin.Context) {
+func classPostHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -56,27 +56,27 @@ func institutePostHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var institute Institute
-	var institutePID int
+	var class Class
+	var classPID int
 	var err error
 
-	if err = json.Unmarshal(params.Data, &institute); err != nil {
+	if err = json.Unmarshal(params.Data, &class); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	institutePID, err = createInstitute(&institute)
+	classPID, err = createClass(&class)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = institutePID
+		response.Payload = classPID
 	}
 	return
 }
 
-func institutePutHandler(ctx *gin.Context) {
+func classPutHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -85,26 +85,26 @@ func institutePutHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var institute Institute
+	var class Class
 	var err error
 
-	if err = json.Unmarshal(params.Data, &institute); err != nil {
+	if err = json.Unmarshal(params.Data, &class); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	err = updateInstitute(&institute)
+	err = updateClass(&class)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = institute.PID
+		response.Payload = class.PID
 	}
 	return
 }
 
-func instituteDeleteHandler(ctx *gin.Context) {
+func classDeleteHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -124,7 +124,7 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	}
 
 	// pid: 0 for all, > 0 for specified one
-	deletedRows, err = deleteInstitute(pid)
+	deletedRows, err = deleteClass(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -134,17 +134,17 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-// find institute, return institute ptr, error
-func findInstitute(pid int) ([]*Institute, error) {
+// find class, return class ptr, error
+func findClass(pid int) ([]*Class, error) {
 	var rows *sql.Rows
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModClassHandler, err.Error())
 		}
 	}()
 
-	var dbQuery = "SELECT pid, institute_uid, institute_name, address, country_code, create_ts, modify_ts FROM institute"
+	var dbQuery = "SELECT pid, class_uid, class_name, location, institute_pid, create_ts, modify_ts FROM class"
 	if pid == 0 {
 		rows, err = dbPool.Query(dbQuery)
 	} else if pid > 0 {
@@ -159,16 +159,16 @@ func findInstitute(pid int) ([]*Institute, error) {
 	}
 	defer rows.Close()
 
-	institutes := []*Institute{}
+	classes := []*Class{}
 	for rows.Next() {
-		var institute Institute
-		err = rows.Scan(&institute.PID, &institute.InstituteUID, &institute.InstituteName, &institute.Address,
-			&institute.CountryCode, &institute.CreateTS, &institute.ModifyTS)
+		var class Class
+		err = rows.Scan(&class.PID, &class.ClassUID, &class.ClassName, &class.Location,
+			&class.InstitutePID, &class.CreateTS, &class.ModifyTS)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return nil, err
 		}
-		institutes = append(institutes, &institute)
+		classes = append(classes, &class)
 	}
 
 	err = rows.Err()
@@ -177,44 +177,44 @@ func findInstitute(pid int) ([]*Institute, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%d)", len(institutes), pid)
-	return institutes, nil
+	logging.Debugmf(logModClassHandler, "Found %d class results from DB (PID=%d)", len(classes), pid)
+	return classes, nil
 }
 
-// create institute, return PID, error
-func createInstitute(institute *Institute) (int, error) {
+// create class, return PID, error
+func createClass(class *Class) (int, error) {
 	var err error
 	var result sql.Result
 	var createWithPID = false
 
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModClassHandler, err.Error())
 		}
 	}()
 
-	if err = ginStructValidCheck(institute); err != nil {
+	if err = ginStructValidCheck(class); err != nil {
 		return 0, err
 	}
 
-	if institute.PID > 0 {
-		if institutes, errExist := findInstitute(institute.PID); errExist == nil && len(institutes) > 0 {
-			err = fmt.Errorf("[%s] - Institute (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], institute.PID)
+	if class.PID > 0 {
+		if classes, errExist := findClass(class.PID); errExist == nil && len(classes) > 0 {
+			err = fmt.Errorf("[%s] - Class (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], class.PID)
 			return 0, err
 		}
 		createWithPID = true
-	} else if institute.PID < 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
+	} else if class.PID < 0 {
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], class.PID)
 		return 0, err
 	}
 
 	var dbQuery string
 	if createWithPID == true {
-		dbQuery = "INSERT INTO institute(pid, institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, institute.PID, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
+		dbQuery = "INSERT INTO class(pid, class_uid, class_name, location, institute_pid) VALUES (?, ?, ?, ?, ?)"
+		result, err = dbPool.Exec(dbQuery, class.PID, class.ClassUID, class.ClassName, class.Location, class.InstitutePID)
 	} else {
-		dbQuery = "INSERT INTO institute(institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
+		dbQuery = "INSERT INTO class(class_uid, class_name, location, institute_pid) VALUES (?, ?, ?, ?)"
+		result, err = dbPool.Exec(dbQuery, class.ClassUID, class.ClassName, class.Location, class.InstitutePID)
 	}
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -224,57 +224,57 @@ func createInstitute(institute *Institute) (int, error) {
 	lastInsertID, err := result.LastInsertId()
 	if err != nil {
 		lastInsertID = -1
-		logging.Warnmf(logModInstituteHandler, "Cound not retrieve created institute PID")
+		logging.Warnmf(logModClassHandler, "Cound not retrieve created class PID")
 	}
-	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertId,PID=%v)", lastInsertID)
+	logging.Debugmf(logModClassHandler, "Created class in DB (LastInsertId,PID=%v)", lastInsertID)
 	return int(lastInsertID), nil
 }
 
-// update institute, return error
-func updateInstitute(institute *Institute) error {
+// update class, return error
+func updateClass(class *Class) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModClassHandler, err.Error())
 		}
 	}()
 
-	if err = ginStructValidCheck(institute); err != nil {
+	if err = ginStructValidCheck(class); err != nil {
 		return err
 	}
 
-	if institute.PID <= 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
+	if class.PID <= 0 {
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], class.PID)
 		return err
 	}
-	if institutes, errExist := findInstitute(institute.PID); errExist != nil || len(institutes) == 0 {
-		err = fmt.Errorf("[%s] - Institute (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], institute.PID)
+	if classes, errExist := findClass(class.PID); errExist != nil || len(classes) == 0 {
+		err = fmt.Errorf("[%s] - Class (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], class.PID)
 		return err
 	}
 
-	var dbQuery = "UPDATE institute SET institute_uid=?, institute_name=?, address=?, country_code=? WHERE pid=?"
-	_, err = dbPool.Exec(dbQuery, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode, institute.PID)
+	var dbQuery = "UPDATE class SET class_uid=?, class_name=?, location=?, institute_pid=? WHERE pid=?"
+	_, err = dbPool.Exec(dbQuery, class.ClassUID, class.ClassName, class.Location, class.InstitutePID, class.PID)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Updated institute in DB (PID=%v)", institute.PID)
+	logging.Debugmf(logModClassHandler, "Updated class in DB (PID=%v)", class.PID)
 	return nil
 }
 
-// delete institute, return #delete rows, error
-func deleteInstitute(pid int) (int, error) {
+// delete class, return #delete rows, error
+func deleteClass(pid int) (int, error) {
 	var err error
 	var result sql.Result
 
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModClassHandler, err.Error())
 		}
 	}()
 
-	var dbQuery = "DELETE FROM institute"
+	var dbQuery = "DELETE FROM class"
 	if pid == 0 {
 		result, err = dbPool.Exec(dbQuery)
 	} else if pid > 0 {
@@ -291,8 +291,8 @@ func deleteInstitute(pid int) (int, error) {
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		rowsAffected = -1
-		logging.Warnmf(logModInstituteHandler, "Cound not count #deleted institutes")
+		logging.Warnmf(logModClassHandler, "Cound not count #deleted classes")
 	}
-	logging.Debugmf(logModInstituteHandler, "Deleted %d institute results from DB", rowsAffected)
+	logging.Debugmf(logModClassHandler, "Deleted %d class results from DB", rowsAffected)
 	return int(rowsAffected), nil
 }

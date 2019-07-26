@@ -47,6 +47,7 @@ const (
 	logModGinContext       = "GinContext"
 	logModDBControl        = "DBControl"
 	logModInstituteHandler = "InstituteHandler"
+	logModClassHandler     = "ClassHandler"
 )
 
 var logModEnabledTable = map[string]bool{
@@ -54,6 +55,7 @@ var logModEnabledTable = map[string]bool{
 	logModGinContext:       true,
 	logModDBControl:        true,
 	logModInstituteHandler: true,
+	logModClassHandler:     true,
 }
 
 // Logging global customized logging module
