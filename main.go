@@ -81,11 +81,19 @@ func main() {
 		logging.Infoln(params)
 	})
 
-	for apiUrl, apiHandlerTable := range ginAPITable {
-		r.GET(apiUrl, apiHandlerTable["get"])
-		r.POST(apiUrl, apiHandlerTable["post"])
-		r.PUT(apiUrl, apiHandlerTable["put"])
-		r.DELETE(apiUrl, apiHandlerTable["delete"])
+	for apiURL, apiHandlerTable := range ginAPITable {
+		for apiMethod, apiHandler := range apiHandlerTable {
+			switch apiMethod {
+			case "get":
+				r.GET(apiURL, apiHandler)
+			case "post":
+				r.POST(apiURL, apiHandler)
+			case "put":
+				r.PUT(apiURL, apiHandler)
+			case "delete":
+				r.DELETE(apiURL, apiHandler)
+			}
+		}
 	}
 
 	logging.Infomln(logModMain, "Server is listening and serving on 0.0.0.0:8080")
