@@ -1,6 +1,7 @@
 package main
 
 import (
+	"null.v3"
 	"time"
 )
 
@@ -21,7 +22,7 @@ type Class struct {
 	ClassUID     string    `json:"classUID"`
 	ClassName    string    `json:"className"`
 	Location     string    `json:"location"`
-	InstitutePID int       `json:"institutePID"`
+	InstitutePID null.Int  `json:"institutePID"`
 	CreateTS     time.Time `json:"createTS"`
 	ModifyTS     time.Time `json:"modifyTS"`
 }
@@ -36,7 +37,7 @@ type Teacher struct {
 	Address      string    `json:"address"`
 	PhoneNumber  string    `json:"phoneNumber"`
 	Email        string    `json:"email"`
-	InstitutePID int       `json:"institutePID"`
+	InstitutePID null.Int  `json:"institutePID"`
 	CreateTS     time.Time `json:"createTS"`
 	ModifyTS     time.Time `json:"modifyTS"`
 }
@@ -49,7 +50,7 @@ type Student struct {
 	LastName      string    `json:"lastName"`
 	DateOfBirth   time.Time `json:"dateOfBirth"`
 	MediaLocation string    `json:"mediaLocation"`
-	ClassPID      int       `json:"classPID"`
+	ClassPID      null.Int  `json:"classPID"`
 	CreateTS      time.Time `json:"createTS"`
 	ModifyTS      time.Time `json:"modifyTS"`
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+	"null.v3"
 	"reflect"
 	"strings"
 )
@@ -98,71 +99,81 @@ func ginStructValidCheck(input interface{}) error {
 			break
 		case "Password":
 			if len(val.FieldByName(fieldName).Interface().(string)) < 5 {
-				return fmt.Errorf("[%s] - invalid struct (%s) field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
+				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (at least 5 length)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
-		case "InstitutePID":
-			pid := val.FieldByName(fieldName).Interface().(int)
-			if institutes, err := findInstitute(pid); err != nil || len(institutes) == 0 {
-				return fmt.Errorf("[%s] - not-found struct (%s) PID field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
+		case "PID":
+			if val.FieldByName(fieldName).Interface().(int) <= 0 {
+				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
-		}
-	}
-	return nil
-}
-
-func ginStructEqualCheck(x, y interface{}) error {
-	valx := reflect.ValueOf(x)
-	if valx.Kind() == reflect.Ptr {
-		valx = reflect.Indirect(valx)
-	}
-
-	valy := reflect.ValueOf(y)
-	if valy.Kind() == reflect.Ptr {
-		valy = reflect.Indirect(valy)
-	}
-
-	if valx.Kind() != reflect.Struct || valy.Kind() != reflect.Struct {
-		return fmt.Errorf("[%s] - unexpected type (%s, %s) - struct required", serverErrorMessages[seInputSchemaNotValid], valx.Type().Name(), valy.Type().Name())
-	}
-	structTypex := valx.Type()
-	structTypey := valy.Type()
-
-	if structTypex.Name() != structTypey.Name() {
-		return fmt.Errorf("[%s] - inconsistent type (%s != %s) ", serverErrorMessages[seInputSchemaNotValid], valx.Type().Name(), valy.Type().Name())
-	}
-
-	for i := 0; i < structTypex.NumField(); i++ {
-		field := structTypex.Field(i)
-		fieldName := field.Name
-		logging.Tracemf(logModGinContext, "compare struct [%s]: field [%s]", valx.Type().Name(), fieldName)
-
-		switch fieldName {
-		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
-			"Name", "InstituteName", "ClassName", "FirstName", "LastName",
-			"Address", "CountryCode", "Location", "MediaLocation",
-			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
-			if valx.FieldByName(fieldName).Interface().(string) != valy.FieldByName(fieldName).Interface().(string) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
-			}
-			break
-		case "PID", "InstitutePID", "ClassPID", "TeacherPID", "StudentPID", "ParentPID":
-			if valx.FieldByName(fieldName).Interface().(int) != valy.FieldByName(fieldName).Interface().(int) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
-			}
-			break
-		case "Enabled":
-			if valx.FieldByName(fieldName).Interface().(bool) != valy.FieldByName(fieldName).Interface().(bool) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
-			}
-			break
-		case "PIDs":
-			if !isIntListEqual(valx.FieldByName(fieldName).Interface().([]int), valy.FieldByName(fieldName).Interface().([]int)) {
-				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
+		case "InstitutePID", "ClassPID", "StudentPID", "TeacherPID", "ParentPID":
+			pid := val.FieldByName(fieldName).Interface().(null.Int)
+			if pid.Valid && pid.ValueOrZero() <= 0 {
+				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
 		}
 	}
 	return nil
 }
+
+// func ginStructEqualCheck(x, y interface{}) error {
+// 	valx := reflect.ValueOf(x)
+// 	if valx.Kind() == reflect.Ptr {
+// 		valx = reflect.Indirect(valx)
+// 	}
+
+// 	valy := reflect.ValueOf(y)
+// 	if valy.Kind() == reflect.Ptr {
+// 		valy = reflect.Indirect(valy)
+// 	}
+
+// 	if valx.Kind() != reflect.Struct || valy.Kind() != reflect.Struct {
+// 		return fmt.Errorf("[%s] - unexpected type (%s, %s) - struct required", serverErrorMessages[seInputSchemaNotValid], valx.Type().Name(), valy.Type().Name())
+// 	}
+// 	structTypex := valx.Type()
+// 	structTypey := valy.Type()
+
+// 	if structTypex.Name() != structTypey.Name() {
+// 		return fmt.Errorf("[%s] - inconsistent type (%s != %s) ", serverErrorMessages[seInputSchemaNotValid], valx.Type().Name(), valy.Type().Name())
+// 	}
+
+// 	for i := 0; i < structTypex.NumField(); i++ {
+// 		field := structTypex.Field(i)
+// 		fieldName := field.Name
+// 		logging.Tracemf(logModGinContext, "compare struct [%s]: field [%s]", valx.Type().Name(), fieldName)
+
+// 		switch fieldName {
+// 		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
+// 			"Name", "InstituteName", "ClassName", "FirstName", "LastName",
+// 			"Address", "CountryCode", "Location", "MediaLocation",
+// 			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
+// 			if valx.FieldByName(fieldName).Interface().(string) != valy.FieldByName(fieldName).Interface().(string) {
+// 				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
+// 			}
+// 			break
+// 		case "PID":
+// 			if valx.FieldByName(fieldName).Interface().(int) != valy.FieldByName(fieldName).Interface().(int) {
+// 				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
+// 			}
+// 			break
+// 		case "InstitutePID", "ClassPID", "TeacherPID", "StudentPID", "ParentPID":
+// 			if valx.FieldByName(fieldName).Interface().(int) != valy.FieldByName(fieldName).Interface().(int) {
+// 				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
+// 			}
+// 			break
+// 		case "Enabled":
+// 			if valx.FieldByName(fieldName).Interface().(bool) != valy.FieldByName(fieldName).Interface().(bool) {
+// 				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
+// 			}
+// 			break
+// 		case "PIDs":
+// 			if !isIntListEqual(valx.FieldByName(fieldName).Interface().([]int), valy.FieldByName(fieldName).Interface().([]int)) {
+// 				return fmt.Errorf("[%s] - field (%s) not equal in struct (%s)", serverErrorMessages[seInputSchemaNotValid], fieldName, valx.Type().Name())
+// 			}
+// 			break
+// 		}
+// 	}
+// 	return nil
+// }

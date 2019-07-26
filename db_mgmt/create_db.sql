@@ -9,8 +9,8 @@ CREATE TABLE institute (
 	pid INT NOT NULL AUTO_INCREMENT,
     institute_uid VARCHAR(63) NOT NULL,
     institute_name VARCHAR(63) NOT NULL,
-    address VARCHAR(255),
-    country_code VARCHAR(3),
+    address VARCHAR(255) NOT NULL,
+    country_code VARCHAR(3) NOT NULL,
     create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (pid),
@@ -23,15 +23,15 @@ CREATE TABLE class (
 	pid INT NOT NULL AUTO_INCREMENT,
 	class_uid VARCHAR(63) NOT NULL,
     class_name VARCHAR(63) NOT NULL,
-    location VARCHAR(255),
-    institute_pid INT NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    institute_pid INT,
     create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (pid),
     UNIQUE (class_uid),
     FOREIGN KEY (institute_pid) REFERENCES institute(pid)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT
+    ON DELETE SET NULL
 ) ENGINE InnoDB;
 ALTER TABLE class AUTO_INCREMENT=1001;
 
@@ -41,18 +41,18 @@ CREATE TABLE teacher (
 	teacher_uid VARCHAR(63) NOT NULL,
     first_name VARCHAR(63) NOT NULL,
     last_name VARCHAR(63) NOT NULL,
-    date_of_birth DATE,
-    address VARCHAR(255),
-    phone_number VARCHAR(31),
-    email VARCHAR(127),
-    institute_pid INT NOT NULL,
+    date_of_birth DATE NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(31) NOT NULL,
+    email VARCHAR(127) NOT NULL,
+    institute_pid INT,
     create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (pid),
     UNIQUE (teacher_uid),
     FOREIGN KEY (institute_pid) REFERENCES institute(pid)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT
+    ON DELETE SET NULL
 ) ENGINE InnoDB;
 ALTER TABLE teacher AUTO_INCREMENT=1001;
 
@@ -79,15 +79,15 @@ CREATE TABLE student (
     first_name VARCHAR(63) NOT NULL,
     last_name VARCHAR(63) NOT NULL,
     date_of_birth DATE NOT NULL,
-    media_location VARCHAR(255),
-    class_pid INT NOT NULL,
+    media_location VARCHAR(255) NOT NULL,
+    class_pid INT,
     create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (pid),
     UNIQUE (student_uid),
     FOREIGN KEY (class_pid) REFERENCES class(pid)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT
+    ON DELETE SET NULL
 ) ENGINE InnoDB;
 ALTER TABLE student AUTO_INCREMENT=1001;
 
@@ -97,11 +97,11 @@ CREATE TABLE parent (
 	parent_uid VARCHAR(63) NOT NULL,
     first_name VARCHAR(63) NOT NULL,
     last_name VARCHAR(63) NOT NULL,
-    date_of_birth DATE,
-	address VARCHAR(255),
-	phone_number VARCHAR(31),
-    email VARCHAR(127),
-    occupation VARCHAR(31),
+    date_of_birth DATE NOT NULL,
+	address VARCHAR(255) NOT NULL,
+	phone_number VARCHAR(31) NOT NULL,
+    email VARCHAR(127) NOT NULL,
+    occupation VARCHAR(31) NOT NULL,
     create_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (pid),

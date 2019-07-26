@@ -28,22 +28,16 @@ func instituteGetHandler(ctx *gin.Context) {
 
 	var institutes []*Institute
 	var err error
+	var pid int
 	if params.PID == "all" {
-		institutes, err = findInstitute(0)
-		if err != nil {
-			response.Status = http.StatusConflict
-			response.Message = err.Error()
+		pid = 0
+	} else {
+		pid, err := strconv.Atoi(params.PID)
+		if err != nil || pid <= 0 {
+			response.Status = http.StatusBadRequest
+			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid > 0)", serverErrorMessages[seInputParamNotValid])
 			return
 		}
-		response.Payload = institutes
-		return
-	}
-
-	pid, err := strconv.Atoi(params.PID)
-	if err != nil || pid <= 0 {
-		response.Status = http.StatusBadRequest
-		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid > 0)", serverErrorMessages[seInputParamNotValid])
-		return
 	}
 
 	institutes, err = findInstitute(pid)
@@ -52,12 +46,8 @@ func instituteGetHandler(ctx *gin.Context) {
 		response.Message = err.Error()
 		return
 	}
-	if len(institutes) == 0 {
-		response.Status = http.StatusNotFound
-		response.Message = fmt.Sprintf("[%s] - No institute found (PID = %d)", serverErrorMessages[seResourceNotFound], pid)
-	} else {
-		response.Payload = institutes[0]
-	}
+	response.Payload = institutes
+	return
 }
 
 func institutePostHandler(ctx *gin.Context) {
@@ -261,13 +251,12 @@ func updateInstitute(institute *Institute) error {
 		return err
 	}
 
-	if institutes, err = findInstitute(institute.PID); err != nil || len(institutes) == 0 {
-		err = fmt.Errorf("[%s] - Institute (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], institute.PID)
+	if institute.PID <= 0 {
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
 		return err
 	}
-
-	if err = ginStructEqualCheck(institute, institutes[0]); err == nil {
-		err = fmt.Errorf("[%s] - No field in institute (PID=%d) is changed", serverErrorMessages[seResourceNotChange], institute.PID)
+	if institutes, err = findInstitute(institute.PID); err != nil || len(institutes) == 0 {
+		err = fmt.Errorf("[%s] - Institute (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], institute.PID)
 		return err
 	}
 
