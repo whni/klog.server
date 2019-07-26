@@ -10,14 +10,14 @@ import (
 	"strconv"
 )
 
-var studentHandlerTable = map[string]gin.HandlerFunc{
-	"get":    studentGetHandler,
-	"post":   studentPostHandler,
-	"put":    studentPutHandler,
-	"delete": studentDeleteHandler,
+var parentHandlerTable = map[string]gin.HandlerFunc{
+	"get":    parentGetHandler,
+	"post":   parentPostHandler,
+	"put":    parentPutHandler,
+	"delete": parentDeleteHandler,
 }
 
-func studentGetHandler(ctx *gin.Context) {
+func parentGetHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -26,7 +26,7 @@ func studentGetHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var students []*Student
+	var parents []*Parent
 	var err error
 	var pid int
 	pid, err = strconv.Atoi(params.PID)
@@ -37,17 +37,17 @@ func studentGetHandler(ctx *gin.Context) {
 	}
 
 	// pid: 0 for all, > 0 for specified one
-	students, err = findStudent(pid)
+	parents, err = findParent(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 		return
 	}
-	response.Payload = students
+	response.Payload = parents
 	return
 }
 
-func studentPostHandler(ctx *gin.Context) {
+func parentPostHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -56,27 +56,27 @@ func studentPostHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var student Student
-	var studentPID int
+	var parent Parent
+	var parentPID int
 	var err error
 
-	if err = json.Unmarshal(params.Data, &student); err != nil {
+	if err = json.Unmarshal(params.Data, &parent); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	studentPID, err = createStudent(&student)
+	parentPID, err = createParent(&parent)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = studentPID
+		response.Payload = parentPID
 	}
 	return
 }
 
-func studentPutHandler(ctx *gin.Context) {
+func parentPutHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -85,26 +85,26 @@ func studentPutHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var student Student
+	var parent Parent
 	var err error
 
-	if err = json.Unmarshal(params.Data, &student); err != nil {
+	if err = json.Unmarshal(params.Data, &parent); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	err = updateStudent(&student)
+	err = updateParent(&parent)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = student.PID
+		response.Payload = parent.PID
 	}
 	return
 }
 
-func studentDeleteHandler(ctx *gin.Context) {
+func parentDeleteHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -124,7 +124,7 @@ func studentDeleteHandler(ctx *gin.Context) {
 	}
 
 	// pid: 0 for all, > 0 for specified one
-	deletedRows, err = deleteStudent(pid)
+	deletedRows, err = deleteParent(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -134,17 +134,17 @@ func studentDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-// find student, return student slice, error
-func findStudent(pid int) ([]*Student, error) {
+// find parent, return parent slice, error
+func findParent(pid int) ([]*Parent, error) {
 	var rows *sql.Rows
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModParentHandler, err.Error())
 		}
 	}()
 
-	var dbQuery = "SELECT pid, student_uid, first_name, last_name, date_of_birth, media_location, class_pid, create_ts, modify_ts FROM student"
+	var dbQuery = "SELECT pid, parent_uid, first_name, last_name, date_of_birth, address, phone_number, email, occupation, create_ts, modify_ts FROM parent"
 	if pid == 0 {
 		rows, err = dbPool.Query(dbQuery)
 	} else if pid > 0 {
@@ -159,16 +159,16 @@ func findStudent(pid int) ([]*Student, error) {
 	}
 	defer rows.Close()
 
-	students := []*Student{}
+	parents := []*Parent{}
 	for rows.Next() {
-		var student Student
-		err = rows.Scan(&student.PID, &student.StudentUID, &student.FirstName, &student.LastName, &student.DateOfBirth,
-			&student.MediaLocation, &student.ClassPID, &student.CreateTS, &student.ModifyTS)
+		var parent Parent
+		err = rows.Scan(&parent.PID, &parent.ParentUID, &parent.FirstName, &parent.LastName, &parent.DateOfBirth,
+			&parent.Address, &parent.PhoneNumber, &parent.Email, &parent.Occupation, &parent.CreateTS, &parent.ModifyTS)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return nil, err
 		}
-		students = append(students, &student)
+		parents = append(parents, &parent)
 	}
 
 	err = rows.Err()
@@ -177,42 +177,44 @@ func findStudent(pid int) ([]*Student, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%d)", len(students), pid)
-	return students, nil
+	logging.Debugmf(logModParentHandler, "Found %d parent results from DB (PID=%d)", len(parents), pid)
+	return parents, nil
 }
 
-// create student, return PID, error
-func createStudent(student *Student) (int, error) {
+// create parent, return PID, error
+func createParent(parent *Parent) (int, error) {
 	var err error
 	var result sql.Result
 
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModParentHandler, err.Error())
 		}
 	}()
 
-	if err = ginStructValidCheck(student); err != nil {
+	if err = ginStructValidCheck(parent); err != nil {
 		return 0, err
 	}
 
-	if student.PID > 0 {
-		if students, errExist := findStudent(student.PID); errExist == nil && len(students) > 0 {
-			err = fmt.Errorf("[%s] - Student (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], student.PID)
+	if parent.PID > 0 {
+		if parents, errExist := findParent(parent.PID); errExist == nil && len(parents) > 0 {
+			err = fmt.Errorf("[%s] - Parent (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], parent.PID)
 			return 0, err
 		}
-	} else if student.PID < 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], student.PID)
+	} else if parent.PID < 0 {
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], parent.PID)
 		return 0, err
 	}
 
 	var dbQuery string
-	if student.PID > 0 {
-		dbQuery = "INSERT INTO student(pid, student_uid, first_name, last_name, date_of_birth, media_location, class_pid) VALUES (?, ?, ?, ?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, student.PID, student.StudentUID, student.FirstName, student.LastName, student.DateOfBirth, student.MediaLocation, student.ClassPID)
+	if parent.PID > 0 {
+		dbQuery = "INSERT INTO parent(pid, parent_uid, first_name, last_name, date_of_birth, address, phone_number, email, occupation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		result, err = dbPool.Exec(dbQuery, parent.PID, parent.ParentUID, parent.FirstName, parent.LastName, parent.DateOfBirth, parent.Address,
+			parent.PhoneNumber, parent.Email, parent.Occupation)
 	} else {
-		dbQuery = "INSERT INTO student(student_uid, first_name, last_name, date_of_birth, media_location, class_pid) VALUES (?, ?, ?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, student.StudentUID, student.FirstName, student.LastName, student.DateOfBirth, student.MediaLocation, student.ClassPID)
+		dbQuery = "INSERT INTO parent(parent_uid, first_name, last_name, date_of_birth, address, phone_number, email, occupation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+		result, err = dbPool.Exec(dbQuery, parent.ParentUID, parent.FirstName, parent.LastName, parent.DateOfBirth, parent.Address,
+			parent.PhoneNumber, parent.Email, parent.Occupation)
 	}
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -222,57 +224,58 @@ func createStudent(student *Student) (int, error) {
 	lastInsertID, err := result.LastInsertId()
 	if err != nil {
 		lastInsertID = -1
-		logging.Warnmf(logModStudentHandler, "Cound not retrieve created student PID")
+		logging.Warnmf(logModParentHandler, "Cound not retrieve created parent PID")
 	}
-	logging.Debugmf(logModStudentHandler, "Created student in DB (LastInsertId,PID=%v)", lastInsertID)
+	logging.Debugmf(logModParentHandler, "Created parent in DB (LastInsertId,PID=%v)", lastInsertID)
 	return int(lastInsertID), nil
 }
 
-// update student, return error
-func updateStudent(student *Student) error {
+// update parent, return error
+func updateParent(parent *Parent) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModParentHandler, err.Error())
 		}
 	}()
 
-	if err = ginStructValidCheck(student); err != nil {
+	if err = ginStructValidCheck(parent); err != nil {
 		return err
 	}
 
-	if student.PID <= 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], student.PID)
+	if parent.PID <= 0 {
+		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], parent.PID)
 		return err
 	}
-	if students, errExist := findStudent(student.PID); errExist != nil || len(students) == 0 {
-		err = fmt.Errorf("[%s] - Student (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], student.PID)
+	if parents, errExist := findParent(parent.PID); errExist != nil || len(parents) == 0 {
+		err = fmt.Errorf("[%s] - Parent (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], parent.PID)
 		return err
 	}
 
-	var dbQuery = "UPDATE student SET student_uid=?, first_name=?, last_name=?, date_of_birth=?, media_location=?, class_pid=? WHERE pid=?"
-	_, err = dbPool.Exec(dbQuery, student.StudentUID, student.FirstName, student.LastName, student.DateOfBirth, student.MediaLocation, student.ClassPID, student.PID)
+	var dbQuery = "UPDATE parent SET parent_uid=?, first_name=?, last_name=?, date_of_birth=?, address=?, phone_number=?, email=?, occupation=? WHERE pid=?"
+	_, err = dbPool.Exec(dbQuery, parent.ParentUID, parent.FirstName, parent.LastName, parent.DateOfBirth, parent.Address,
+		parent.PhoneNumber, parent.Email, parent.Occupation, parent.PID)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Updated student in DB (PID=%v)", student.PID)
+	logging.Debugmf(logModParentHandler, "Updated parent in DB (PID=%v)", parent.PID)
 	return nil
 }
 
-// delete student, return #delete rows, error
-func deleteStudent(pid int) (int, error) {
+// delete parent, return #delete rows, error
+func deleteParent(pid int) (int, error) {
 	var err error
 	var result sql.Result
 
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModParentHandler, err.Error())
 		}
 	}()
 
-	var dbQuery = "DELETE FROM student"
+	var dbQuery = "DELETE FROM parent"
 	if pid == 0 {
 		result, err = dbPool.Exec(dbQuery)
 	} else if pid > 0 {
@@ -289,8 +292,8 @@ func deleteStudent(pid int) (int, error) {
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		rowsAffected = -1
-		logging.Warnmf(logModStudentHandler, "Cound not count #deleted students")
+		logging.Warnmf(logModParentHandler, "Cound not count #deleted parents")
 	}
-	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", rowsAffected)
+	logging.Debugmf(logModParentHandler, "Deleted %d parents results from DB", rowsAffected)
 	return int(rowsAffected), nil
 }

@@ -134,7 +134,7 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-// find institute, return institute ptr, error
+// find institute, return institute slice, error
 func findInstitute(pid int) ([]*Institute, error) {
 	var rows *sql.Rows
 	var err error

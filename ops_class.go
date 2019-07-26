@@ -134,7 +134,7 @@ func classDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-// find class, return class ptr, error
+// find class, return class slice, error
 func findClass(pid int) ([]*Class, error) {
 	var rows *sql.Rows
 	var err error

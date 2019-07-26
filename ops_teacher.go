@@ -134,7 +134,7 @@ func teacherDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-// find teacher, return teacher ptr, error
+// find teacher, return teacher slice, error
 func findTeacher(pid int) ([]*Teacher, error) {
 	var rows *sql.Rows
 	var err error
