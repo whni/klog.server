@@ -69,6 +69,7 @@ func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {
 		responseContent["message"] = response.Message
 	}
 	ctx.JSON(response.Status, responseContent)
+	logging.Debugmf(logModGinContext, "GIN: [%s] FROM %v | URL %v | RESPONSE CODE %v", ctx.Request.Method, ctx.Request.RemoteAddr, ctx.Request.URL, response.Status)
 }
 
 /* gin input struct check */

@@ -29,17 +29,14 @@ func instituteGetHandler(ctx *gin.Context) {
 	var institutes []*Institute
 	var err error
 	var pid int
-	if params.PID == "all" {
-		pid = 0
-	} else {
-		pid, err := strconv.Atoi(params.PID)
-		if err != nil || pid <= 0 {
-			response.Status = http.StatusBadRequest
-			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid > 0)", serverErrorMessages[seInputParamNotValid])
-			return
-		}
+	pid, err = strconv.Atoi(params.PID)
+	if err != nil || pid < 0 {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid >= 0)", serverErrorMessages[seInputParamNotValid])
+		return
 	}
 
+	// pid: 0 for all, > 0 for specified one
 	institutes, err = findInstitute(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -119,17 +116,14 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	var err error
 	var deletedRows int
 	var pid int
-	if params.PID == "all" {
-		pid = 0
-	} else {
-		pid, err = strconv.Atoi(params.PID)
-		if err != nil || pid <= 0 {
-			response.Status = http.StatusBadRequest
-			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid > 0)", serverErrorMessages[seInputParamNotValid])
-			return
-		}
+	pid, err = strconv.Atoi(params.PID)
+	if err != nil || pid < 0 {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid institute PID (pid >= 0)", serverErrorMessages[seInputParamNotValid])
+		return
 	}
 
+	// pid: 0 for all, > 0 for specified one
 	deletedRows, err = deleteInstitute(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -142,7 +136,6 @@ func instituteDeleteHandler(ctx *gin.Context) {
 
 // find institute, return institute ptr, error
 func findInstitute(pid int) ([]*Institute, error) {
-	var institutes []*Institute
 	var rows *sql.Rows
 	var err error
 	defer func() {
@@ -166,6 +159,7 @@ func findInstitute(pid int) ([]*Institute, error) {
 	}
 	defer rows.Close()
 
+	institutes := []*Institute{}
 	for rows.Next() {
 		var institute Institute
 		err = rows.Scan(&institute.PID, &institute.InstituteUID, &institute.InstituteName, &institute.Address,
@@ -239,8 +233,6 @@ func createInstitute(institute *Institute) (int, error) {
 // update institute, return error
 func updateInstitute(institute *Institute) error {
 	var err error
-	var institutes []*Institute
-
 	defer func() {
 		if err != nil {
 			logging.Errormf(logModInstituteHandler, err.Error())
@@ -255,7 +247,7 @@ func updateInstitute(institute *Institute) error {
 		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
 		return err
 	}
-	if institutes, err = findInstitute(institute.PID); err != nil || len(institutes) == 0 {
+	if institutes, errExist := findInstitute(institute.PID); errExist != nil || len(institutes) == 0 {
 		err = fmt.Errorf("[%s] - Institute (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], institute.PID)
 		return err
 	}
