@@ -185,7 +185,6 @@ func findInstitute(pid int) ([]*Institute, error) {
 func createInstitute(institute *Institute) (int, error) {
 	var err error
 	var result sql.Result
-	var createWithPID = false
 
 	defer func() {
 		if err != nil {
@@ -202,14 +201,13 @@ func createInstitute(institute *Institute) (int, error) {
 			err = fmt.Errorf("[%s] - Institute (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], institute.PID)
 			return 0, err
 		}
-		createWithPID = true
 	} else if institute.PID < 0 {
 		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
 		return 0, err
 	}
 
 	var dbQuery string
-	if createWithPID == true {
+	if institute.PID > 0 {
 		dbQuery = "INSERT INTO institute(pid, institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?, ?)"
 		result, err = dbPool.Exec(dbQuery, institute.PID, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
 	} else {

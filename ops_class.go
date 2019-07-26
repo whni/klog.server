@@ -185,7 +185,6 @@ func findClass(pid int) ([]*Class, error) {
 func createClass(class *Class) (int, error) {
 	var err error
 	var result sql.Result
-	var createWithPID = false
 
 	defer func() {
 		if err != nil {
@@ -202,14 +201,13 @@ func createClass(class *Class) (int, error) {
 			err = fmt.Errorf("[%s] - Class (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], class.PID)
 			return 0, err
 		}
-		createWithPID = true
 	} else if class.PID < 0 {
 		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], class.PID)
 		return 0, err
 	}
 
 	var dbQuery string
-	if createWithPID == true {
+	if class.PID > 0 {
 		dbQuery = "INSERT INTO class(pid, class_uid, class_name, location, institute_pid) VALUES (?, ?, ?, ?, ?)"
 		result, err = dbPool.Exec(dbQuery, class.PID, class.ClassUID, class.ClassName, class.Location, class.InstitutePID)
 	} else {

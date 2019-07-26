@@ -13,6 +13,7 @@ import (
 var ginAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/institute": instituteHandlerTable,
 	"/api/0/config/class":     classHandlerTable,
+	"/api/0/config/teacher":   teacherHandlerTable,
 }
 
 // GinParameter a generic paramter wrapper for gin web framework handler
@@ -94,7 +95,7 @@ func ginStructValidCheck(input interface{}) error {
 		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
 			"Name", "InstituteName", "ClassName", "FirstName", "LastName",
 			"Address", "CountryCode", "Location", "MediaLocation",
-			"DateOfBirth", "PhoneNumber", "Email", "Occupation":
+			"PhoneNumber", "Email", "Occupation":
 			if len(val.FieldByName(fieldName).Interface().(string)) < 1 {
 				return fmt.Errorf("[%s] - invalid struct (%s) field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
@@ -105,7 +106,7 @@ func ginStructValidCheck(input interface{}) error {
 			}
 			break
 		case "PID":
-			if val.FieldByName(fieldName).Interface().(int) <= 0 {
+			if val.FieldByName(fieldName).Interface().(int) < 0 {
 				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
 			}
 			break
