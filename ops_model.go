@@ -55,7 +55,7 @@ type Student struct {
 	ModifyTS      time.Time `json:"modifyTS"`
 }
 
-// Parent struct for parent
+// Parent struct
 type Parent struct {
 	PID         int       `json:"PID"`
 	ParentUID   string    `json:"parentUID"`
@@ -68,4 +68,23 @@ type Parent struct {
 	Occupation  string    `json:"occupation"`
 	CreateTS    time.Time `json:"createTS"`
 	ModifyTS    time.Time `json:"modifyTS"`
+}
+
+// VideoClip struct
+type VideoClip struct {
+	PID           int       `json:"PID"`
+	VideoClipUID  string    `json:"videoUID"`
+	VideoClipURL  string    `json:"videoClipURL"`
+	VideoMetaURL  string    `json:"videoMetaURL"`
+	VideoLifeTime int       `json:"videoLifeTime"`
+	CreateTS      time.Time `json:"createTS"`
+	ModifyTS      time.Time `json:"modifyTS"`
+}
+
+// VideoMeta struct
+type VideoMeta struct {
+	PID          int    `json:"PID"`
+	VideoMetaUID string `json:"videoUID"`
+	VideoMetaURL string `json:"videoMetaURL"`
+	VideoClipPID string `json:"videoClipURL"`
 }
