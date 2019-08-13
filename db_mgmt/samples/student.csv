@@ -1,5 +1,0 @@
-pid,student_uid,first_name,last_name,date_of_birth,media_location,class_pid,create_ts,modify_ts
-1001,"student-1","Thomas","Hu","03/29/1998","mediaasset/thomas_loc",1001,NULL,NULL
-1002,"student-2","Bruce","Wang","01/30/1999","mediaasset/bruce_loc",1002,NULL,NULL
-1003,"student-3","Tiffiny","Shawn","12/15/2002","mediaasset/tiffiny_loc",1003,NULL,NULL
-1004,"student-4","Gintama","Y.","05/22/2000","mediaasset/gintama_loc",1004,NULL,NULL

@@ -11,8 +11,9 @@ db.createCollection("institutes", {
             properties: {
                 institute_uid: {
                     bsonType: "string",
-                    minLength: 5,
-                    description: "required string (>= 5 length)"
+                    pattern: "^[a-z]{3}-[a-z0-9\-]{4,}+$",
+                    minLength: 8,
+                    description: "required string (>= 8 length, match xxx-xxxx)"
                 },
                 institute_name: {
                     bsonType: "string",
@@ -26,6 +27,12 @@ db.createCollection("institutes", {
                     properties: {
                         street: {
                             bsonType: "string",
+                            description: "optional string",
+                        },
+                        code: {
+                            bsonType: "string",
+                            minLength: 5,
+                            maxLength: 6,
                             description: "optional string",
                         },
                         city: {
@@ -61,12 +68,13 @@ db.createCollection("teachers", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["teacher_uid", "teacher_name", "class_name", "phone_number", "email", "institute_uid"],
+            required: ["teacher_uid", "teacher_name", "class_name", "phone_number", "email", "institute_id"],
             properties: {
                 teacher_uid: {
                     bsonType: "string",
-                    minLength: 5,
-                    description: "required string (>= 5 length)"
+                    pattern: "^[a-z]{3}-[a-z0-9\-]{4,}+$",
+                    minLength: 8,
+                    description: "required string (>= 8 length, match xxx-xxxx)"
                 },
                 teacher_name: {
                     bsonType: "string",
@@ -74,22 +82,21 @@ db.createCollection("teachers", {
                     description: "required string (>= 2 length)"
                 },
                 class_name: {
-                    bsontype: "string",
-                    minlength: 2,
+                    bsonType: "string",
+                    minLength: 2,
                     description: "required string (>= 2 length)"
                 },
                 phone_number: {
-                    bsontype: "string",
+                    bsonType: "string",
                     description: "required string"
                 },
                 email: {
-                    bsontype: "string",
+                    bsonType: "string",
                     description: "required string"
                 },
-                institute_uid: {
-                    bsonType: "string",
-                    minLength: 5,
-                    description: "required string (>= 5 length)"
+                institute_id: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
                 }
             }
         }
@@ -104,12 +111,13 @@ db.createCollection("students", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["student_uid", "student_name", "parent_wxid", "parent_name", "phone_number", "email", "teacher_uid", "institute_uid"],
+            required: ["student_uid", "student_name", "parent_wxid", "parent_name", "phone_number", "email", "teacher_id"],
             properties: {
                 student_uid: {
                     bsonType: "string",
-                    minLength: 5,
-                    description: "required string (>= 5 length)"
+                    pattern: "^[a-z]{3}-[a-z0-9\-]{4,}+$",
+                    minLength: 8,
+                    description: "required string (>= 8 length, match xxx-xxxx)"
                 },
                 student_name: {
                     bsonType: "string",
@@ -117,32 +125,26 @@ db.createCollection("students", {
                     description: "required string (>= 2 length)"
                 },
                 parent_wxid: {
-                    bsontype: "string",
-                    minlength: 2,
+                    bsonType: "string",
+                    minLength: 2,
                     description: "required string (>= 2 length)"
                 },
                 parent_name: {
-                    bsontype: "string",
-                    minlength: 2,
+                    bsonType: "string",
+                    minLength: 2,
                     description: "required string"
                 },
                 phone_number: {
-                    bsontype: "string",
+                    bsonType: "string",
                     description: "required string"
                 },
                 email: {
-                    bsontype: "string",
+                    bsonType: "string",
                     description: "required string"
                 },
-                teacher_uid: {
-                    bsonType: "string",
-                    minLength: 5,
-                    description: "required string (>= 5 length)"
-                },
-                institute_uid: {
-                    bsonType: "string",
-                    minLength: 5,
-                    description: "required string (>= 5 length)"
+                teacher_id: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
                 }
             }
         }
@@ -160,24 +162,117 @@ print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);
 db.institutes.insertMany(
     [
         {
-            institute_uid: "ins-10001",
-            institute_name: "test ins 1",
+            _id: ObjectId("102030405060708090000001"),
+            institute_uid: "uid-usa-0001",
+            institute_name: "Institute 1",
             address: {
-                country: "USA",
-                state: "CA",
+                street: "180 Elm Ct",
+                code: "94086",
                 city: "Sunnyvale",
-                street: "Valley Green 6"
+                state: "CA",
+                country: "USA"
             }
         },
         {
-            institute_uid: "ins-10002",
-            institute_name: "test ins 2",
+            _id: ObjectId("102030405060708090000002"),
+            institute_uid: "uid-usa-0002",
+            institute_name: "Institute 2",
             address: {
-                country: "USA",
+                street: "Valley Green 6",
+                code: "95014",
+                city: "Cupertino",
                 state: "CA",
-                city: "Sunnyvale",
-                street: "Valley Green 6"
+                country: "USA"
             }
+        }
+    ]
+);
+
+db.teachers.insertMany(
+    [
+        {
+            _id: ObjectId("102030405060708090000001"),
+            teacher_uid: "uid-usa-1001",
+            teacher_name: "Nicole Taylor",
+            class_name: "GoldenEye",
+            phone_number: "123-456-9876",
+            email: "nigoo@klog.com",
+            institute_id: ObjectId("102030405060708090000001")
+        },
+        {
+            _id: ObjectId("102030405060708090000002"),
+            teacher_uid: "uid-usa-1002",
+            teacher_name: "Wayne Grace",
+            class_name: "FastWind",
+            phone_number: "123-456-9876",
+            email: "wayne@klog.com",
+            institute_id: ObjectId("102030405060708090000001")
+        },
+        {
+            _id: ObjectId("102030405060708090000003"),
+            teacher_uid: "uid-usa-1003",
+            teacher_name: "Fantasy God",
+            class_name: "CloudTop",
+            phone_number: "000-111-2222",
+            email: "fanfan@klog.com",
+            institute_id: ObjectId("102030405060708090000002")
+        },
+        {
+            _id: ObjectId("102030405060708090000004"),
+            teacher_uid: "uid-usa-1004",
+            teacher_name: "Summer Season",
+            class_name: "UnderWorld",
+            phone_number: "619-763-1020",
+            email: "summer@klog.com",
+            institute_id: ObjectId("102030405060708090000002")
+        }
+    ]
+);
+
+
+
+
+db.students.insertMany(
+    [
+        {
+            _id: ObjectId("102030405060708090000001"),
+            student_uid: "uid-usa-1001",
+            student_name: "Thomas Hu",
+            parent_wxid: "wxid-0123456789",
+            parent_name: "Ed Sheeran",
+            phone_number: "777-888-9999",
+            email: "ed_sh@apple.com",
+            teacher_id: ObjectId("102030405060708090000001")
+        },
+        {
+            _id: ObjectId("102030405060708090000002"),
+            student_uid: "uid-usa-1002",
+            student_name: "Bruce Wang",
+            parent_wxid: "wxid-0123456789",
+            parent_name: "Madison Beer",
+            phone_number: "777-888-9999",
+            email: "beer@google.com",
+            teacher_id: ObjectId("102030405060708090000002")
+        },
+        {
+            _id: ObjectId("102030405060708090000003"),
+            student_uid: "uid-usa-1003",
+            student_name: "Tiffiny Shawn",
+            parent_wxid: "wxid-0123456789",
+            parent_name: "Skylar Grey",
+            phone_number: "777-888-9999",
+            email: "skylar@facebook.com",
+            teacher_id: ObjectId("102030405060708090000003")
+        },
+        {
+            _id: ObjectId("102030405060708090000004"),
+            student_uid: "uid-usa-1004",
+            student_name: "Gintama Y.",
+            parent_wxid: "wxid-0123456789",
+            parent_name: "Autumn Mendes",
+            phone_number: "777-888-9999",
+            email: "autumn@xxx.com",
+            teacher_id: ObjectId("102030405060708090000004")
         }
     ]
 );
