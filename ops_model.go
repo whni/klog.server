@@ -23,30 +23,15 @@ type Institute struct {
 	Address       AddressInfo        `json:"address" bson:"address"`
 }
 
-// Class struct
-type Class struct {
-	PID          int       `json:"PID"`
-	ClassUID     string    `json:"classUID"`
-	ClassName    string    `json:"className"`
-	Location     string    `json:"location"`
-	InstitutePID null.Int  `json:"institutePID"`
-	CreateTS     time.Time `json:"createTS"`
-	ModifyTS     time.Time `json:"modifyTS"`
-}
-
 // Teacher struct
 type Teacher struct {
-	PID          int       `json:"PID"`
-	TeacherUID   string    `json:"teacherUID"`
-	FirstName    string    `json:"firstName"`
-	LastName     string    `json:"lastName"`
-	DateOfBirth  time.Time `json:"dateOfBirth"`
-	Address      string    `json:"address"`
-	PhoneNumber  string    `json:"phoneNumber"`
-	Email        string    `json:"email"`
-	InstitutePID null.Int  `json:"institutePID"`
-	CreateTS     time.Time `json:"createTS"`
-	ModifyTS     time.Time `json:"modifyTS"`
+	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	TeacherUID   string             `json:"teacher_uid" bson:"teacher_uid"`
+	TeacherName  string             `json:"teacher_name" bson:"teacher_name"`
+	ClassName    string             `json:"class_name" bson:"class_name"`
+	PhoneNumber  string             `json:"phone_number" bson:"phone_number"`
+	Email        string             `json:"email" bson:"email"`
+	InstitutePID primitive.ObjectID `json:"institute_pid" bson:"institute_pid"`
 }
 
 // Student struct

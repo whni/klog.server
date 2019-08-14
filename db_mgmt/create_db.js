@@ -68,7 +68,7 @@ db.createCollection("teachers", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["teacher_uid", "teacher_name", "class_name", "phone_number", "email", "institute_id"],
+            required: ["teacher_uid", "teacher_name", "class_name", "phone_number", "email", "institute_pid"],
             properties: {
                 teacher_uid: {
                     bsonType: "string",
@@ -94,7 +94,7 @@ db.createCollection("teachers", {
                     bsonType: "string",
                     description: "required string"
                 },
-                institute_id: {
+                institute_pid: {
                     bsonType: "objectId",
                     description: "required ObjectId"
                 }
@@ -111,7 +111,7 @@ db.createCollection("students", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["student_uid", "student_name", "parent_wxid", "parent_name", "phone_number", "email", "teacher_id"],
+            required: ["student_uid", "student_name", "parent_wxid", "parent_name", "phone_number", "email", "teacher_pid"],
             properties: {
                 student_uid: {
                     bsonType: "string",
@@ -142,7 +142,7 @@ db.createCollection("students", {
                     bsonType: "string",
                     description: "required string"
                 },
-                teacher_id: {
+                teacher_pid: {
                     bsonType: "objectId",
                     description: "required ObjectId"
                 }
@@ -197,7 +197,7 @@ db.teachers.insertMany(
             class_name: "GoldenEye",
             phone_number: "123-456-9876",
             email: "nigoo@klog.com",
-            institute_id: ObjectId("102030405060708090000001")
+            institute_pid: ObjectId("102030405060708090000001")
         },
         {
             _id: ObjectId("102030405060708090000002"),
@@ -206,7 +206,7 @@ db.teachers.insertMany(
             class_name: "FastWind",
             phone_number: "123-456-9876",
             email: "wayne@klog.com",
-            institute_id: ObjectId("102030405060708090000001")
+            institute_pid: ObjectId("102030405060708090000001")
         },
         {
             _id: ObjectId("102030405060708090000003"),
@@ -215,7 +215,7 @@ db.teachers.insertMany(
             class_name: "CloudTop",
             phone_number: "000-111-2222",
             email: "fanfan@klog.com",
-            institute_id: ObjectId("102030405060708090000002")
+            institute_pid: ObjectId("102030405060708090000002")
         },
         {
             _id: ObjectId("102030405060708090000004"),
@@ -224,7 +224,7 @@ db.teachers.insertMany(
             class_name: "UnderWorld",
             phone_number: "619-763-1020",
             email: "summer@klog.com",
-            institute_id: ObjectId("102030405060708090000002")
+            institute_pid: ObjectId("102030405060708090000002")
         }
     ]
 );
@@ -242,7 +242,7 @@ db.students.insertMany(
             parent_name: "Ed Sheeran",
             phone_number: "777-888-9999",
             email: "ed_sh@apple.com",
-            teacher_id: ObjectId("102030405060708090000001")
+            teacher_pid: ObjectId("102030405060708090000001")
         },
         {
             _id: ObjectId("102030405060708090000002"),
@@ -252,7 +252,7 @@ db.students.insertMany(
             parent_name: "Madison Beer",
             phone_number: "777-888-9999",
             email: "beer@google.com",
-            teacher_id: ObjectId("102030405060708090000002")
+            teacher_pid: ObjectId("102030405060708090000002")
         },
         {
             _id: ObjectId("102030405060708090000003"),
@@ -262,7 +262,7 @@ db.students.insertMany(
             parent_name: "Skylar Grey",
             phone_number: "777-888-9999",
             email: "skylar@facebook.com",
-            teacher_id: ObjectId("102030405060708090000003")
+            teacher_pid: ObjectId("102030405060708090000003")
         },
         {
             _id: ObjectId("102030405060708090000004"),
@@ -272,7 +272,7 @@ db.students.insertMany(
             parent_name: "Autumn Mendes",
             phone_number: "777-888-9999",
             email: "autumn@xxx.com",
-            teacher_id: ObjectId("102030405060708090000004")
+            teacher_pid: ObjectId("102030405060708090000004")
         }
     ]
 );

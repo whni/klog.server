@@ -4,12 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	_ "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -219,6 +218,7 @@ func updateInstitute(institute *Institute) error {
 		}
 	}()
 
+	// check institute PID
 	if institute.PID.IsZero() {
 		err = fmt.Errorf("[%s] - institute PID is empty", serverErrorMessages[seInputJSONNotValid])
 		return err
@@ -256,7 +256,7 @@ func updateInstitute(institute *Institute) error {
 	return nil
 }
 
-// delete institute, return #delete rows, error
+// delete institute, return #delete entries, error
 func deleteInstitute(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
@@ -266,10 +266,21 @@ func deleteInstitute(pid primitive.ObjectID) (int, error) {
 	}()
 
 	var deleteFilter bson.D
+	var teacherFindFilter bson.D
 	if pid.IsZero() {
 		deleteFilter = bson.D{{}}
+		teacherFindFilter = bson.D{{}}
 	} else {
 		deleteFilter = bson.D{{"_id", pid}}
+		teacherFindFilter = bson.D{{"institute_pid", pid}}
+	}
+
+	// check teacher dependency
+	var teacher Teacher
+	if dbPool.Collection(DBCollectionTeacher).FindOne(context.TODO(), teacherFindFilter).Decode(&teacher) == nil {
+		err = fmt.Errorf("[%s] - teacher-institute dependency unresolved (e.g. teacher PID %s institute PID %s)",
+			serverErrorMessages[seDependencyIssue], teacher.PID.Hex(), teacher.InstitutePID.Hex())
+		return 0, err
 	}
 
 	deleteResult, err := dbPool.Collection(DBCollectionInstitute).DeleteMany(context.TODO(), deleteFilter)
