@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	_ "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"net/http"
-	"strconv"
 )
 
 var instituteHandlerTable = map[string]gin.HandlerFunc{
@@ -122,15 +122,19 @@ func instituteDeleteHandler(ctx *gin.Context) {
 
 	var err error
 	var deletedRows int
-	var pid int
-	pid, err = strconv.Atoi(params.PID)
-	if err != nil || pid < 0 {
-		response.Status = http.StatusBadRequest
-		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (pid >= 0)", serverErrorMessages[seInputParamNotValid])
-		return
+	var pid primitive.ObjectID
+	if params.PID == "all" {
+		pid = primitive.NilObjectID
+	} else {
+		pid, err = primitive.ObjectIDFromHex(params.PID)
+		if err != nil {
+			response.Status = http.StatusBadRequest
+			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+			return
+		}
 	}
 
-	// pid: 0 for all, > 0 for specified one
+	// pid: nil objectid for all, others for specified one
 	deletedRows, err = deleteInstitute(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -139,10 +143,6 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	}
 	response.Payload = deletedRows
 	return
-}
-
-func deleteInstitute(pid int) (int, error) {
-	return 0, nil
 }
 
 // find institute, return institute slice, error
@@ -256,39 +256,28 @@ func updateInstitute(institute *Institute) error {
 	return nil
 }
 
-/*
 // delete institute, return #delete rows, error
-func deleteInstitute(pid int) (int, error) {
+func deleteInstitute(pid primitive.ObjectID) (int, error) {
 	var err error
-	var result sql.Result
-
 	defer func() {
 		if err != nil {
 			logging.Errormf(logModInstituteHandler, err.Error())
 		}
 	}()
 
-	var dbQuery = "DELETE FROM institute"
-	if pid == 0 {
-		result, err = dbPool.Exec(dbQuery)
-	} else if pid > 0 {
-		result, err = dbPool.Exec(dbQuery+" WHERE pid = ?", pid)
+	var deleteFilter bson.D
+	if pid.IsZero() {
+		deleteFilter = bson.D{{}}
 	} else {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], pid)
-		return 0, err
+		deleteFilter = bson.D{{"_id", pid}}
 	}
+
+	deleteResult, err := dbPool.Collection(DBCollectionInstitute).DeleteMany(context.TODO(), deleteFilter)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return 0, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		rowsAffected = -1
-		logging.Warnmf(logModInstituteHandler, "Cound not count #deleted institutes")
-	}
-	logging.Debugmf(logModInstituteHandler, "Deleted %d institute results from DB", rowsAffected)
-	return int(rowsAffected), nil
+	logging.Debugmf(logModInstituteHandler, "Deleted %d institute results from DB", deleteResult.DeletedCount)
+	return int(deleteResult.DeletedCount), nil
 }
-
-*/
