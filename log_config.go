@@ -47,7 +47,6 @@ const (
 	logModGinContext       = "GinContext"
 	logModDBControl        = "DBControl"
 	logModInstituteHandler = "InstituteHandler"
-	logModClassHandler     = "ClassHandler"
 	logModTeacherHandler   = "TeacherHandler"
 	logModStudentHandler   = "StudentHandler"
 	logModParentHandler    = "ParentHandler"
@@ -58,7 +57,6 @@ var logModEnabledTable = map[string]bool{
 	logModGinContext:       true,
 	logModDBControl:        true,
 	logModInstituteHandler: true,
-	logModClassHandler:     true,
 	logModTeacherHandler:   true,
 	logModStudentHandler:   true,
 	logModParentHandler:    true,

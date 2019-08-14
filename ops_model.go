@@ -1,19 +1,26 @@
 package main
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"null.v3"
 	"time"
 )
 
+// AddressInfo struct
+type AddressInfo struct {
+	Street  string `json:"street" bson:"street"`
+	Code    string `json:"code" bson:"code"`
+	City    string `json:"city" bson:"city"`
+	State   string `json:"state" bson:"state"`
+	Country string `json:"country" bson:"country"`
+}
+
 // Institute struct
 type Institute struct {
-	PID           int       `json:"PID"`
-	InstituteUID  string    `json:"instituteUID"`
-	InstituteName string    `json:"instituteName"`
-	Address       string    `json:"address"`
-	CountryCode   string    `json:"countryCode"`
-	CreateTS      time.Time `json:"createTS"`
-	ModifyTS      time.Time `json:"modifyTS"`
+	PID           primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	InstituteUID  string             `json:"institute_uid" bson:"institute_uid"`
+	InstituteName string             `json:"institute_name" bson:"institute_name"`
+	Address       AddressInfo        `json:"address" bson:"address"`
 }
 
 // Class struct

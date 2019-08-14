@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -134,6 +133,20 @@ func parentDeleteHandler(ctx *gin.Context) {
 	return
 }
 
+func findParent(pid int) ([]*Parent, error) {
+	return []*Parent{}, nil
+}
+func createParent(parent *Parent) (int, error) {
+	return 0, nil
+}
+func updateParent(parent *Parent) error {
+	return nil
+}
+func deleteParent(pid int) (int, error) {
+	return 0, nil
+}
+
+/*
 // find parent, return parent slice, error
 func findParent(pid int) ([]*Parent, error) {
 	var rows *sql.Rows
@@ -297,3 +310,4 @@ func deleteParent(pid int) (int, error) {
 	logging.Debugmf(logModParentHandler, "Deleted %d parents results from DB", rowsAffected)
 	return int(rowsAffected), nil
 }
+*/

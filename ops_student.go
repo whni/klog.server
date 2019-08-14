@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -134,6 +133,20 @@ func studentDeleteHandler(ctx *gin.Context) {
 	return
 }
 
+func findStudent(pid int) ([]*Student, error) {
+	return []*Student{}, nil
+}
+func createStudent(student *Student) (int, error) {
+	return 0, nil
+}
+func updateStudent(student *Student) error {
+	return nil
+}
+func deleteStudent(pid int) (int, error) {
+	return 0, nil
+}
+
+/*
 // find student, return student slice, error
 func findStudent(pid int) ([]*Student, error) {
 	var rows *sql.Rows
@@ -294,3 +307,5 @@ func deleteStudent(pid int) (int, error) {
 	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", rowsAffected)
 	return int(rowsAffected), nil
 }
+
+*/

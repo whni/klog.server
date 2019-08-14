@@ -1,27 +1,16 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
-	"time"
+	//"time"
 
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
+	//"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type AddressInfo struct {
-	Street  string `json:"street" bson:"street"`
-	Code    string `json:"code" bson:"code"`
-	City    string `json:"city" bson:"city"`
-	State   string `json:"state" bson:"state"`
-	Country string `json:"country" bson:"country"`
-}
-
-type Institute struct {
-	ID            bson.ObjectId `json:"id" bson:"_id,omitempty"`
-	InstituteUID  string        `json:"institute_uid" bson:"institute_uid"`
-	InstituteName string        `json:"institute_name" bson:"institute_name"`
-	Address       AddressInfo   `json:"address" bson:"address"`
-}
 
 const (
 	MongoDBHosts = "localhost:27017"
@@ -31,35 +20,46 @@ const (
 )
 
 func main() {
+	// Set client options
+	dbURL := fmt.Sprintf("mongodb://%s:%s@%s/%s", AuthUserName, AuthPassword, MongoDBHosts, AuthDatabase)
+	clientOptions := options.Client().ApplyURI(dbURL)
 
-	mongoDBDialInfo := &mgo.DialInfo{
-		Addrs:    []string{MongoDBHosts},
-		Timeout:  15 * time.Second,
-		Database: AuthDatabase,
-		Username: AuthUserName,
-		Password: AuthPassword,
-	}
-
-	// Create a session which maintains a pool of socket connections
-	// to our MongoDB.
-	mongoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatalf("failed to create mongodb session: %s\n", err)
+		log.Fatal(err)
 	}
-	defer mongoSession.Close()
 
-	mongoSession.SetMode(mgo.Monotonic, true)
-	log.Println(mongoSession)
-
-	db := mongoSession.DB(AuthDatabase)
-	collections, err := db.CollectionNames()
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatalf("failed to load collections: %s\n", err)
+		log.Fatal(err)
+	}
+	fmt.Println("Connected to MongoDB!")
+
+	defer func() {
+		err = client.Disconnect(context.TODO())
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Connection to MongoDB closed.")
+	}()
+
+	db := client.Database(AuthDatabase)
+	collectNames, err := db.ListCollectionNames(context.TODO(), nil)
+	log.Println("collection names: ", collectNames)
+	if err != nil {
+		log.Fatal(err)
+	}
+	collectNames = []string{"institutes", "teachers"}
+
+	for _, cName := range collectNames {
+		collections := db.Collection(cName)
+		cCount, err := collections.EstimatedDocumentCount(context.TODO())
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("Collection: %s: count %d", cName, cCount)
 	}
 
-	log.Println(db, collections)
-
-	var institute []Institute
-	err = db.C("institutes").Find(bson.M{"institute_uid": bson.M{"$regex": "uid-.*1"}}).All(&institute)
-	log.Println(err, institute)
 }

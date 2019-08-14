@@ -1,11 +1,14 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	_ "go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 	"strconv"
 )
@@ -28,15 +31,19 @@ func instituteGetHandler(ctx *gin.Context) {
 
 	var institutes []*Institute
 	var err error
-	var pid int
-	pid, err = strconv.Atoi(params.PID)
-	if err != nil || pid < 0 {
-		response.Status = http.StatusBadRequest
-		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (pid >= 0)", serverErrorMessages[seInputParamNotValid])
-		return
+	var pid primitive.ObjectID
+	if params.PID == "all" {
+		pid = primitive.NilObjectID
+	} else {
+		pid, err = primitive.ObjectIDFromHex(params.PID)
+		if err != nil {
+			response.Status = http.StatusBadRequest
+			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+			return
+		}
 	}
 
-	// pid: 0 for all, > 0 for specified one
+	// pid: nil objectid for all, others for specified one
 	institutes, err = findInstitute(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -57,7 +64,7 @@ func institutePostHandler(ctx *gin.Context) {
 	}()
 
 	var institute Institute
-	var institutePID int
+	var institutePID primitive.ObjectID
 	var err error
 
 	if err = json.Unmarshal(params.Data, &institute); err != nil {
@@ -134,9 +141,12 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	return
 }
 
+func deleteInstitute(pid int) (int, error) {
+	return 0, nil
+}
+
 // find institute, return institute slice, error
-func findInstitute(pid int) ([]*Institute, error) {
-	var rows *sql.Rows
+func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -144,26 +154,25 @@ func findInstitute(pid int) ([]*Institute, error) {
 		}
 	}()
 
-	var dbQuery = "SELECT pid, institute_uid, institute_name, address, country_code, create_ts, modify_ts FROM institute"
-	if pid == 0 {
-		rows, err = dbPool.Query(dbQuery)
-	} else if pid > 0 {
-		rows, err = dbPool.Query(dbQuery+" WHERE pid = ?", pid)
+	var findOptions = options.Find()
+	var findFilter bson.D
+	if pid.IsZero() {
+		findFilter = bson.D{{}}
 	} else {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], pid)
-		return nil, err
+		findOptions.SetLimit(1)
+		findFilter = bson.D{{"_id", pid}}
 	}
+
+	findCursor, err := dbPool.Collection(DBCollectionInstitute).Find(context.TODO(), findFilter, findOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
-	defer rows.Close()
 
 	institutes := []*Institute{}
-	for rows.Next() {
+	for findCursor.Next(context.TODO()) {
 		var institute Institute
-		err = rows.Scan(&institute.PID, &institute.InstituteUID, &institute.InstituteName, &institute.Address,
-			&institute.CountryCode, &institute.CreateTS, &institute.ModifyTS)
+		err = findCursor.Decode(&institute)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return nil, err
@@ -171,61 +180,34 @@ func findInstitute(pid int) ([]*Institute, error) {
 		institutes = append(institutes, &institute)
 	}
 
-	err = rows.Err()
+	err = findCursor.Err()
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%d)", len(institutes), pid)
+	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%v)", len(institutes), pid)
 	return institutes, nil
 }
 
 // create institute, return PID, error
-func createInstitute(institute *Institute) (int, error) {
+func createInstitute(institute *Institute) (primitive.ObjectID, error) {
 	var err error
-	var result sql.Result
-
 	defer func() {
 		if err != nil {
 			logging.Errormf(logModInstituteHandler, err.Error())
 		}
 	}()
 
-	if err = ginStructValidCheck(institute); err != nil {
-		return 0, err
-	}
-
-	if institute.PID > 0 {
-		if institutes, errExist := findInstitute(institute.PID); errExist == nil && len(institutes) > 0 {
-			err = fmt.Errorf("[%s] - Institute (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], institute.PID)
-			return 0, err
-		}
-	} else if institute.PID < 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
-		return 0, err
-	}
-
-	var dbQuery string
-	if institute.PID > 0 {
-		dbQuery = "INSERT INTO institute(pid, institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, institute.PID, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
-	} else {
-		dbQuery = "INSERT INTO institute(institute_uid, institute_name, address, country_code) VALUES (?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode)
-	}
+	insertResult, err := dbPool.Collection(DBCollectionInstitute).InsertOne(context.TODO(), institute)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-		return 0, err
+		return primitive.NilObjectID, err
 	}
 
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		lastInsertID = -1
-		logging.Warnmf(logModInstituteHandler, "Cound not retrieve created institute PID")
-	}
-	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertId,PID=%v)", lastInsertID)
-	return int(lastInsertID), nil
+	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
+	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	return lastInsertID, nil
 }
 
 // update institute, return error
@@ -237,30 +219,44 @@ func updateInstitute(institute *Institute) error {
 		}
 	}()
 
-	if err = ginStructValidCheck(institute); err != nil {
+	if institute.PID.IsZero() {
+		err = fmt.Errorf("[%s] - institute PID is empty", serverErrorMessages[seInputJSONNotValid])
 		return err
 	}
 
-	if institute.PID <= 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], institute.PID)
+	var updateFilter = bson.D{{"_id", institute.PID}}
+	var updateBSONDocument = bson.D{}
+	instituteBSONData, err := bson.Marshal(institute)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert institute (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], institute.PID.Hex())
 		return err
 	}
-	if institutes, errExist := findInstitute(institute.PID); errExist != nil || len(institutes) == 0 {
-		err = fmt.Errorf("[%s] - Institute (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], institute.PID)
+	err = bson.Unmarshal(instituteBSONData, &updateBSONDocument)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert institute (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], institute.PID.Hex())
 		return err
 	}
+	var updateOptions = bson.D{{"$set", updateBSONDocument}}
 
-	var dbQuery = "UPDATE institute SET institute_uid=?, institute_name=?, address=?, country_code=? WHERE pid=?"
-	_, err = dbPool.Exec(dbQuery, institute.InstituteUID, institute.InstituteName, institute.Address, institute.CountryCode, institute.PID)
+	insertResult, err := dbPool.Collection(DBCollectionInstitute).UpdateOne(context.TODO(), updateFilter, updateOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Updated institute in DB (PID=%v)", institute.PID)
+	logging.Debugmf(logModInstituteHandler, "Update institute (PID %s): matched %d modified %d",
+		institute.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
+	if insertResult.MatchedCount == 0 {
+		err = fmt.Errorf("[%s] - could not find institute (PID %s)", serverErrorMessages[seResourceNotFound], institute.PID.Hex())
+		return err
+	} else if insertResult.ModifiedCount == 0 {
+		err = fmt.Errorf("[%s] - institute (PID %s) not changed", serverErrorMessages[seResourceNotChange], institute.PID.Hex())
+		return err
+	}
 	return nil
 }
 
+/*
 // delete institute, return #delete rows, error
 func deleteInstitute(pid int) (int, error) {
 	var err error
@@ -294,3 +290,5 @@ func deleteInstitute(pid int) (int, error) {
 	logging.Debugmf(logModInstituteHandler, "Deleted %d institute results from DB", rowsAffected)
 	return int(rowsAffected), nil
 }
+
+*/

@@ -5,6 +5,7 @@ const (
 	seInputParamNotValid  = -iota
 	seInputSchemaNotValid = -iota
 	seInputJSONNotValid   = -iota
+	seInputBSONNotValid   = -iota
 	seDBResourceQuery     = -iota
 	seResourceNotFound    = -iota
 	seResourceDuplicated  = -iota
@@ -19,6 +20,7 @@ var serverErrorMessages = map[int]string{
 	seInputParamNotValid:  "Invalid input parameter",
 	seInputSchemaNotValid: "Invalid input schema",
 	seInputJSONNotValid:   "Invalid input JSON format",
+	seInputBSONNotValid:   "Invalid input BSON format",
 	seDBResourceQuery:     "DB resource query error",
 	seResourceNotFound:    "Resource not found",
 	seResourceDuplicated:  "Resource duplicated",

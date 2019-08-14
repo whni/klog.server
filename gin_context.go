@@ -5,14 +5,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
-	"null.v3"
-	"reflect"
+	//"reflect"
 	"strings"
 )
 
 var ginAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/institute": instituteHandlerTable,
-	"/api/0/config/class":     classHandlerTable,
 	"/api/0/config/teacher":   teacherHandlerTable,
 	"/api/0/config/student":   studentHandlerTable,
 	"/api/0/config/parent":    parentHandlerTable,
@@ -77,51 +75,51 @@ func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {
 }
 
 /* gin input struct check */
-func ginStructValidCheck(input interface{}) error {
-	val := reflect.ValueOf(input)
-	if val.Kind() == reflect.Ptr {
-		val = reflect.Indirect(val)
-	}
+// func ginStructValidCheck(input interface{}) error {
+// 	val := reflect.ValueOf(input)
+// 	if val.Kind() == reflect.Ptr {
+// 		val = reflect.Indirect(val)
+// 	}
 
-	if val.Kind() != reflect.Struct {
-		return fmt.Errorf("[%s] - unexpected type (%s) - struct required", serverErrorMessages[seInputSchemaNotValid], val.Type().Name())
-	}
-	structType := val.Type()
+// 	if val.Kind() != reflect.Struct {
+// 		return fmt.Errorf("[%s] - unexpected type (%s) - struct required", serverErrorMessages[seInputSchemaNotValid], val.Type().Name())
+// 	}
+// 	structType := val.Type()
 
-	for i := 0; i < structType.NumField(); i++ {
-		field := structType.Field(i)
-		fieldName := field.Name
-		logging.Tracemf(logModGinContext, "check struct (%s) field: %s", val.Type().Name(), fieldName)
+// 	for i := 0; i < structType.NumField(); i++ {
+// 		field := structType.Field(i)
+// 		fieldName := field.Name
+// 		logging.Tracemf(logModGinContext, "check struct (%s) field: %s", val.Type().Name(), fieldName)
 
-		switch fieldName {
-		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
-			"Name", "InstituteName", "ClassName", "FirstName", "LastName",
-			"Address", "CountryCode", "Location", "MediaLocation",
-			"PhoneNumber", "Email", "Occupation":
-			if len(val.FieldByName(fieldName).Interface().(string)) < 1 {
-				return fmt.Errorf("[%s] - invalid struct (%s) field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
-			}
-			break
-		case "Password":
-			if len(val.FieldByName(fieldName).Interface().(string)) < 5 {
-				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (at least 5 length)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
-			}
-			break
-		case "PID":
-			if val.FieldByName(fieldName).Interface().(int) < 0 {
-				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
-			}
-			break
-		case "InstitutePID", "ClassPID", "StudentPID", "TeacherPID", "ParentPID":
-			pid := val.FieldByName(fieldName).Interface().(null.Int)
-			if pid.Valid && pid.ValueOrZero() <= 0 {
-				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
-			}
-			break
-		}
-	}
-	return nil
-}
+// 		switch fieldName {
+// 		case "InstituteUID", "ClassUID", "TeacherUID", "StudentUID", "ParentUID",
+// 			"Name", "InstituteName", "ClassName", "StudentName", "ParentName",
+// 			"Address", "CountryCode", "Location", "MediaLocation",
+// 			"PhoneNumber", "Email", "Occupation":
+// 			if len(val.FieldByName(fieldName).Interface().(string)) < 1 {
+// 				return fmt.Errorf("[%s] - invalid struct (%s) field: %s", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
+// 			}
+// 			break
+// 		case "Password":
+// 			if len(val.FieldByName(fieldName).Interface().(string)) < 5 {
+// 				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (at least 5 length)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
+// 			}
+// 			break
+// 		case "PID":
+// 			if val.FieldByName(fieldName).Interface().(int) < 0 {
+// 				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
+// 			}
+// 			break
+// 		case "InstitutePID", "ClassPID", "StudentPID", "TeacherPID", "ParentPID":
+// 			pid := val.FieldByName(fieldName).Interface().(null.Int)
+// 			if pid.Valid && pid.ValueOrZero() <= 0 {
+// 				return fmt.Errorf("[%s] - invalid struct (%s) field: %s (require postive value)", serverErrorMessages[seInputSchemaNotValid], structType.Name(), fieldName)
+// 			}
+// 			break
+// 		}
+// 	}
+// 	return nil
+// }
 
 // func ginStructEqualCheck(x, y interface{}) error {
 // 	valx := reflect.ValueOf(x)

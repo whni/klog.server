@@ -1,31 +1,38 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
-var dbPool *sql.DB
+const (
+	DBCollectionInstitute = "institutes"
+	DBCollectionTeacher   = "teachers"
+	DBCollectionStudent   = "students"
+)
 
-func dbPoolInit(sc *ServerConfig) (*sql.DB, error) {
-	// open a db pool
-	dbDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", sc.DBUsername, sc.DBPassword, sc.DBHostAddress, sc.DBName)
-	db, dbErr := sql.Open("mysql", dbDSN)
-	if dbErr != nil {
-		return nil, dbErr
+var dbPool *mongo.Database
+
+func dbPoolInit(sc *ServerConfig) (*mongo.Database, error) {
+	dbURL := fmt.Sprintf("mongodb://%s:%s@%s/%s", sc.DBUsername, sc.DBPassword, sc.DBHostAddress, sc.DBName)
+	dbClientOptions := options.Client().ApplyURI(dbURL)
+	dbClientOptions.SetConnectTimeout(5 * time.Second)
+
+	// Connect to MongoDB
+	dbClient, connErr := mongo.Connect(context.TODO(), dbClientOptions)
+	if connErr != nil {
+		return nil, connErr
 	}
 
-	// setup db pool
-	db.SetMaxOpenConns(0)
-	db.SetMaxIdleConns(3)
-	db.SetConnMaxLifetime(0)
-
-	// check db connection
-	pingErr := db.Ping()
+	// Check the connection
+	pingErr := dbClient.Ping(context.TODO(), nil)
 	if pingErr != nil {
 		return nil, pingErr
 	}
 
-	return db, nil
+	database := dbClient.Database(sc.DBName)
+	return database, nil
 }

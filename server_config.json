@@ -2,8 +2,8 @@
     "loggingReleaseMode": false,
     "loggingLevel": "trace",
     "loggingDestination": "stdout",
-	"DBHostAddress": "127.0.0.1:3306",
-    "DBName": "klog_business",
-    "DBUsername": "kloguser",
-    "DBPassword": "kloguser"
+	"DBHostAddress": "127.0.0.1:27017",
+    "DBName": "klog",
+    "DBUsername": "klog_user",
+    "DBPassword": "klog_pwd"
 }

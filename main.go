@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -44,6 +45,15 @@ func main() {
 	if dbErr != nil {
 		logging.Panicmf(logModMain, "Unable to load DB - Error msg: %s", dbErr.Error())
 	}
+	defer func() {
+		if dbPool != nil && dbPool.Client() != nil {
+			if dbDisconnectErr := dbPool.Client().Disconnect(context.TODO()); dbDisconnectErr != nil {
+				logging.Errormln(logModMain, "Unable to disconnected DB: ", dbDisconnectErr)
+			} else {
+				logging.Infomln(logModMain, "Disconnected from DB")
+			}
+		}
+	}()
 
 	// gin web framework
 	gin.SetMode(gin.DebugMode)
@@ -99,4 +109,5 @@ func main() {
 	logging.Infomln(logModMain, "Server is listening and serving on 0.0.0.0:8080")
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 	logging.Warnmln(logModMain, "Server existed unexpectedly :(")
+
 }
