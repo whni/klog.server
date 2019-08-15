@@ -2,7 +2,6 @@ package main
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"null.v3"
 	"time"
 )
 
@@ -36,30 +35,14 @@ type Teacher struct {
 
 // Student struct
 type Student struct {
-	PID           int       `json:"PID"`
-	StudentUID    string    `json:"studentUID"`
-	FirstName     string    `json:"firstName"`
-	LastName      string    `json:"lastName"`
-	DateOfBirth   time.Time `json:"dateOfBirth"`
-	MediaLocation string    `json:"mediaLocation"`
-	ClassPID      null.Int  `json:"classPID"`
-	CreateTS      time.Time `json:"createTS"`
-	ModifyTS      time.Time `json:"modifyTS"`
-}
-
-// Parent struct
-type Parent struct {
-	PID         int       `json:"PID"`
-	ParentUID   string    `json:"parentUID"`
-	FirstName   string    `json:"firstName"`
-	LastName    string    `json:"lastName"`
-	DateOfBirth time.Time `json:"dateOfBirth"`
-	Address     string    `json:"address"`
-	PhoneNumber string    `json:"phoneNumber"`
-	Email       string    `json:"email"`
-	Occupation  string    `json:"occupation"`
-	CreateTS    time.Time `json:"createTS"`
-	ModifyTS    time.Time `json:"modifyTS"`
+	PID         primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentUID  string             `json:"student_uid" bson:"student_uid"`
+	StudentName string             `json:"student_name" bson:"student_name"`
+	ParentWXID  string             `json:"parent_wxid" bson:"parent_wxid"`
+	ParentName  string             `json:"parent_name" bson:"parent_name"`
+	PhoneNumber string             `json:"phone_number" bson:"phone_number"`
+	Email       string             `json:"email" bson:"email"`
+	TeacherPID  primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
 // VideoClip struct

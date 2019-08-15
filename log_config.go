@@ -49,7 +49,6 @@ const (
 	logModInstituteHandler = "InstituteHandler"
 	logModTeacherHandler   = "TeacherHandler"
 	logModStudentHandler   = "StudentHandler"
-	logModParentHandler    = "ParentHandler"
 )
 
 var logModEnabledTable = map[string]bool{
@@ -59,7 +58,6 @@ var logModEnabledTable = map[string]bool{
 	logModInstituteHandler: true,
 	logModTeacherHandler:   true,
 	logModStudentHandler:   true,
-	logModParentHandler:    true,
 }
 
 // Logging global customized logging module

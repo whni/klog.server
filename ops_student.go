@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"net/http"
-	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var studentHandlerTable = map[string]gin.HandlerFunc{
@@ -27,15 +30,19 @@ func studentGetHandler(ctx *gin.Context) {
 
 	var students []*Student
 	var err error
-	var pid int
-	pid, err = strconv.Atoi(params.PID)
-	if err != nil || pid < 0 {
-		response.Status = http.StatusBadRequest
-		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (pid >= 0)", serverErrorMessages[seInputParamNotValid])
-		return
+	var pid primitive.ObjectID
+	if params.PID == "all" {
+		pid = primitive.NilObjectID
+	} else {
+		pid, err = primitive.ObjectIDFromHex(params.PID)
+		if err != nil {
+			response.Status = http.StatusBadRequest
+			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+			return
+		}
 	}
 
-	// pid: 0 for all, > 0 for specified one
+	// pid: nil objectid for all, others for specified one
 	students, err = findStudent(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -56,7 +63,7 @@ func studentPostHandler(ctx *gin.Context) {
 	}()
 
 	var student Student
-	var studentPID int
+	var studentPID primitive.ObjectID
 	var err error
 
 	if err = json.Unmarshal(params.Data, &student); err != nil {
@@ -114,15 +121,19 @@ func studentDeleteHandler(ctx *gin.Context) {
 
 	var err error
 	var deletedRows int
-	var pid int
-	pid, err = strconv.Atoi(params.PID)
-	if err != nil || pid < 0 {
-		response.Status = http.StatusBadRequest
-		response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (pid >= 0)", serverErrorMessages[seInputParamNotValid])
-		return
+	var pid primitive.ObjectID
+	if params.PID == "all" {
+		pid = primitive.NilObjectID
+	} else {
+		pid, err = primitive.ObjectIDFromHex(params.PID)
+		if err != nil {
+			response.Status = http.StatusBadRequest
+			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+			return
+		}
 	}
 
-	// pid: 0 for all, > 0 for specified one
+	// pid: nil objectid for all, others for specified one
 	deletedRows, err = deleteStudent(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -133,23 +144,8 @@ func studentDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-func findStudent(pid int) ([]*Student, error) {
-	return []*Student{}, nil
-}
-func createStudent(student *Student) (int, error) {
-	return 0, nil
-}
-func updateStudent(student *Student) error {
-	return nil
-}
-func deleteStudent(pid int) (int, error) {
-	return 0, nil
-}
-
-/*
 // find student, return student slice, error
-func findStudent(pid int) ([]*Student, error) {
-	var rows *sql.Rows
+func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -157,26 +153,25 @@ func findStudent(pid int) ([]*Student, error) {
 		}
 	}()
 
-	var dbQuery = "SELECT pid, student_uid, first_name, last_name, date_of_birth, media_location, class_pid, create_ts, modify_ts FROM student"
-	if pid == 0 {
-		rows, err = dbPool.Query(dbQuery)
-	} else if pid > 0 {
-		rows, err = dbPool.Query(dbQuery+" WHERE pid = ?", pid)
+	var findOptions = options.Find()
+	var findFilter bson.D
+	if pid.IsZero() {
+		findFilter = bson.D{{}}
 	} else {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], pid)
-		return nil, err
+		findOptions.SetLimit(1)
+		findFilter = bson.D{{"_id", pid}}
 	}
+
+	findCursor, err := dbPool.Collection(DBCollectionStudent).Find(context.TODO(), findFilter, findOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
-	defer rows.Close()
 
 	students := []*Student{}
-	for rows.Next() {
+	for findCursor.Next(context.TODO()) {
 		var student Student
-		err = rows.Scan(&student.PID, &student.StudentUID, &student.FirstName, &student.LastName, &student.DateOfBirth,
-			&student.MediaLocation, &student.ClassPID, &student.CreateTS, &student.ModifyTS)
+		err = findCursor.Decode(&student)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return nil, err
@@ -184,61 +179,45 @@ func findStudent(pid int) ([]*Student, error) {
 		students = append(students, &student)
 	}
 
-	err = rows.Err()
+	err = findCursor.Err()
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%d)", len(students), pid)
+	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%v)", len(students), pid)
 	return students, nil
 }
 
 // create student, return PID, error
-func createStudent(student *Student) (int, error) {
+func createStudent(student *Student) (primitive.ObjectID, error) {
 	var err error
-	var result sql.Result
-
 	defer func() {
 		if err != nil {
 			logging.Errormf(logModStudentHandler, err.Error())
 		}
 	}()
 
-	if err = ginStructValidCheck(student); err != nil {
-		return 0, err
+	// teacher PID check
+	if student.TeacherPID.IsZero() {
+		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
+		return primitive.NilObjectID, err
+	}
+	teachers, err := findTeacher(student.TeacherPID)
+	if err != nil || len(teachers) == 0 {
+		err = fmt.Errorf("[%s] - No teachers found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
+		return primitive.NilObjectID, err
 	}
 
-	if student.PID > 0 {
-		if students, errExist := findStudent(student.PID); errExist == nil && len(students) > 0 {
-			err = fmt.Errorf("[%s] - Student (PID=%d) already exists", serverErrorMessages[seResourceDuplicated], student.PID)
-			return 0, err
-		}
-	} else if student.PID < 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], student.PID)
-		return 0, err
-	}
-
-	var dbQuery string
-	if student.PID > 0 {
-		dbQuery = "INSERT INTO student(pid, student_uid, first_name, last_name, date_of_birth, media_location, class_pid) VALUES (?, ?, ?, ?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, student.PID, student.StudentUID, student.FirstName, student.LastName, student.DateOfBirth, student.MediaLocation, student.ClassPID)
-	} else {
-		dbQuery = "INSERT INTO student(student_uid, first_name, last_name, date_of_birth, media_location, class_pid) VALUES (?, ?, ?, ?, ?, ?)"
-		result, err = dbPool.Exec(dbQuery, student.StudentUID, student.FirstName, student.LastName, student.DateOfBirth, student.MediaLocation, student.ClassPID)
-	}
+	insertResult, err := dbPool.Collection(DBCollectionStudent).InsertOne(context.TODO(), student)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-		return 0, err
+		return primitive.NilObjectID, err
 	}
 
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		lastInsertID = -1
-		logging.Warnmf(logModStudentHandler, "Cound not retrieve created student PID")
-	}
-	logging.Debugmf(logModStudentHandler, "Created student in DB (LastInsertId,PID=%v)", lastInsertID)
-	return int(lastInsertID), nil
+	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
+	logging.Debugmf(logModStudentHandler, "Created student in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	return lastInsertID, nil
 }
 
 // update student, return error
@@ -250,62 +229,77 @@ func updateStudent(student *Student) error {
 		}
 	}()
 
-	if err = ginStructValidCheck(student); err != nil {
+	// student PID check
+	if student.PID.IsZero() {
+		err = fmt.Errorf("[%s] - student PID is empty", serverErrorMessages[seInputJSONNotValid])
 		return err
 	}
 
-	if student.PID <= 0 {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], student.PID)
+	// teacher PID check
+	if student.TeacherPID.IsZero() {
+		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	if students, errExist := findStudent(student.PID); errExist != nil || len(students) == 0 {
-		err = fmt.Errorf("[%s] - Student (PID=%d) does not exist ==> not updated", serverErrorMessages[seResourceNotFound], student.PID)
+	teachers, err := findTeacher(student.TeacherPID)
+	if err != nil || len(teachers) == 0 {
+		err = fmt.Errorf("[%s] - No teacher found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
 		return err
 	}
 
-	var dbQuery = "UPDATE student SET student_uid=?, first_name=?, last_name=?, date_of_birth=?, media_location=?, class_pid=? WHERE pid=?"
-	_, err = dbPool.Exec(dbQuery, student.StudentUID, student.FirstName, student.LastName, student.DateOfBirth, student.MediaLocation, student.ClassPID, student.PID)
+	var updateFilter = bson.D{{"_id", student.PID}}
+	var updateBSONDocument = bson.D{}
+	studentBSONData, err := bson.Marshal(student)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert student (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], student.PID.Hex())
+		return err
+	}
+	err = bson.Unmarshal(studentBSONData, &updateBSONDocument)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert student (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], student.PID.Hex())
+		return err
+	}
+	var updateOptions = bson.D{{"$set", updateBSONDocument}}
+
+	insertResult, err := dbPool.Collection(DBCollectionStudent).UpdateOne(context.TODO(), updateFilter, updateOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Updated student in DB (PID=%v)", student.PID)
+	logging.Debugmf(logModStudentHandler, "Update student (PID %s): matched %d modified %d",
+		student.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
+	if insertResult.MatchedCount == 0 {
+		err = fmt.Errorf("[%s] - could not find student (PID %s)", serverErrorMessages[seResourceNotFound], student.PID.Hex())
+		return err
+	} else if insertResult.ModifiedCount == 0 {
+		err = fmt.Errorf("[%s] - student (PID %s) not changed", serverErrorMessages[seResourceNotChange], student.PID.Hex())
+		return err
+	}
 	return nil
 }
 
-// delete student, return #delete rows, error
-func deleteStudent(pid int) (int, error) {
+// delete student, return #delete entries, error
+func deleteStudent(pid primitive.ObjectID) (int, error) {
 	var err error
-	var result sql.Result
-
 	defer func() {
 		if err != nil {
 			logging.Errormf(logModStudentHandler, err.Error())
 		}
 	}()
 
-	var dbQuery = "DELETE FROM student"
-	if pid == 0 {
-		result, err = dbPool.Exec(dbQuery)
-	} else if pid > 0 {
-		result, err = dbPool.Exec(dbQuery+" WHERE pid = ?", pid)
+	var deleteFilter bson.D
+	if pid.IsZero() {
+		deleteFilter = bson.D{{}}
 	} else {
-		err = fmt.Errorf("[%s] - PID (%d) not valid", serverErrorMessages[seInputParamNotValid], pid)
-		return 0, err
+		deleteFilter = bson.D{{"_id", pid}}
 	}
+
+	deleteResult, err := dbPool.Collection(DBCollectionStudent).DeleteMany(context.TODO(), deleteFilter)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return 0, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		rowsAffected = -1
-		logging.Warnmf(logModStudentHandler, "Cound not count #deleted students")
-	}
-	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", rowsAffected)
-	return int(rowsAffected), nil
+	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", deleteResult.DeletedCount)
+	return int(deleteResult.DeletedCount), nil
 }
-
-*/
