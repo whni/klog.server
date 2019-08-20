@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 
@@ -14,17 +13,14 @@ import (
 
 var azureContainerURL *azblob.ContainerURL
 
-func handleErrors(err error) {
+func azureErrorInfo(err error) string {
 	if err != nil {
-		if serr, ok := err.(azblob.StorageError); ok { // This error is a Service-specific
-			switch serr.ServiceCode() { // Compare serviceCode to ServiceCodeXxx constants
-			case azblob.ServiceCodeContainerAlreadyExists:
-				fmt.Println("Received 409. Container already exists")
-				return
-			}
+		if serr, ok := err.(azblob.StorageError); ok { // This error is an Azure Service-specific
+			return "[Azure Service Code]: " + string(serr.ServiceCode())
 		}
-		log.Fatal(err)
+		return err.Error()
 	}
+	return ""
 }
 
 func azureStorageInit(sc *ServerConfig) (*azblob.ContainerURL, error) {
@@ -36,7 +32,7 @@ func azureStorageInit(sc *ServerConfig) (*azblob.ContainerURL, error) {
 	// create a default request pipeline using storage account name and account key.
 	credential, credentailErr := azblob.NewSharedKeyCredential(sc.AzureStorageAccount, sc.AzureStorageAccessKey)
 	if credentailErr != nil {
-		return nil, fmt.Errorf("Invalid azure credentials with error: %v", credentailErr.Error())
+		return nil, fmt.Errorf("Invalid azure credentials with error: %s", credentailErr.Error())
 	}
 	pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{})
 
@@ -54,7 +50,7 @@ func azureStorageInit(sc *ServerConfig) (*azblob.ContainerURL, error) {
 				return nil, containerCreateErr
 			}
 		} else {
-			return nil, fmt.Errorf("Failed to connect to azure container: %v", containerPropErr.Error())
+			return nil, fmt.Errorf("Failed to connect to azure container: %s", azureErrorInfo(containerPropErr))
 		}
 	}
 
@@ -68,7 +64,7 @@ func azureStorageCreateContainer(azureContainerURL *azblob.ContainerURL) error {
 
 	// create azure storage container
 	if _, containerCreateErr := azureContainerURL.Create(context.TODO(), azblob.Metadata{}, azblob.PublicAccessBlob); containerCreateErr != nil {
-		return fmt.Errorf("Failed to create azure storage container: %v", containerCreateErr.Error())
+		return fmt.Errorf("Failed to create azure storage container: %s", azureErrorInfo(containerCreateErr))
 	}
 	return nil
 }
@@ -80,7 +76,7 @@ func azureStorageDeleteContainer(azureContainerURL *azblob.ContainerURL) error {
 
 	// delete azure storage container
 	if _, containerDeleteErr := azureContainerURL.Delete(context.TODO(), azblob.ContainerAccessConditions{}); containerDeleteErr != nil {
-		return fmt.Errorf("Failed to delete azure storage container: %v", containerDeleteErr.Error())
+		return fmt.Errorf("Failed to delete azure storage container: %s", azureErrorInfo(containerDeleteErr))
 	}
 	return nil
 }
@@ -97,7 +93,7 @@ func azureStorageListBlobs(azureContainer *azblob.ContainerURL, prefix string) (
 			Prefix: prefix,
 		})
 		if listBlobErr != nil {
-			return []*azblob.BlobItem{}, fmt.Errorf("Failed to list blobs in azure container: %v", listBlobErr.Error())
+			return []*azblob.BlobItem{}, fmt.Errorf("Failed to list blobs in azure container: %s", azureErrorInfo(listBlobErr))
 		}
 
 		// append blobs to results
@@ -137,7 +133,7 @@ func azureStorageUploadBlob(azureContainerURL *azblob.ContainerURL, blobname str
 		BlockSize:   4 * 1024 * 1024,
 		Parallelism: 16})
 	if blobUploadErr != nil {
-		return fmt.Errorf("Failed to upload blob %s: %v", blobname, blobUploadErr.Error())
+		return fmt.Errorf("Failed to upload blob %s: %s", blobname, azureErrorInfo(blobUploadErr))
 	}
 
 	return nil
@@ -152,19 +148,19 @@ func azureStorageDownloadBlob(azureContainerURL *azblob.ContainerURL, blobname s
 	blobURL := azureContainerURL.NewBlockBlobURL(blobname)
 	downloadResp, downloadErr := blobURL.Download(context.TODO(), 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false)
 	if downloadErr != nil {
-		return fmt.Errorf("Failed to download blob %s: %v", blobname, downloadErr.Error())
+		return fmt.Errorf("Failed to download blob %s: %s", blobname, azureErrorInfo(downloadErr))
 	}
 	bodyStream := downloadResp.Body(azblob.RetryReaderOptions{MaxRetryRequests: 5})
 	downloadedData := bytes.Buffer{}
 	_, dataErr := downloadedData.ReadFrom(bodyStream)
 	if dataErr != nil {
-		return fmt.Errorf("")
+		return fmt.Errorf("Failed to read downloaded blob data: %s", dataErr.Error())
 	}
 
 	// save blob file
 	fileErr := ioutil.WriteFile(blobname, downloadedData.Bytes(), 0755)
 	if fileErr != nil {
-		return fmt.Errorf("Failed to save blob file %s: %v", blobname, fileErr.Error())
+		return fmt.Errorf("Failed to save blob file %s: %s", blobname, fileErr.Error())
 	}
 
 	return nil
@@ -179,7 +175,7 @@ func azureStorageDeleteBlob(azureContainerURL *azblob.ContainerURL, blobname str
 	blobURL := azureContainerURL.NewBlockBlobURL(blobname)
 	_, deleteErr := blobURL.Delete(context.TODO(), azblob.DeleteSnapshotsOptionInclude, azblob.BlobAccessConditions{})
 	if deleteErr != nil {
-		return fmt.Errorf("Failed to delete blob %s: %v", blobname, deleteErr.Error())
+		return fmt.Errorf("Failed to delete blob %s: %s", blobname, azureErrorInfo(deleteErr))
 	}
 
 	return nil
