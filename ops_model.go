@@ -2,7 +2,6 @@ package main
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 // AddressInfo struct
@@ -45,21 +44,12 @@ type Student struct {
 	TeacherPID  primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
-// VideoClip struct
-type VideoClip struct {
-	PID           int       `json:"PID"`
-	VideoClipUID  string    `json:"videoUID"`
-	VideoClipURL  string    `json:"videoClipURL"`
-	VideoMetaURL  string    `json:"videoMetaURL"`
-	VideoLifeTime int       `json:"videoLifeTime"`
-	CreateTS      time.Time `json:"createTS"`
-	ModifyTS      time.Time `json:"modifyTS"`
-}
-
 // VideoMeta struct
 type VideoMeta struct {
-	PID          int    `json:"PID"`
-	VideoMetaUID string `json:"videoUID"`
-	VideoMetaURL string `json:"videoMetaURL"`
-	VideoClipPID string `json:"videoClipURL"`
+	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	VideoMetaUID string             `json:"videometa_uid" bson:"videometa_uid"`
+	StorageURL   string             `json:"storage_url" bson:"storage_url"`
+	Timestamp    int64              `json:"timestamp" bson:"timestamp"`
+	Lifetime     int64              `json:"lifetime" bson:"lifetime"`
+	StudentPID   primitive.ObjectID `json:"student_pid" bson:"student_pid"`
 }

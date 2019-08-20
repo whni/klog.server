@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	_ "net/http/pprof"
 	"runtime/debug"
 	"time"
@@ -18,7 +17,7 @@ func main() {
 	serverStartTime = time.Now()
 
 	// global serverConfig variable
-	var scErr error = nil
+	var scErr error
 	serverConfig, scErr = readServerConfig(serverConfigFile)
 	if scErr != nil {
 		fmt.Printf("Could not load server configuration\n")
@@ -27,7 +26,7 @@ func main() {
 	initDefaultServerConfig(serverConfig)
 
 	// logging setup
-	var loggingErr error = nil
+	var loggingErr error
 	logging = loggingInitSetup(serverConfig)
 	if loggingErr = loggingRegisterModules(logging, logModEnabledTable); loggingErr != nil {
 		fmt.Printf("Could not register logging modules\n")
@@ -40,11 +39,12 @@ func main() {
 	logging.Infomln(logModMain, "Logging module loaded.")
 
 	// db setup
-	var dbErr error = nil
+	var dbErr error
 	dbPool, dbErr = dbPoolInit(serverConfig)
 	if dbErr != nil {
 		logging.Panicmf(logModMain, "Unable to load DB - Error msg: %s", dbErr.Error())
 	}
+	logging.Infomln(logModMain, "DB module loaded.")
 	defer func() {
 		if dbPool != nil && dbPool.Client() != nil {
 			if dbDisconnectErr := dbPool.Client().Disconnect(context.TODO()); dbDisconnectErr != nil {
@@ -54,6 +54,14 @@ func main() {
 			}
 		}
 	}()
+
+	// azure storage setup
+	var azureContainerErr error
+	azureContainerURL, azureContainerErr = azureStorageInit(serverConfig)
+	if azureContainerErr != nil {
+		logging.Panicmf(logModMain, "Unable to load azure storage container - Error msg: %s", azureContainerErr.Error())
+	}
+	logging.Infomln(logModMain, "Azure storage container loaded.")
 
 	// gin web framework
 	gin.SetMode(gin.DebugMode)
@@ -78,19 +86,7 @@ func main() {
 
 	debug.SetTraceback("crash")
 
-	r.POST("/ping", func(c *gin.Context) {
-		var response = GinResponse{
-			Status: http.StatusOK,
-		}
-		defer func() {
-			ginContextProcessResponse(c, &response)
-		}()
-
-		var params = ginContextRequestParameter(c)
-		response.Payload = params
-		logging.Infoln(params)
-	})
-
+	// regiester api handlers
 	for apiURL, apiHandlerTable := range ginAPITable {
 		for apiMethod, apiHandler := range apiHandlerTable {
 			switch apiMethod {

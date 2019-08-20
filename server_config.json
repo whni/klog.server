@@ -5,5 +5,8 @@
 	"DBHostAddress": "127.0.0.1:27017",
     "DBName": "klog",
     "DBUsername": "klog_user",
-    "DBPassword": "klog_pwd"
+    "DBPassword": "klog_pwd",
+    "azureStorageAccount": "klogresourcediag",
+    "azureStorageAccessKey": "lWE+Egtb3azMUGHXHT8nS6wfLEz2uAYuhajpuNhO+pJmhBVmGq6BNyZ4mjkyAYNXqbpbmxRMlz6eKM5CJaaZ4g==",
+    "azureStorageContainer": "klogserver-videodata"
 }

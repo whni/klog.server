@@ -10,13 +10,16 @@ import (
 
 // ServerConfig global server config
 type ServerConfig struct {
-	LoggingReleaseMode bool   `json:"loggingReleaseMode"`
-	LoggingLevel       string `json:"loggingLevel"`
-	LoggingDestination string `json:"loggingDestination"`
-	DBHostAddress      string `json:"DBHostAddress"`
-	DBName             string `json:"DBName"`
-	DBUsername         string `json:"DBUsername"`
-	DBPassword         string `json:"DBPassword"`
+	LoggingReleaseMode    bool   `json:"loggingReleaseMode"`
+	LoggingLevel          string `json:"loggingLevel"`
+	LoggingDestination    string `json:"loggingDestination"`
+	DBHostAddress         string `json:"DBHostAddress"`
+	DBName                string `json:"DBName"`
+	DBUsername            string `json:"DBUsername"`
+	DBPassword            string `json:"DBPassword"`
+	AzureStorageAccount   string `json:"azureStorageAccount"`
+	AzureStorageAccessKey string `json:"azureStorageAccessKey"`
+	AzureStorageContainer string `json:"azureStorageContainer"`
 }
 
 var serverConfig *ServerConfig
