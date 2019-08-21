@@ -43,6 +43,8 @@ type Student struct {
 	ParentName      string             `json:"parent_name" bson:"parent_name"`
 	PhoneNumber     string             `json:"phone_number" bson:"phone_number"`
 	Email           string             `json:"email" bson:"email"`
+	BindingCode     string             `json:"binding_code" bson:"binding_code"`
+	BindingExpire   int64              `json:"binding_expire" bson:"binding_expire"`
 	TeacherPID      primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 

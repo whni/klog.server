@@ -83,8 +83,7 @@ db.createCollection("teachers", {
                 },
                 teacher_key: {
                     bsonType: "string",
-                    maxLength: 32,
-                    description: "required string (md5 hash)"
+                    description: "required string (sha256 hash)"
                 },
                 class_name: {
                     bsonType: "string",
@@ -116,7 +115,7 @@ db.createCollection("students", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["student_uid", "student_name", "parent_wxid", "parent_name", "phone_number", "email", "teacher_pid"],
+            required: ["student_uid", "student_name", "student_image_url", "parent_wxid", "parent_name", "phone_number", "email", "binding_code", "binding_expire", "teacher_pid"],
             properties: {
                 student_uid: {
                     bsonType: "string",
@@ -129,10 +128,13 @@ db.createCollection("students", {
                     minLength: 2,
                     description: "required string (>= 2 length)"
                 },
+                student_image_url: {
+                    bsonType: "string",
+                    description: "required string"
+                },
                 parent_wxid: {
                     bsonType: "string",
-                    minLength: 2,
-                    description: "required string (>= 2 length)"
+                    description: "required string"
                 },
                 parent_name: {
                     bsonType: "string",
@@ -146,6 +148,14 @@ db.createCollection("students", {
                 email: {
                     bsonType: "string",
                     description: "required string"
+                },
+                binding_code: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                binding_expire: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
                 },
                 teacher_pid: {
                     bsonType: "objectId",
@@ -228,7 +238,7 @@ db.teachers.insertMany(
         {
             _id: ObjectId("102030405060708090000004"),
             teacher_uid: "uid-usa-1004",
-            teacher_name: "Summer Season",
+            teacher_name: "倪炜恒",
             teacher_key: "no_key",
             class_name: "UnderWorld",
             phone_number: "619-763-1020",
@@ -240,47 +250,58 @@ db.teachers.insertMany(
 
 
 
-
 db.students.insertMany(
     [
         {
             _id: ObjectId("102030405060708090000001"),
             student_uid: "uid-usa-1001",
             student_name: "Thomas Hu",
+            student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Ed Sheeran",
             phone_number: "777-888-9999",
             email: "ed_sh@apple.com",
+            binding_code: "",
+            binding_expire: NumberLong(0),
             teacher_pid: ObjectId("102030405060708090000001")
         },
         {
             _id: ObjectId("102030405060708090000002"),
             student_uid: "uid-usa-1002",
             student_name: "Bruce Wang",
+            student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Madison Beer",
             phone_number: "777-888-9999",
             email: "beer@google.com",
+            binding_code: "",
+            binding_expire: NumberLong(0),
             teacher_pid: ObjectId("102030405060708090000002")
         },
         {
             _id: ObjectId("102030405060708090000003"),
             student_uid: "uid-usa-1003",
             student_name: "Tiffiny Shawn",
+            student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Skylar Grey",
             phone_number: "777-888-9999",
             email: "skylar@facebook.com",
+            binding_code: "",
+            binding_expire: NumberLong(0),
             teacher_pid: ObjectId("102030405060708090000003")
         },
         {
             _id: ObjectId("102030405060708090000004"),
             student_uid: "uid-usa-1004",
             student_name: "Gintama Y.",
+            student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Autumn Mendes",
             phone_number: "777-888-9999",
             email: "autumn@xxx.com",
+            binding_code: "",
+            binding_expire: NumberLong(0),
             teacher_pid: ObjectId("102030405060708090000004")
         }
     ]
