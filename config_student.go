@@ -12,14 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var instituteHandlerTable = map[string]gin.HandlerFunc{
-	"get":    instituteGetHandler,
-	"post":   institutePostHandler,
-	"put":    institutePutHandler,
-	"delete": instituteDeleteHandler,
+var studentConfigHandlerTable = map[string]gin.HandlerFunc{
+	"get":    studentGetHandler,
+	"post":   studentPostHandler,
+	"put":    studentPutHandler,
+	"delete": studentDeleteHandler,
 }
 
-func instituteGetHandler(ctx *gin.Context) {
+func studentGetHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -28,7 +28,7 @@ func instituteGetHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var institutes []*Institute
+	var students []*Student
 	var err error
 	var pid primitive.ObjectID
 	if params.PID == "all" {
@@ -43,17 +43,17 @@ func instituteGetHandler(ctx *gin.Context) {
 	}
 
 	// pid: nil objectid for all, others for specified one
-	institutes, err = findInstitute(pid)
+	students, err = findStudent(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 		return
 	}
-	response.Payload = institutes
+	response.Payload = students
 	return
 }
 
-func institutePostHandler(ctx *gin.Context) {
+func studentPostHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -62,27 +62,27 @@ func institutePostHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var institute Institute
-	var institutePID primitive.ObjectID
+	var student Student
+	var studentPID primitive.ObjectID
 	var err error
 
-	if err = json.Unmarshal(params.Data, &institute); err != nil {
+	if err = json.Unmarshal(params.Data, &student); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	institutePID, err = createInstitute(&institute)
+	studentPID, err = createStudent(&student)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = institutePID
+		response.Payload = studentPID
 	}
 	return
 }
 
-func institutePutHandler(ctx *gin.Context) {
+func studentPutHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -91,26 +91,26 @@ func institutePutHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var institute Institute
+	var student Student
 	var err error
 
-	if err = json.Unmarshal(params.Data, &institute); err != nil {
+	if err = json.Unmarshal(params.Data, &student); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	err = updateInstitute(&institute)
+	err = updateStudent(&student)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = institute.PID
+		response.Payload = student.PID
 	}
 	return
 }
 
-func instituteDeleteHandler(ctx *gin.Context) {
+func studentDeleteHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -134,7 +134,7 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	}
 
 	// pid: nil objectid for all, others for specified one
-	deletedRows, err = deleteInstitute(pid)
+	deletedRows, err = deleteStudent(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -144,12 +144,12 @@ func instituteDeleteHandler(ctx *gin.Context) {
 	return
 }
 
-// find institute, return institute slice, error
-func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
+// find student, return student slice, error
+func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModStudentHandler, err.Error())
 		}
 	}()
 
@@ -162,21 +162,21 @@ func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
 		findFilter = bson.D{{"_id", pid}}
 	}
 
-	findCursor, err := dbPool.Collection(DBCollectionInstitute).Find(context.TODO(), findFilter, findOptions)
+	findCursor, err := dbPool.Collection(DBCollectionStudent).Find(context.TODO(), findFilter, findOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
 
-	institutes := []*Institute{}
+	students := []*Student{}
 	for findCursor.Next(context.TODO()) {
-		var institute Institute
-		err = findCursor.Decode(&institute)
+		var student Student
+		err = findCursor.Decode(&student)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return nil, err
 		}
-		institutes = append(institutes, &institute)
+		students = append(students, &student)
 	}
 
 	err = findCursor.Err()
@@ -185,110 +185,121 @@ func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%v)", len(institutes), pid)
-	return institutes, nil
+	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%v)", len(students), pid)
+	return students, nil
 }
 
-// create institute, return PID, error
-func createInstitute(institute *Institute) (primitive.ObjectID, error) {
+// create student, return PID, error
+func createStudent(student *Student) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModStudentHandler, err.Error())
 		}
 	}()
 
-	insertResult, err := dbPool.Collection(DBCollectionInstitute).InsertOne(context.TODO(), institute)
+	// teacher PID check
+	if student.TeacherPID.IsZero() {
+		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
+		return primitive.NilObjectID, err
+	}
+	teachers, err := findTeacher(student.TeacherPID)
+	if err != nil || len(teachers) == 0 {
+		err = fmt.Errorf("[%s] - No teachers found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
+		return primitive.NilObjectID, err
+	}
+
+	insertResult, err := dbPool.Collection(DBCollectionStudent).InsertOne(context.TODO(), student)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return primitive.NilObjectID, err
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	logging.Debugmf(logModStudentHandler, "Created student in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 	return lastInsertID, nil
 }
 
-// update institute, return error
-func updateInstitute(institute *Institute) error {
+// update student, return error
+func updateStudent(student *Student) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModStudentHandler, err.Error())
 		}
 	}()
 
-	// check institute PID
-	if institute.PID.IsZero() {
-		err = fmt.Errorf("[%s] - institute PID is empty", serverErrorMessages[seInputJSONNotValid])
+	// student PID check
+	if student.PID.IsZero() {
+		err = fmt.Errorf("[%s] - student PID is empty", serverErrorMessages[seInputJSONNotValid])
 		return err
 	}
 
-	var updateFilter = bson.D{{"_id", institute.PID}}
-	var updateBSONDocument = bson.D{}
-	instituteBSONData, err := bson.Marshal(institute)
-	if err != nil {
-		err = fmt.Errorf("[%s] - could not convert institute (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], institute.PID.Hex())
+	// teacher PID check
+	if student.TeacherPID.IsZero() {
+		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	err = bson.Unmarshal(instituteBSONData, &updateBSONDocument)
+	teachers, err := findTeacher(student.TeacherPID)
+	if err != nil || len(teachers) == 0 {
+		err = fmt.Errorf("[%s] - No teacher found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
+		return err
+	}
+
+	var updateFilter = bson.D{{"_id", student.PID}}
+	var updateBSONDocument = bson.D{}
+	studentBSONData, err := bson.Marshal(student)
 	if err != nil {
-		err = fmt.Errorf("[%s] - could not convert institute (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], institute.PID.Hex())
+		err = fmt.Errorf("[%s] - could not convert student (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], student.PID.Hex())
+		return err
+	}
+	err = bson.Unmarshal(studentBSONData, &updateBSONDocument)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert student (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], student.PID.Hex())
 		return err
 	}
 	var updateOptions = bson.D{{"$set", updateBSONDocument}}
 
-	insertResult, err := dbPool.Collection(DBCollectionInstitute).UpdateOne(context.TODO(), updateFilter, updateOptions)
+	insertResult, err := dbPool.Collection(DBCollectionStudent).UpdateOne(context.TODO(), updateFilter, updateOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Update institute (PID %s): matched %d modified %d",
-		institute.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
+	logging.Debugmf(logModStudentHandler, "Update student (PID %s): matched %d modified %d",
+		student.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
-		err = fmt.Errorf("[%s] - could not find institute (PID %s)", serverErrorMessages[seResourceNotFound], institute.PID.Hex())
+		err = fmt.Errorf("[%s] - could not find student (PID %s)", serverErrorMessages[seResourceNotFound], student.PID.Hex())
 		return err
 	} else if insertResult.ModifiedCount == 0 {
-		err = fmt.Errorf("[%s] - institute (PID %s) not changed", serverErrorMessages[seResourceNotChange], institute.PID.Hex())
+		err = fmt.Errorf("[%s] - student (PID %s) not changed", serverErrorMessages[seResourceNotChange], student.PID.Hex())
 		return err
 	}
 	return nil
 }
 
-// delete institute, return #delete entries, error
-func deleteInstitute(pid primitive.ObjectID) (int, error) {
+// delete student, return #delete entries, error
+func deleteStudent(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModStudentHandler, err.Error())
 		}
 	}()
 
 	var deleteFilter bson.D
-	var teacherFindFilter bson.D
 	if pid.IsZero() {
 		deleteFilter = bson.D{{}}
-		teacherFindFilter = bson.D{{}}
 	} else {
 		deleteFilter = bson.D{{"_id", pid}}
-		teacherFindFilter = bson.D{{"institute_pid", pid}}
 	}
 
-	// check teacher dependency
-	var teacher Teacher
-	if dbPool.Collection(DBCollectionTeacher).FindOne(context.TODO(), teacherFindFilter).Decode(&teacher) == nil {
-		err = fmt.Errorf("[%s] - teacher-institute dependency unresolved (e.g. teacher PID %s institute PID %s)",
-			serverErrorMessages[seDependencyIssue], teacher.PID.Hex(), teacher.InstitutePID.Hex())
-		return 0, err
-	}
-
-	deleteResult, err := dbPool.Collection(DBCollectionInstitute).DeleteMany(context.TODO(), deleteFilter)
+	deleteResult, err := dbPool.Collection(DBCollectionStudent).DeleteMany(context.TODO(), deleteFilter)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return 0, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Deleted %d institute results from DB", deleteResult.DeletedCount)
+	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", deleteResult.DeletedCount)
 	return int(deleteResult.DeletedCount), nil
 }

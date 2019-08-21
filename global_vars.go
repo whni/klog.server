@@ -8,6 +8,7 @@ const (
 	seInputBSONNotValid   = -iota
 	seDBResourceQuery     = -iota
 	seResourceNotFound    = -iota
+	seResourceNotMatched  = -iota
 	seResourceDuplicated  = -iota
 	seResourceNotChange   = -iota
 	seDependencyIssue     = -iota
@@ -23,6 +24,7 @@ var serverErrorMessages = map[int]string{
 	seInputBSONNotValid:   "Invalid input BSON format",
 	seDBResourceQuery:     "DB resource query error",
 	seResourceNotFound:    "Resource not found",
+	seResourceNotMatched:  "Resource not matched",
 	seResourceDuplicated:  "Resource duplicated",
 	seResourceNotChange:   "Resource not changed",
 	seDependencyIssue:     "Dependency not resolved",

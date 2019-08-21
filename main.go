@@ -86,8 +86,8 @@ func main() {
 
 	debug.SetTraceback("crash")
 
-	// regiester api handlers
-	for apiURL, apiHandlerTable := range ginAPITable {
+	// regiester config api handlers
+	for apiURL, apiHandlerTable := range ginConfigAPITable {
 		for apiMethod, apiHandler := range apiHandlerTable {
 			switch apiMethod {
 			case "get":
@@ -100,6 +100,10 @@ func main() {
 				r.DELETE(apiURL, apiHandler)
 			}
 		}
+	}
+	// register workflow api handlers
+	for apiURL, apiHandler := range ginWorkflowAPISlice {
+		r.POST(apiURL, apiHandler)
 	}
 
 	logging.Infomln(logModMain, "Server is listening and serving on 0.0.0.0:8080")

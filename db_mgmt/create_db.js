@@ -11,9 +11,9 @@ db.createCollection("institutes", {
             properties: {
                 institute_uid: {
                     bsonType: "string",
-                    pattern: "^[a-z]{3}-[a-z0-9\-]{4,}+$",
-                    minLength: 8,
-                    description: "required string (>= 8 length, match xxx-xxxx)"
+                    pattern: "^[a-zA-Z]{1}[a-zA-Z0-9_\-]{5,}+$",
+                    minLength: 6,
+                    description: "required string (>= 6 length, start with letter)"
                 },
                 institute_name: {
                     bsonType: "string",
@@ -68,18 +68,23 @@ db.createCollection("teachers", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["teacher_uid", "teacher_name", "class_name", "phone_number", "email", "institute_pid"],
+            required: ["teacher_uid", "teacher_name", "teacher_key", "class_name", "phone_number", "email", "institute_pid"],
             properties: {
                 teacher_uid: {
                     bsonType: "string",
-                    pattern: "^[a-z]{3}-[a-z0-9\-]{4,}+$",
-                    minLength: 8,
-                    description: "required string (>= 8 length, match xxx-xxxx)"
+                    pattern: "^[a-zA-Z]{1}[a-zA-Z0-9_\-]{5,}+$",
+                    minLength: 6,
+                    description: "required string (>= 6 length, start with letter)"
                 },
                 teacher_name: {
                     bsonType: "string",
                     minLength: 2,
                     description: "required string (>= 2 length)"
+                },
+                teacher_key: {
+                    bsonType: "string",
+                    maxLength: 32,
+                    description: "required string (md5 hash)"
                 },
                 class_name: {
                     bsonType: "string",
@@ -115,9 +120,9 @@ db.createCollection("students", {
             properties: {
                 student_uid: {
                     bsonType: "string",
-                    pattern: "^[a-z]{3}-[a-z0-9\-]{4,}+$",
-                    minLength: 8,
-                    description: "required string (>= 8 length, match xxx-xxxx)"
+                    pattern: "^[a-zA-Z]{1}[a-zA-Z0-9_\-]{5,}+$",
+                    minLength: 6,
+                    description: "required string (>= 6 length, start with letter)"
                 },
                 student_name: {
                     bsonType: "string",
@@ -194,6 +199,7 @@ db.teachers.insertMany(
             _id: ObjectId("102030405060708090000001"),
             teacher_uid: "uid-usa-1001",
             teacher_name: "Nicole Taylor",
+            teacher_key: "no_key",
             class_name: "GoldenEye",
             phone_number: "123-456-9876",
             email: "nigoo@klog.com",
@@ -203,6 +209,7 @@ db.teachers.insertMany(
             _id: ObjectId("102030405060708090000002"),
             teacher_uid: "uid-usa-1002",
             teacher_name: "Wayne Grace",
+            teacher_key: "no_key",
             class_name: "FastWind",
             phone_number: "123-456-9876",
             email: "wayne@klog.com",
@@ -212,6 +219,7 @@ db.teachers.insertMany(
             _id: ObjectId("102030405060708090000003"),
             teacher_uid: "uid-usa-1003",
             teacher_name: "Fantasy God",
+            teacher_key: "no_key",
             class_name: "CloudTop",
             phone_number: "000-111-2222",
             email: "fanfan@klog.com",
@@ -221,6 +229,7 @@ db.teachers.insertMany(
             _id: ObjectId("102030405060708090000004"),
             teacher_uid: "uid-usa-1004",
             teacher_name: "Summer Season",
+            teacher_key: "no_key",
             class_name: "UnderWorld",
             phone_number: "619-763-1020",
             email: "summer@klog.com",

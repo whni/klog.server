@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var teacherHandlerTable = map[string]gin.HandlerFunc{
+var teacherConfigHandlerTable = map[string]gin.HandlerFunc{
 	"get":    teacherGetHandler,
 	"post":   teacherPostHandler,
 	"put":    teacherPutHandler,

@@ -25,6 +25,7 @@ type Institute struct {
 type Teacher struct {
 	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
 	TeacherUID   string             `json:"teacher_uid" bson:"teacher_uid"`
+	TeacherKey   string             `json:"teacher_key" bson:"teacher_key"`
 	TeacherName  string             `json:"teacher_name" bson:"teacher_name"`
 	ClassName    string             `json:"class_name" bson:"class_name"`
 	PhoneNumber  string             `json:"phone_number" bson:"phone_number"`
@@ -34,14 +35,15 @@ type Teacher struct {
 
 // Student struct
 type Student struct {
-	PID         primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	StudentUID  string             `json:"student_uid" bson:"student_uid"`
-	StudentName string             `json:"student_name" bson:"student_name"`
-	ParentWXID  string             `json:"parent_wxid" bson:"parent_wxid"`
-	ParentName  string             `json:"parent_name" bson:"parent_name"`
-	PhoneNumber string             `json:"phone_number" bson:"phone_number"`
-	Email       string             `json:"email" bson:"email"`
-	TeacherPID  primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
+	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentUID      string             `json:"student_uid" bson:"student_uid"`
+	StudentName     string             `json:"student_name" bson:"student_name"`
+	StudentImageURL string             `json:"student_image_url" bson:"student_image_url"`
+	ParentWXID      string             `json:"parent_wxid" bson:"parent_wxid"`
+	ParentName      string             `json:"parent_name" bson:"parent_name"`
+	PhoneNumber     string             `json:"phone_number" bson:"phone_number"`
+	Email           string             `json:"email" bson:"email"`
+	TeacherPID      primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
 // VideoMeta struct
