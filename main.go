@@ -102,7 +102,7 @@ func main() {
 		}
 	}
 	// register workflow api handlers
-	for apiURL, apiHandler := range ginWorkflowAPISlice {
+	for apiURL, apiHandler := range ginWorkflowAPITable {
 		r.POST(apiURL, apiHandler)
 	}
 

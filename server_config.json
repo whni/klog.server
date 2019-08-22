@@ -8,5 +8,6 @@
     "DBPassword": "klog_pwd",
     "azureStorageAccount": "klogresourcediag",
     "azureStorageAccessKey": "lWE+Egtb3azMUGHXHT8nS6wfLEz2uAYuhajpuNhO+pJmhBVmGq6BNyZ4mjkyAYNXqbpbmxRMlz6eKM5CJaaZ4g==",
-    "azureStorageContainer": "klogserver-videodata"
+    "azureStorageContainer": "klogserver-videodata",
+    "studentBindingCodeLifeTime": 72
 }

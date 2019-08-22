@@ -10,16 +10,17 @@ import (
 
 // ServerConfig global server config
 type ServerConfig struct {
-	LoggingReleaseMode    bool   `json:"loggingReleaseMode"`
-	LoggingLevel          string `json:"loggingLevel"`
-	LoggingDestination    string `json:"loggingDestination"`
-	DBHostAddress         string `json:"DBHostAddress"`
-	DBName                string `json:"DBName"`
-	DBUsername            string `json:"DBUsername"`
-	DBPassword            string `json:"DBPassword"`
-	AzureStorageAccount   string `json:"azureStorageAccount"`
-	AzureStorageAccessKey string `json:"azureStorageAccessKey"`
-	AzureStorageContainer string `json:"azureStorageContainer"`
+	LoggingReleaseMode         bool   `json:"loggingReleaseMode"`
+	LoggingLevel               string `json:"loggingLevel"`
+	LoggingDestination         string `json:"loggingDestination"`
+	DBHostAddress              string `json:"DBHostAddress"`
+	DBName                     string `json:"DBName"`
+	DBUsername                 string `json:"DBUsername"`
+	DBPassword                 string `json:"DBPassword"`
+	AzureStorageAccount        string `json:"azureStorageAccount"`
+	AzureStorageAccessKey      string `json:"azureStorageAccessKey"`
+	AzureStorageContainer      string `json:"azureStorageContainer"`
+	StudentBindingCodeLifeTime int    `json:"studentBindingCodeLifeTime"` // hour
 }
 
 var serverConfig *ServerConfig
@@ -48,5 +49,8 @@ func initDefaultServerConfig(sc *ServerConfig) {
 	}
 	if sc.LoggingDestination == "" {
 		sc.LoggingDestination = "stdout+file"
+	}
+	if sc.StudentBindingCodeLifeTime == 0 {
+		sc.StudentBindingCodeLifeTime = 72
 	}
 }
