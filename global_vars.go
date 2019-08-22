@@ -10,6 +10,7 @@ const (
 	seResourceNotFound    = -iota
 	seResourceNotMatched  = -iota
 	seResourceDuplicated  = -iota
+	seResourceExpired     = -iota
 	seResourceNotChange   = -iota
 	seDependencyIssue     = -iota
 	seUnresolvedError     = -iota
@@ -17,17 +18,18 @@ const (
 )
 
 var serverErrorMessages = map[int]string{
-	seNoError:             "No error",
-	seInputParamNotValid:  "Invalid input parameter",
-	seInputSchemaNotValid: "Invalid input schema",
-	seInputJSONNotValid:   "Invalid input JSON format",
-	seInputBSONNotValid:   "Invalid input BSON format",
-	seDBResourceQuery:     "DB resource query error",
-	seResourceNotFound:    "Resource not found",
-	seResourceNotMatched:  "Resource not matched",
-	seResourceDuplicated:  "Resource duplicated",
-	seResourceNotChange:   "Resource not changed",
-	seDependencyIssue:     "Dependency not resolved",
-	seUnresolvedError:     "Unresolved server error",
-	seAPINotSupport:       "API not supported",
+	seNoError:             "NO_ERROR",
+	seInputParamNotValid:  "INVALID_INPUT_PARAMS",
+	seInputSchemaNotValid: "INVALID_INPUT_SCHEMA",
+	seInputJSONNotValid:   "INVALID_INPUT_JSON",
+	seInputBSONNotValid:   "INVALID_INPUT_BSON",
+	seDBResourceQuery:     "DB_QUERY_ERROR",
+	seResourceNotFound:    "RESOURCE_NOT_FOUND",
+	seResourceNotMatched:  "RESOURCE_NOT_MATCHED",
+	seResourceDuplicated:  "RESOURCE_DUPLICATED",
+	seResourceExpired:     "RESOURCE_EXPIRED",
+	seResourceNotChange:   "RESOURCE_NOT_CHANGED",
+	seDependencyIssue:     "DEPENDENCY_UNRESOLVED",
+	seUnresolvedError:     "UNRESOLVED_SERVER_ERROR",
+	seAPINotSupport:       "API_NOT_SUPPORTED",
 }

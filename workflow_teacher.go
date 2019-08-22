@@ -27,6 +27,7 @@ func teacherLoginHandler(ctx *gin.Context) {
 		return
 	}
 
+	// find teacher by login information (teacher uid and password)
 	var teacherFound *Teacher
 	teacherFound, err = findTeacherByUID(teacher.TeacherUID)
 	if err != nil {
