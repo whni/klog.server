@@ -97,7 +97,7 @@ func studentBindingParentHandler(ctx *gin.Context) {
 
 	// check if binding code is expired
 	var curTS = int64(time.Now().Unix())
-	if curTS > studentInfo.BindingExpire {
+	if curTS > studentFound.BindingExpire {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - Binding code (%s) for student (PID %s) is expired at %v", serverErrorMessages[seResourceExpired],
 			studentFound.BindingCode, studentFound.PID.Hex(), time.Unix(studentFound.BindingExpire, 0).Format(time.RFC3339))

@@ -10,11 +10,14 @@ import json
 host = "127.0.0.1"
 if len(sys.argv) > 1:
     host = sys.argv[1]
-api_url = "http://{}:8080/api/0/workflow/teacher/login".format(host)
+api_url = "http://{}:8080/api/0/workflow/student/binding".format(host)
 method = HTTPMethod.POST
 params = {
-    "teacher_uid": "uid-usa-1001",
-    "teacher_key": "no_key"
+    "parent_wxid": "wxid-my-test",
+    "parent_name": "For Test",
+    "phone_number": "777-888-9999",
+    "email": "test@klog.com",
+    "binding_code": "blfe488fggckigkkbio0",
 }
 
 http_req = HTTPRequest(api_url, method, params)

@@ -25,3 +25,4 @@ params = {
 
 http_req = HTTPRequest(api_url, method, params)
 http_req.send()
+http_req.print_resp()

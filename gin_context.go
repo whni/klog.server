@@ -18,6 +18,7 @@ var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 var ginWorkflowAPITable = map[string]gin.HandlerFunc{
 	"/api/0/workflow/teacher/login":        teacherLoginHandler,
 	"/api/0/workflow/student/generatecode": studentGenerateCodeHandler,
+	"/api/0/workflow/student/binding":      studentBindingParentHandler,
 }
 
 // GinParameter a generic paramter wrapper for gin web framework handler

@@ -22,20 +22,21 @@ class HTTPRequest:
         self.api_url = api_url
         self.method = method
         self.params = {key:val for key, val in params.items()}
+        self.resp = None
         
     def send(self):
         req_handler = HTTPMethodMap[self.method]
-        resp = None
+        self.resp = None
         if self.method == HTTPMethod.GET or self.method == HTTPMethod.DELETE:
-            resp = req_handler(url=self.api_url, params=self.params, timeout=3)
+            self.resp = req_handler(url=self.api_url, params=self.params, timeout=3)
         elif self.method == HTTPMethod.POST or self.method == HTTPMethod.PUT:
-            resp = req_handler(url=self.api_url, json=self.params, timeout=3)
+            self.resp = req_handler(url=self.api_url, json=self.params, timeout=3)
         else:
             print("Unsupported HTTP method: {}".format(self.method))
-        
-        if resp is None:
+  
+    def print_resp(self):
+        if self.resp is None:
             print("No response received.")
         else:
-            print("Received {}".format(resp))
-            print(json.dumps(resp.json(), indent=4, ensure_ascii=False))
-  
+            print("Received {}".format(self.resp))
+            print(json.dumps(self.resp.json(), indent=4, ensure_ascii=False))
