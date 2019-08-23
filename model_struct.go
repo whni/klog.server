@@ -36,7 +36,6 @@ type Teacher struct {
 // Student struct
 type Student struct {
 	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	StudentUID      string             `json:"student_uid" bson:"student_uid"`
 	StudentName     string             `json:"student_name" bson:"student_name"`
 	StudentImageURL string             `json:"student_image_url" bson:"student_image_url"`
 	ParentWXID      string             `json:"parent_wxid" bson:"parent_wxid"`
@@ -48,12 +47,18 @@ type Student struct {
 	TeacherPID      primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
-// VideoMeta struct
-type VideoMeta struct {
-	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	VideoMetaUID string             `json:"videometa_uid" bson:"videometa_uid"`
-	StorageURL   string             `json:"storage_url" bson:"storage_url"`
-	Timestamp    int64              `json:"timestamp" bson:"timestamp"`
-	Lifetime     int64              `json:"lifetime" bson:"lifetime"`
-	StudentPID   primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+const (
+	CloudMediaTypeVideo  = "video"
+	CloudMediaTypeImage  = "image"
+	CloudMediaTypeOthers = "others"
+)
+
+// CloudMedia struct
+type CloudMedia struct {
+	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	MediaType  string             `json:"media_type" bson:"media_type"`
+	MediaURL   string             `json:"media_url" bson:"media_url"`
+	RankScore  float64            `json:"rank_score" bson:"rank_score"`
+	CreateTime int64              `json:"create_time" bson:"create_time"`
+	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
 }

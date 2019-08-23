@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	DBCollectionInstitute = "institutes"
-	DBCollectionTeacher   = "teachers"
-	DBCollectionStudent   = "students"
+	DBCollectionInstitute  = "institutes"
+	DBCollectionTeacher    = "teachers"
+	DBCollectionStudent    = "students"
+	DBCollectionCloudMedia = "cloudmedia"
 )
 
 var dbPool *mongo.Database

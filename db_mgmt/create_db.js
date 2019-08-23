@@ -115,14 +115,8 @@ db.createCollection("students", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["student_uid", "student_name", "student_image_url", "parent_wxid", "parent_name", "phone_number", "email", "binding_code", "binding_expire", "teacher_pid"],
+            required: ["student_name", "student_image_url", "parent_wxid", "parent_name", "phone_number", "email", "binding_code", "binding_expire", "teacher_pid"],
             properties: {
-                student_uid: {
-                    bsonType: "string",
-                    pattern: "^[a-zA-Z]{1}[a-zA-Z0-9_\-]{5,}+$",
-                    minLength: 6,
-                    description: "required string (>= 6 length, start with letter)"
-                },
                 student_name: {
                     bsonType: "string",
                     minLength: 2,
@@ -167,7 +161,44 @@ db.createCollection("students", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.students.createIndex({"student_uid": 1}, {unique: true});
+
+
+// cloudmedia collection
+db.createCollection("cloudmedia", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["media_type", "media_url", "rank_score", "create_time", "student_pid"],
+            properties: {
+                media_type: {
+                    bsonType: "string",
+                    enum: ["video", "image", "others"],
+                    description: "required string - video/image/others"
+                },
+                media_url: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                rank_score: {
+                    bsonType: "double",
+                    description: "required double/float64"
+                },
+                create_time: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                student_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+
+
 
 // db info
 print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);
@@ -254,7 +285,6 @@ db.students.insertMany(
     [
         {
             _id: ObjectId("102030405060708090000001"),
-            student_uid: "uid-usa-1001",
             student_name: "Thomas Hu",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
@@ -267,7 +297,6 @@ db.students.insertMany(
         },
         {
             _id: ObjectId("102030405060708090000002"),
-            student_uid: "uid-usa-1002",
             student_name: "Bruce Wang",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
@@ -280,7 +309,6 @@ db.students.insertMany(
         },
         {
             _id: ObjectId("102030405060708090000003"),
-            student_uid: "uid-usa-1003",
             student_name: "Tiffiny Shawn",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
@@ -293,7 +321,6 @@ db.students.insertMany(
         },
         {
             _id: ObjectId("102030405060708090000004"),
-            student_uid: "uid-usa-1004",
             student_name: "Gintama Y.",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
@@ -306,3 +333,32 @@ db.students.insertMany(
         }
     ]
 );
+
+db.cloudmedia.insertMany(
+    [
+        {
+            _id: ObjectId("102030405060708090000001"),
+            media_type: "video",
+            media_url: "",
+            rank_score: 12.31,
+            create_time: NumberLong(0),
+            student_pid: ObjectId("102030405060708090000001")
+        },
+        {
+            _id: ObjectId("102030405060708090000002"),
+            media_type: "image",
+            media_url: "",
+            rank_score: 93.2,
+            create_time: NumberLong(0),
+            student_pid: ObjectId("102030405060708090000002")
+        },
+        {
+            _id: ObjectId("102030405060708090000003"),
+            media_type: "others",
+            media_url: "",
+            rank_score: 38.2,
+            create_time: NumberLong(0),
+            student_pid: ObjectId("102030405060708090000003")
+        }
+    ]
+)

@@ -107,9 +107,10 @@ func azureStorageListBlobs(azureContainer *azblob.ContainerURL, prefix string) (
 	return blobItems, nil
 }
 
-func azureStorageCheckBlobExist(azureContainerURL *azblob.ContainerURL, blobname string) bool {
-	blobItems, err := azureStorageListBlobs(azureContainerURL, blobname)
-	if err != nil || len(blobItems) == 0 {
+func azureStorageIsBlobExist(azureContainerURL *azblob.ContainerURL, blobname string) bool {
+	blobURL := azureContainerURL.NewBlobURL(blobname)
+	blobResp, err := blobURL.GetProperties(context.TODO(), azblob.BlobAccessConditions{})
+	if err != nil || blobResp == nil {
 		return false
 	}
 	return true
