@@ -77,7 +77,7 @@ func cloudMediaPostHandler(ctx *gin.Context) {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
 	} else {
-		response.Payload = cloudMedia
+		response.Payload = cloudMediaPID
 	}
 	return
 }
@@ -198,7 +198,7 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 		}
 	}()
 
-	// teacher PID check
+	// student PID check
 	if cloudMedia.StudentPID.IsZero() {
 		err = fmt.Errorf("[%s] - No student PID associated", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
@@ -209,17 +209,22 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 		return primitive.NilObjectID, err
 	}
 
-	// check if media uploaded to cloud already
+	// check if media exists at cloud
+	if azureStorageGetBlobProperties(azureContainerURL, cloudMedia.MediaName) == nil {
+		err = fmt.Errorf("[%s] - No media (URL: %s/%s) found at cloud side", serverErrorMessages[seResourceNotFound],
+			azureContainerURL.String(), cloudMedia.MediaName)
+		return primitive.NilObjectID, err
+	}
 
-	// insertResult, err := dbPool.Collection(DBCollectionCloudMedia).InsertOne(context.TODO(), student)
-	// if err != nil {
-	// 	err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-	// 	return primitive.NilObjectID, err
-	// }
+	insertResult, err := dbPool.Collection(DBCollectionCloudMedia).InsertOne(context.TODO(), cloudMedia)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return primitive.NilObjectID, err
+	}
 
-	// lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	// logging.Debugmf(logModStudentHandler, "Created student in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
-	// return lastInsertID, nil
+	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
+	logging.Debugmf(logModCloudMediaHandler, "Created cloud media in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	return lastInsertID, nil
 }
 
 // // update student, return error

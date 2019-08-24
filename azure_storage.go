@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 )
@@ -107,13 +109,24 @@ func azureStorageListBlobs(azureContainer *azblob.ContainerURL, prefix string) (
 	return blobItems, nil
 }
 
-func azureStorageIsBlobExist(azureContainerURL *azblob.ContainerURL, blobname string) bool {
+func azureStorageGetBlobProperties(azureContainerURL *azblob.ContainerURL, blobname string) *AzureBlobProp {
 	blobURL := azureContainerURL.NewBlobURL(blobname)
-	blobResp, err := blobURL.GetProperties(context.TODO(), azblob.BlobAccessConditions{})
-	if err != nil || blobResp == nil {
-		return false
+	blobPropResp, err := blobURL.GetProperties(context.TODO(), azblob.BlobAccessConditions{})
+	if err != nil || blobPropResp == nil || blobPropResp.Response().StatusCode != http.StatusOK {
+		return nil
 	}
-	return true
+
+	var azureBlobProp AzureBlobProp
+	azureBlobProp.BlobURL = fmt.Sprintf("%s/%s", azureContainerURL.String(), blobname)
+	azureBlobProp.Timestamp = 0
+	if createTimeString, ok := blobPropResp.Response().Header["Last-Modified"]; ok && len(createTimeString) > 0 {
+		if timestamp, timpErr := time.Parse(time.RFC1123, createTimeString[0]); timpErr == nil {
+			azureBlobProp.Timestamp = int64(timestamp.Unix())
+		}
+	}
+	azureBlobProp.ContentLength = blobPropResp.Response().ContentLength
+
+	return &azureBlobProp
 }
 
 func azureStorageUploadBlob(azureContainerURL *azblob.ContainerURL, blobname string) error {

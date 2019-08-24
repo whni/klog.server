@@ -57,8 +57,14 @@ const (
 type CloudMedia struct {
 	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
 	MediaType  string             `json:"media_type" bson:"media_type"`
-	MediaURL   string             `json:"media_url" bson:"media_url"`
+	MediaName  string             `json:"media_name" bson:"media_name"`
 	RankScore  float64            `json:"rank_score" bson:"rank_score"`
-	CreateTime int64              `json:"create_time" bson:"create_time"`
 	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+}
+
+// AzureBlobProp struct
+type AzureBlobProp struct {
+	BlobURL       string
+	Timestamp     int64
+	ContentLength int64
 }

@@ -161,31 +161,28 @@ db.createCollection("students", {
     validationLevel: "strict",
     validationAction: "error"
 });
-
+db.cloudmedia.createIndex({"media_name": 1}, {unique: true});
 
 // cloudmedia collection
 db.createCollection("cloudmedia", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["media_type", "media_url", "rank_score", "create_time", "student_pid"],
+            required: ["media_type", "media_name", "rank_score", "student_pid"],
             properties: {
                 media_type: {
                     bsonType: "string",
                     enum: ["video", "image", "others"],
                     description: "required string - video/image/others"
                 },
-                media_url: {
+                media_name: {
                     bsonType: "string",
-                    description: "required string"
+                    minLength: 1,
+                    description: "required string (media blob name)"
                 },
                 rank_score: {
                     bsonType: "double",
                     description: "required double/float64"
-                },
-                create_time: {
-                    bsonType: "long",
-                    description: "required int64 (unix timestamp)"
                 },
                 student_pid: {
                     bsonType: "objectId",
@@ -339,25 +336,22 @@ db.cloudmedia.insertMany(
         {
             _id: ObjectId("102030405060708090000001"),
             media_type: "video",
-            media_url: "",
+            media_name: "video_media",
             rank_score: 12.31,
-            create_time: NumberLong(0),
             student_pid: ObjectId("102030405060708090000001")
         },
         {
             _id: ObjectId("102030405060708090000002"),
             media_type: "image",
-            media_url: "",
+            media_name: "image_media",
             rank_score: 93.2,
-            create_time: NumberLong(0),
             student_pid: ObjectId("102030405060708090000002")
         },
         {
             _id: ObjectId("102030405060708090000003"),
             media_type: "others",
-            media_url: "",
+            media_name: "other_media",
             rank_score: 38.2,
-            create_time: NumberLong(0),
             student_pid: ObjectId("102030405060708090000003")
         }
     ]
