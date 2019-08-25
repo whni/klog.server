@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/gin-gonic/gin"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -82,67 +84,67 @@ func cloudMediaPostHandler(ctx *gin.Context) {
 	return
 }
 
-// func studentPutHandler(ctx *gin.Context) {
-// 	params := ginContextRequestParameter(ctx)
-// 	response := GinResponse{
-// 		Status: http.StatusOK,
-// 	}
-// 	defer func() {
-// 		ginContextProcessResponse(ctx, &response)
-// 	}()
+func cloudMediaPutHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
 
-// 	var student Student
-// 	var err error
+	var cloudMedia CloudMedia
+	var err error
 
-// 	if err = json.Unmarshal(params.Data, &student); err != nil {
-// 		response.Status = http.StatusBadRequest
-// 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
-// 		return
-// 	}
+	if err = json.Unmarshal(params.Data, &cloudMedia); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
 
-// 	err = updateStudent(&student)
-// 	if err != nil {
-// 		response.Status = http.StatusConflict
-// 		response.Message = err.Error()
-// 	} else {
-// 		response.Payload = student.PID
-// 	}
-// 	return
-// }
+	err = updateCloudMedia(&cloudMedia)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = err.Error()
+	} else {
+		response.Payload = cloudMedia.PID
+	}
+	return
+}
 
-// func studentDeleteHandler(ctx *gin.Context) {
-// 	params := ginContextRequestParameter(ctx)
-// 	response := GinResponse{
-// 		Status: http.StatusOK,
-// 	}
-// 	defer func() {
-// 		ginContextProcessResponse(ctx, &response)
-// 	}()
+func cloudMediaDeleteHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
 
-// 	var err error
-// 	var deletedRows int
-// 	var pid primitive.ObjectID
-// 	if params.PID == "all" {
-// 		pid = primitive.NilObjectID
-// 	} else {
-// 		pid, err = primitive.ObjectIDFromHex(params.PID)
-// 		if err != nil {
-// 			response.Status = http.StatusBadRequest
-// 			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
-// 			return
-// 		}
-// 	}
+	var err error
+	var deletedRows int
+	var pid primitive.ObjectID
+	if params.PID == "all" {
+		pid = primitive.NilObjectID
+	} else {
+		pid, err = primitive.ObjectIDFromHex(params.PID)
+		if err != nil {
+			response.Status = http.StatusBadRequest
+			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+			return
+		}
+	}
 
-// 	// pid: nil objectid for all, others for specified one
-// 	deletedRows, err = deleteStudent(pid)
-// 	if err != nil {
-// 		response.Status = http.StatusConflict
-// 		response.Message = err.Error()
-// 		return
-// 	}
-// 	response.Payload = deletedRows
-// 	return
-// }
+	// pid: nil objectid for all, others for specified one
+	deletedRows, err = deleteCloudMedia(pid)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = err.Error()
+		return
+	}
+	response.Payload = deletedRows
+	return
+}
 
 // find cloud media, return cloud media slice, error
 func findCloudMedia(pid primitive.ObjectID) ([]*CloudMedia, error) {
@@ -210,9 +212,9 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 	}
 
 	// check if media exists at cloud
-	if azureStorageGetBlobProperties(azureContainerURL, cloudMedia.MediaName) == nil {
-		err = fmt.Errorf("[%s] - No media (URL: %s/%s) found at cloud side", serverErrorMessages[seResourceNotFound],
-			azureContainerURL.String(), cloudMedia.MediaName)
+	if _, azPropErr := azureStorageGetBlobProperties(azMediaContainerURL, cloudMedia.MediaName); azPropErr != nil {
+		err = fmt.Errorf("[%s] - No media properties (URL: %s/%s) found at cloud (please check cloud connection and blob contents)",
+			serverErrorMessages[seResourceNotFound], azMediaContainerURL.String(), cloudMedia.MediaName)
 		return primitive.NilObjectID, err
 	}
 
@@ -227,86 +229,120 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 	return lastInsertID, nil
 }
 
-// // update student, return error
-// func updateStudent(student *Student) error {
-// 	var err error
-// 	defer func() {
-// 		if err != nil {
-// 			logging.Errormf(logModStudentHandler, err.Error())
-// 		}
-// 	}()
+// update cloud media, return error
+func updateCloudMedia(cloudMedia *CloudMedia) error {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCloudMediaHandler, err.Error())
+		}
+	}()
 
-// 	// student PID check
-// 	if student.PID.IsZero() {
-// 		err = fmt.Errorf("[%s] - student PID is empty", serverErrorMessages[seInputJSONNotValid])
-// 		return err
-// 	}
+	// cloud media PID check
+	if cloudMedia.PID.IsZero() {
+		err = fmt.Errorf("[%s] - cloud media PID is empty", serverErrorMessages[seInputJSONNotValid])
+		return err
+	}
+	cloudMediaSlice, err := findCloudMedia(cloudMedia.PID)
+	if err != nil || len(cloudMediaSlice) == 0 {
+		err = fmt.Errorf("[%s] - No cloud media found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.PID.Hex())
+		return err
+	}
+	cloudMediaFound := cloudMediaSlice[0]
+	// check media type and name (can not change media type and name so not need to update cloud content)
+	if cloudMediaFound.MediaName != cloudMedia.MediaName {
+		err = fmt.Errorf("[%s] - inconsistent cloud media name (PID %s) - old:%s new:%s", serverErrorMessages[seResourceNotFound],
+			cloudMedia.PID.Hex(), cloudMediaFound.MediaName, cloudMedia.MediaName)
+		return err
+	}
+	if cloudMediaFound.MediaType != cloudMedia.MediaType {
+		err = fmt.Errorf("[%s] - inconsistent cloud media type (PID %s) - old:%s new:%s", serverErrorMessages[seResourceNotFound],
+			cloudMedia.PID.Hex(), cloudMediaFound.MediaType, cloudMedia.MediaType)
+		return err
+	}
 
-// 	// teacher PID check
-// 	if student.TeacherPID.IsZero() {
-// 		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
-// 		return err
-// 	}
-// 	teachers, err := findTeacher(student.TeacherPID)
-// 	if err != nil || len(teachers) == 0 {
-// 		err = fmt.Errorf("[%s] - No teacher found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
-// 		return err
-// 	}
+	// student PID check
+	if cloudMedia.StudentPID.IsZero() {
+		err = fmt.Errorf("[%s] - No student PID associated", serverErrorMessages[seResourceNotFound])
+		return err
+	}
+	students, err := findStudent(cloudMedia.StudentPID)
+	if err != nil || len(students) == 0 {
+		err = fmt.Errorf("[%s] - No associated student found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.StudentPID.Hex())
+		return err
+	}
 
-// 	var updateFilter = bson.D{{"_id", student.PID}}
-// 	var updateBSONDocument = bson.D{}
-// 	studentBSONData, err := bson.Marshal(student)
-// 	if err != nil {
-// 		err = fmt.Errorf("[%s] - could not convert student (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], student.PID.Hex())
-// 		return err
-// 	}
-// 	err = bson.Unmarshal(studentBSONData, &updateBSONDocument)
-// 	if err != nil {
-// 		err = fmt.Errorf("[%s] - could not convert student (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], student.PID.Hex())
-// 		return err
-// 	}
-// 	var updateOptions = bson.D{{"$set", updateBSONDocument}}
+	var updateFilter = bson.D{{"_id", cloudMedia.PID}}
+	var updateBSONDocument = bson.D{}
+	cloudMediaBSONData, err := bson.Marshal(cloudMedia)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert cloud media (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], cloudMedia.PID.Hex())
+		return err
+	}
+	err = bson.Unmarshal(cloudMediaBSONData, &updateBSONDocument)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not convert cloud media (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], cloudMedia.PID.Hex())
+		return err
+	}
+	var updateOptions = bson.D{{"$set", updateBSONDocument}}
 
-// 	insertResult, err := dbPool.Collection(DBCollectionStudent).UpdateOne(context.TODO(), updateFilter, updateOptions)
-// 	if err != nil {
-// 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-// 		return err
-// 	}
+	insertResult, err := dbPool.Collection(DBCollectionCloudMedia).UpdateOne(context.TODO(), updateFilter, updateOptions)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return err
+	}
 
-// 	logging.Debugmf(logModStudentHandler, "Update student (PID %s): matched %d modified %d",
-// 		student.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
-// 	if insertResult.MatchedCount == 0 {
-// 		err = fmt.Errorf("[%s] - could not find student (PID %s)", serverErrorMessages[seResourceNotFound], student.PID.Hex())
-// 		return err
-// 	} else if insertResult.ModifiedCount == 0 {
-// 		err = fmt.Errorf("[%s] - student (PID %s) not changed", serverErrorMessages[seResourceNotChange], student.PID.Hex())
-// 		return err
-// 	}
-// 	return nil
-// }
+	logging.Debugmf(logModCloudMediaHandler, "Update cloud media (PID %s): matched %d modified %d",
+		cloudMedia.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
+	if insertResult.MatchedCount == 0 {
+		err = fmt.Errorf("[%s] - could not find cloud media (PID %s)", serverErrorMessages[seResourceNotFound], cloudMedia.PID.Hex())
+		return err
+	} else if insertResult.ModifiedCount == 0 {
+		err = fmt.Errorf("[%s] - cloud media (PID %s) not changed", serverErrorMessages[seResourceNotChange], cloudMedia.PID.Hex())
+		return err
+	}
+	return nil
+}
 
-// // delete student, return #delete entries, error
-// func deleteStudent(pid primitive.ObjectID) (int, error) {
-// 	var err error
-// 	defer func() {
-// 		if err != nil {
-// 			logging.Errormf(logModStudentHandler, err.Error())
-// 		}
-// 	}()
+// delete cloud media, return #delete entries, error
+func deleteCloudMedia(pid primitive.ObjectID) (int, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCloudMediaHandler, err.Error())
+		}
+	}()
 
-// 	var deleteFilter bson.D
-// 	if pid.IsZero() {
-// 		deleteFilter = bson.D{{}}
-// 	} else {
-// 		deleteFilter = bson.D{{"_id", pid}}
-// 	}
+	// try to delete media files at cloud side
+	cloudMediaSlice, findErr := findCloudMedia(pid)
+	if findErr != nil {
+		err = fmt.Errorf("[%s] - could not delete cloud media DB entries due to query error", serverErrorMessages[seResourceNotFound])
+		return 0, err
+	}
 
-// 	deleteResult, err := dbPool.Collection(DBCollectionStudent).DeleteMany(context.TODO(), deleteFilter)
-// 	if err != nil {
-// 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-// 		return 0, err
-// 	}
+	var deleteCount int64
+	for i := range cloudMediaSlice {
+		cloudMedia := cloudMediaSlice[i]
+		azBlobDeleteErr := azureStorageDeleteBlob(azMediaContainerURL, cloudMedia.MediaName)
+		// return if error occurs (except blob not found)
+		if azBlobDeleteErr != nil {
+			if serr, ok := azBlobDeleteErr.(azblob.StorageError); !ok || serr.ServiceCode() != azblob.ServiceCodeBlobNotFound {
+				err = fmt.Errorf("[%s] - could not delete cloud media blob at cloud (PID: %s name:%s type:%s) due to error:\n%s",
+					serverErrorMessages[seCloudOpsError], cloudMedia.PID.Hex(), cloudMedia.MediaName, cloudMedia.MediaType, azBlobDeleteErr.Error())
+				return int(deleteCount), err
+			}
+		}
 
-// 	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", deleteResult.DeletedCount)
-// 	return int(deleteResult.DeletedCount), nil
-// }
+		deleteFilter := bson.D{{"_id", cloudMedia.PID}}
+		deleteResult, err := dbPool.Collection(DBCollectionCloudMedia).DeleteMany(context.TODO(), deleteFilter)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return int(deleteCount), err
+		}
+
+		deleteCount += deleteResult.DeletedCount
+	}
+
+	logging.Debugmf(logModCloudMediaHandler, "Deleted %d cloud media results from DB", deleteCount)
+	return int(deleteCount), nil
+}

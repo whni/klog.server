@@ -13,6 +13,7 @@ const (
 	seResourceExpired     = -iota
 	seResourceNotChange   = -iota
 	seDependencyIssue     = -iota
+	seCloudOpsError       = -iota
 	seUnresolvedError     = -iota
 	seAPINotSupport       = -iota
 )
@@ -30,6 +31,7 @@ var serverErrorMessages = map[int]string{
 	seResourceExpired:     "RESOURCE_EXPIRED",
 	seResourceNotChange:   "RESOURCE_NOT_CHANGED",
 	seDependencyIssue:     "DEPENDENCY_UNRESOLVED",
+	seCloudOpsError:       "CLOUD_OPS_ERROR",
 	seUnresolvedError:     "UNRESOLVED_SERVER_ERROR",
 	seAPINotSupport:       "API_NOT_SUPPORTED",
 }

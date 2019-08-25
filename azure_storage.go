@@ -13,7 +13,7 @@ import (
 	"github.com/Azure/azure-storage-blob-go/azblob"
 )
 
-var azureContainerURL *azblob.ContainerURL
+var azMediaContainerURL *azblob.ContainerURL
 
 func azureErrorInfo(err error) string {
 	if err != nil {
@@ -83,7 +83,7 @@ func azureStorageDeleteContainer(azureContainerURL *azblob.ContainerURL) error {
 	return nil
 }
 
-func azureStorageListBlobs(azureContainer *azblob.ContainerURL, prefix string) ([]*azblob.BlobItem, error) {
+func azureStorageListBlobs(azureContainerURL *azblob.ContainerURL, prefix string) ([]*azblob.BlobItem, error) {
 	if azureContainerURL == nil {
 		return []*azblob.BlobItem{}, fmt.Errorf("Empty azure container URL object")
 	}
@@ -91,7 +91,7 @@ func azureStorageListBlobs(azureContainer *azblob.ContainerURL, prefix string) (
 	var blobItems = []*azblob.BlobItem{}
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		// get a result segment starting with the blob indicated by the current Marker.
-		listBlob, listBlobErr := azureContainer.ListBlobsFlatSegment(context.TODO(), marker, azblob.ListBlobsSegmentOptions{
+		listBlob, listBlobErr := azureContainerURL.ListBlobsFlatSegment(context.TODO(), marker, azblob.ListBlobsSegmentOptions{
 			Prefix: prefix,
 		})
 		if listBlobErr != nil {
@@ -109,11 +109,14 @@ func azureStorageListBlobs(azureContainer *azblob.ContainerURL, prefix string) (
 	return blobItems, nil
 }
 
-func azureStorageGetBlobProperties(azureContainerURL *azblob.ContainerURL, blobname string) *AzureBlobProp {
+func azureStorageGetBlobProperties(azureContainerURL *azblob.ContainerURL, blobname string) (*AzureBlobProp, error) {
 	blobURL := azureContainerURL.NewBlobURL(blobname)
 	blobPropResp, err := blobURL.GetProperties(context.TODO(), azblob.BlobAccessConditions{})
-	if err != nil || blobPropResp == nil || blobPropResp.Response().StatusCode != http.StatusOK {
-		return nil
+	if err != nil {
+		return nil, err
+	}
+	if blobPropResp == nil || blobPropResp.Response().StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("[%s] - no blob properties response received", serverErrorMessages[seCloudOpsError])
 	}
 
 	var azureBlobProp AzureBlobProp
@@ -126,7 +129,7 @@ func azureStorageGetBlobProperties(azureContainerURL *azblob.ContainerURL, blobn
 	}
 	azureBlobProp.ContentLength = blobPropResp.Response().ContentLength
 
-	return &azureBlobProp
+	return &azureBlobProp, nil
 }
 
 func azureStorageUploadBlob(azureContainerURL *azblob.ContainerURL, blobname string) error {

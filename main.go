@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	_ "net/http/pprof"
 	"runtime/debug"
 	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 var serverStartTime time.Time
@@ -57,7 +57,7 @@ func main() {
 
 	// azure storage setup
 	var azureContainerErr error
-	azureContainerURL, azureContainerErr = azureStorageInit(serverConfig)
+	azMediaContainerURL, azureContainerErr = azureStorageInit(serverConfig)
 	if azureContainerErr != nil {
 		logging.Panicmf(logModMain, "Unable to load azure storage container - Error msg: %s", azureContainerErr.Error())
 	}
