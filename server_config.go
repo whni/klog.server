@@ -10,6 +10,7 @@ import (
 
 // ServerConfig global server config
 type ServerConfig struct {
+	ServerPort                 int    `json:"serverPort"`
 	LoggingReleaseMode         bool   `json:"loggingReleaseMode"`
 	LoggingLevel               string `json:"loggingLevel"`
 	LoggingDestination         string `json:"loggingDestination"`

@@ -1,4 +1,5 @@
 {
+    "serverPort": 80,
     "loggingReleaseMode": false,
     "loggingLevel": "trace",
     "loggingDestination": "stdout",
