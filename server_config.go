@@ -10,8 +10,9 @@ import (
 
 // ServerConfig global server config
 type ServerConfig struct {
-	ServerPort                 int    `json:"serverPort"`
+	ServerHTTPPort             int    `json:"serverHTTPPort"`
 	RunHTTPS                   bool   `json:"runHttps"`
+	ServerHTTPSecurePort       int    `json:"serverHTTPSecurePort"`
 	SSLCertPath                string `json:"sslCertPath"`
 	SSLKeyPath                 string `json:"sslKeyPath"`
 	LoggingReleaseMode         bool   `json:"loggingReleaseMode"`

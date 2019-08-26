@@ -106,11 +106,12 @@ func main() {
 		r.POST(apiURL, apiHandler)
 	}
 
-	logging.Infomf(logModMain, "Server is listening and serving on 0.0.0.0:%d", serverConfig.ServerPort)
 	if serverConfig.RunHTTPS {
-		r.RunTLS(fmt.Sprintf(":%d", serverConfig.ServerPort), serverConfig.SSLCertPath, serverConfig.SSLKeyPath)
+		logging.Infomf(logModMain, "HTTPS Server is listening on port %d", serverConfig.ServerHTTPSecurePort)
+		r.RunTLS(fmt.Sprintf(":%d", serverConfig.ServerHTTPSecurePort), serverConfig.SSLCertPath, serverConfig.SSLKeyPath)
 	} else {
-		r.Run(fmt.Sprintf(":%d", serverConfig.ServerPort))
+		logging.Infomf(logModMain, "HTTP Server is listening on port %d", serverConfig.ServerHTTPPort)
+		r.Run(fmt.Sprintf(":%d", serverConfig.ServerHTTPPort))
 	}
 	logging.Warnmln(logModMain, "Server existed unexpectedly -> please check server config")
 }
