@@ -168,7 +168,7 @@ db.createCollection("cloudmedia", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["media_type", "media_name", "rank_score", "student_pid"],
+            required: ["media_type", "media_name", "media_url", "rank_score", "student_pid", "create_ts", "content_length"],
             properties: {
                 media_type: {
                     bsonType: "string",
@@ -180,6 +180,11 @@ db.createCollection("cloudmedia", {
                     minLength: 1,
                     description: "required string (media blob name)"
                 },
+                media_url: {
+                    bsonType: "string",
+                    minLength: 1,
+                    description: "required string (media blob full url)"
+                },
                 rank_score: {
                     bsonType: "double",
                     description: "required double/float64"
@@ -187,6 +192,14 @@ db.createCollection("cloudmedia", {
                 student_pid: {
                     bsonType: "objectId",
                     description: "required ObjectId"
+                },
+                create_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                content_length: {
+                    bsonType: "long",
+                    description: "required int64"
                 }
             }
         }
@@ -336,23 +349,32 @@ db.cloudmedia.insertMany(
         {
             _id: ObjectId("102030405060708090000001"),
             media_type: "video",
-            media_name: "video_media",
+            media_name: "binary_tree.c",
+            media_url: "cloudstorageurl/binary_tree.c",
             rank_score: 12.31,
-            student_pid: ObjectId("102030405060708090000001")
+            student_pid: ObjectId("102030405060708090000001"),
+            create_ts: NumberLong(0),
+            content_length: NumberLong(0)
         },
         {
             _id: ObjectId("102030405060708090000002"),
             media_type: "image",
-            media_name: "image_media",
+            media_name: "bitfield.c",
+            media_url: "cloudstorageurl/bitfield.c",
             rank_score: 93.2,
-            student_pid: ObjectId("102030405060708090000002")
+            student_pid: ObjectId("102030405060708090000002"),
+            create_ts: NumberLong(0),
+            content_length: NumberLong(0)
         },
         {
             _id: ObjectId("102030405060708090000003"),
             media_type: "others",
-            media_name: "other_media",
+            media_name: "data_type.c",
+            media_url: "cloudstorageurl/data_type.c",
             rank_score: 38.2,
-            student_pid: ObjectId("102030405060708090000003")
+            student_pid: ObjectId("102030405060708090000003"),
+            create_ts: NumberLong(0),
+            content_length: NumberLong(0)
         }
     ]
 )

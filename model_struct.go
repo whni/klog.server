@@ -53,18 +53,27 @@ const (
 	CloudMediaTypeOthers = "others"
 )
 
+var cloudMediaTypeMap = map[string]bool{
+	CloudMediaTypeVideo:  true,
+	CloudMediaTypeImage:  true,
+	CloudMediaTypeOthers: true,
+}
+
 // CloudMedia struct
 type CloudMedia struct {
-	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	MediaType  string             `json:"media_type" bson:"media_type"`
-	MediaName  string             `json:"media_name" bson:"media_name"`
-	RankScore  float64            `json:"rank_score" bson:"rank_score"`
-	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	PID           primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	MediaType     string             `json:"media_type" bson:"media_type"`
+	MediaName     string             `json:"media_name" bson:"media_name"`
+	MediaURL      string             `json:"media_url" bson:"media_url"`
+	RankScore     float64            `json:"rank_score" bson:"rank_score"`
+	CreateTS      int64              `json:"create_ts" bson:"create_ts"`
+	ContentLength int64              `json:"content_length" bson:"content_length"`
+	StudentPID    primitive.ObjectID `json:"student_pid" bson:"student_pid"`
 }
 
 // AzureBlobProp struct
 type AzureBlobProp struct {
-	BlobURL       string
-	Timestamp     int64
+	BlobName      string
+	CreateTS      int64
 	ContentLength int64
 }

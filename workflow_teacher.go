@@ -1,13 +1,10 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func teacherLoginHandler(ctx *gin.Context) {
@@ -40,25 +37,4 @@ func teacherLoginHandler(ctx *gin.Context) {
 		response.Payload = teacherFound
 	}
 	return
-}
-
-// find teacher by teacherUID
-func findTeacherByUID(teacherUID string) (*Teacher, error) {
-	var err error
-	defer func() {
-		if err != nil {
-			logging.Errormf(logModTeacherHandler, err.Error())
-		}
-	}()
-
-	var teacher Teacher
-	findFilter := bson.D{{"teacher_uid", teacherUID}}
-	err = dbPool.Collection(DBCollectionTeacher).FindOne(context.TODO(), findFilter).Decode(&teacher)
-	if err != nil {
-		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-		return nil, err
-	}
-
-	logging.Debugmf(logModTeacherHandler, "Found teacher from DB (teacherUID=%s)", teacherUID)
-	return &teacher, nil
 }

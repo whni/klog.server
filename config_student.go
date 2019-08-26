@@ -189,6 +189,27 @@ func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 	return students, nil
 }
 
+// find student by binding code
+func findStudentByBindingCode(bindingCode string) (*Student, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModStudentHandler, err.Error())
+		}
+	}()
+
+	var student Student
+	findFilter := bson.D{{"binding_code", bindingCode}}
+	err = dbPool.Collection(DBCollectionStudent).FindOne(context.TODO(), findFilter).Decode(&student)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModTeacherHandler, "Found student from DB (studentPID=%s, bindingCode=%s)", student.PID.Hex(), bindingCode)
+	return &student, nil
+}
+
 // create student, return PID, error
 func createStudent(student *Student) (primitive.ObjectID, error) {
 	var err error
@@ -287,19 +308,28 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
-	var deleteFilter bson.D
-	if pid.IsZero() {
-		deleteFilter = bson.D{{}}
-	} else {
-		deleteFilter = bson.D{{"_id", pid}}
+	students, findErr := findStudent(pid)
+	if findErr != nil {
+		return 0, fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery])
 	}
 
-	deleteResult, err := dbPool.Collection(DBCollectionStudent).DeleteMany(context.TODO(), deleteFilter)
-	if err != nil {
-		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-		return 0, err
+	var deleteCnt int64
+	for i := range students {
+		_, deleteCloudMediaErr := deleteCloudMediaByStudentPID(students[i].PID)
+		if deleteCloudMediaErr != nil {
+			return int(deleteCnt), fmt.Errorf("[%s] - stop deleting student (PID %s) since cloud media could not be deleted: %s", deleteCloudMediaErr.Error())
+		}
+
+		deleteFilter := bson.D{{"_id", pid}}
+		deleteResult, err := dbPool.Collection(DBCollectionStudent).DeleteMany(context.TODO(), deleteFilter)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return 0, err
+		}
+
+		deleteCnt += deleteResult.DeletedCount
 	}
 
-	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", deleteResult.DeletedCount)
-	return int(deleteResult.DeletedCount), nil
+	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", deleteCnt)
+	return int(deleteCnt), nil
 }

@@ -15,14 +15,14 @@ import (
 
 var azMediaContainerURL *azblob.ContainerURL
 
-func azureErrorInfo(err error) string {
+func azureErrorCode(err error) (string, error) {
 	if err != nil {
 		if serr, ok := err.(azblob.StorageError); ok { // This error is an Azure Service-specific
-			return "[Azure Service Code]: " + string(serr.ServiceCode())
+			return string(serr.ServiceCode()), nil
 		}
-		return err.Error()
+		return err.Error(), fmt.Errorf("Not an azblob error -> return original error string")
 	}
-	return ""
+	return "", fmt.Errorf("Original error is nil")
 }
 
 func azureStorageInit(sc *ServerConfig) (*azblob.ContainerURL, error) {
@@ -52,7 +52,7 @@ func azureStorageInit(sc *ServerConfig) (*azblob.ContainerURL, error) {
 				return nil, containerCreateErr
 			}
 		} else {
-			return nil, fmt.Errorf("Failed to connect to azure container: %s", azureErrorInfo(containerPropErr))
+			return nil, containerPropErr
 		}
 	}
 
@@ -66,7 +66,7 @@ func azureStorageCreateContainer(azureContainerURL *azblob.ContainerURL) error {
 
 	// create azure storage container
 	if _, containerCreateErr := azureContainerURL.Create(context.TODO(), azblob.Metadata{}, azblob.PublicAccessBlob); containerCreateErr != nil {
-		return fmt.Errorf("Failed to create azure storage container: %s", azureErrorInfo(containerCreateErr))
+		return containerCreateErr
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ func azureStorageDeleteContainer(azureContainerURL *azblob.ContainerURL) error {
 
 	// delete azure storage container
 	if _, containerDeleteErr := azureContainerURL.Delete(context.TODO(), azblob.ContainerAccessConditions{}); containerDeleteErr != nil {
-		return fmt.Errorf("Failed to delete azure storage container: %s", azureErrorInfo(containerDeleteErr))
+		return containerDeleteErr
 	}
 	return nil
 }
@@ -95,7 +95,7 @@ func azureStorageListBlobs(azureContainerURL *azblob.ContainerURL, prefix string
 			Prefix: prefix,
 		})
 		if listBlobErr != nil {
-			return []*azblob.BlobItem{}, fmt.Errorf("Failed to list blobs in azure container: %s", azureErrorInfo(listBlobErr))
+			return []*azblob.BlobItem{}, listBlobErr
 		}
 
 		// append blobs to results
@@ -120,11 +120,11 @@ func azureStorageGetBlobProperties(azureContainerURL *azblob.ContainerURL, blobn
 	}
 
 	var azureBlobProp AzureBlobProp
-	azureBlobProp.BlobURL = fmt.Sprintf("%s/%s", azureContainerURL.String(), blobname)
-	azureBlobProp.Timestamp = 0
+	azureBlobProp.BlobName = blobname
+	azureBlobProp.CreateTS = 0
 	if createTimeString, ok := blobPropResp.Response().Header["Last-Modified"]; ok && len(createTimeString) > 0 {
 		if timestamp, timpErr := time.Parse(time.RFC1123, createTimeString[0]); timpErr == nil {
-			azureBlobProp.Timestamp = int64(timestamp.Unix())
+			azureBlobProp.CreateTS = int64(timestamp.Unix())
 		}
 	}
 	azureBlobProp.ContentLength = blobPropResp.Response().ContentLength
@@ -150,7 +150,7 @@ func azureStorageUploadBlob(azureContainerURL *azblob.ContainerURL, blobname str
 		BlockSize:   4 * 1024 * 1024,
 		Parallelism: 16})
 	if blobUploadErr != nil {
-		return fmt.Errorf("Failed to upload blob %s: %s", blobname, azureErrorInfo(blobUploadErr))
+		return blobUploadErr
 	}
 
 	return nil
@@ -165,7 +165,7 @@ func azureStorageDownloadBlob(azureContainerURL *azblob.ContainerURL, blobname s
 	blobURL := azureContainerURL.NewBlockBlobURL(blobname)
 	downloadResp, downloadErr := blobURL.Download(context.TODO(), 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false)
 	if downloadErr != nil {
-		return fmt.Errorf("Failed to download blob %s: %s", blobname, azureErrorInfo(downloadErr))
+		return downloadErr
 	}
 	bodyStream := downloadResp.Body(azblob.RetryReaderOptions{MaxRetryRequests: 5})
 	downloadedData := bytes.Buffer{}
@@ -192,7 +192,7 @@ func azureStorageDeleteBlob(azureContainerURL *azblob.ContainerURL, blobname str
 	blobURL := azureContainerURL.NewBlockBlobURL(blobname)
 	_, deleteErr := blobURL.Delete(context.TODO(), azblob.DeleteSnapshotsOptionInclude, azblob.BlobAccessConditions{})
 	if deleteErr != nil {
-		return fmt.Errorf("Failed to delete blob %s: %s", blobname, azureErrorInfo(deleteErr))
+		return deleteErr
 	}
 
 	return nil

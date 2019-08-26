@@ -189,6 +189,27 @@ func findTeacher(pid primitive.ObjectID) ([]*Teacher, error) {
 	return teachers, nil
 }
 
+// find teacher by teacherUID
+func findTeacherByUID(teacherUID string) (*Teacher, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModTeacherHandler, err.Error())
+		}
+	}()
+
+	var teacher Teacher
+	findFilter := bson.D{{"teacher_uid", teacherUID}}
+	err = dbPool.Collection(DBCollectionTeacher).FindOne(context.TODO(), findFilter).Decode(&teacher)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModTeacherHandler, "Found teacher from DB (teacherUID=%s)", teacherUID)
+	return &teacher, nil
+}
+
 // create teacher, return PID, error
 func createTeacher(teacher *Teacher) (primitive.ObjectID, error) {
 	var err error

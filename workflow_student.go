@@ -1,12 +1,10 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
-	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
 	"time"
 )
@@ -115,24 +113,4 @@ func studentBindingParentHandler(ctx *gin.Context) {
 
 	response.Payload = studentFound
 	return
-}
-
-func findStudentByBindingCode(bindingCode string) (*Student, error) {
-	var err error
-	defer func() {
-		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
-		}
-	}()
-
-	var student Student
-	findFilter := bson.D{{"binding_code", bindingCode}}
-	err = dbPool.Collection(DBCollectionStudent).FindOne(context.TODO(), findFilter).Decode(&student)
-	if err != nil {
-		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-		return nil, err
-	}
-
-	logging.Debugmf(logModTeacherHandler, "Found student from DB (studentPID=%s, bindingCode=%s)", student.PID.Hex(), bindingCode)
-	return &student, nil
 }
