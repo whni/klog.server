@@ -93,6 +93,14 @@ func studentBindingParentHandler(ctx *gin.Context) {
 		return
 	}
 
+	// avoid repeated binding
+	if studentFound.ParentWXID != "" {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Cannot binding parent wxID since parent (%s) has been already bound to student (%s)",
+			serverErrorMessages[seResourceConflict], studentFound.ParentName, studentFound.StudentName)
+		return
+	}
+
 	// check if binding code is expired
 	var curTS = int64(time.Now().Unix())
 	if curTS > studentFound.BindingExpire {
@@ -107,6 +115,64 @@ func studentBindingParentHandler(ctx *gin.Context) {
 	studentFound.ParentName = studentInfo.ParentName
 	studentFound.PhoneNumber = studentInfo.PhoneNumber
 	studentFound.Email = studentInfo.Email
+	studentFound.BindingCode = ""
+	studentFound.BindingExpire = 0
+	updateStudent(studentFound)
+
+	response.Payload = studentFound
+	return
+}
+
+func studentUnbindingParentHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
+
+	var studentInfo Student
+	var err error
+	if err = json.Unmarshal(params.Data, &studentInfo); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
+
+	// check student parent wxID and binding code
+	if studentInfo.ParentWXID == "" || studentInfo.PID.IsZero() {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Please specified valid parent wxID and student PID", serverErrorMessages[seInputJSONNotValid])
+		return
+	}
+
+	// find student by binding code
+	var students []*Student
+	students, err = findStudent(studentInfo.PID)
+	if err != nil || len(students) == 0 {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], studentInfo.PID.Hex())
+		return
+	}
+	studentFound := students[0]
+
+	// check parent wxid
+	if studentFound.ParentWXID == "" {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No need to unbind parent wxID since nothing is in record", serverErrorMessages[seResourceNotFound])
+		return
+	}
+
+	if studentFound.ParentWXID != studentInfo.ParentWXID {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Could not unbind parent wxID due to mismatched record (received %s recorded %s)", serverErrorMessages[seResourceNotMatched],
+			studentFound.ParentWXID, studentInfo.ParentWXID)
+		return
+	}
+
+	// update binding information
+	studentFound.ParentWXID = ""
 	studentFound.BindingCode = ""
 	studentFound.BindingExpire = 0
 	updateStudent(studentFound)

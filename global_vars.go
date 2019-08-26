@@ -10,6 +10,7 @@ const (
 	seResourceNotFound    = -iota
 	seResourceNotMatched  = -iota
 	seResourceDuplicated  = -iota
+	seResourceConflict    = -iota
 	seResourceExpired     = -iota
 	seResourceNotChange   = -iota
 	seDependencyIssue     = -iota
@@ -28,6 +29,7 @@ var serverErrorMessages = map[int]string{
 	seResourceNotFound:    "RESOURCE_NOT_FOUND",
 	seResourceNotMatched:  "RESOURCE_NOT_MATCHED",
 	seResourceDuplicated:  "RESOURCE_DUPLICATED",
+	seResourceConflict:    "RESOURCE_CONFLICT",
 	seResourceExpired:     "RESOURCE_EXPIRED",
 	seResourceNotChange:   "RESOURCE_NOT_CHANGED",
 	seDependencyIssue:     "DEPENDENCY_UNRESOLVED",

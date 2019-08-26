@@ -7,17 +7,14 @@ import os
 import json
         
 # url + method
-host = "127.0.0.1"
+host = "127.0.0.1:80"
 if len(sys.argv) > 1:
     host = sys.argv[1]
-api_url = "http://{}:8080/api/0/workflow/student/binding".format(host)
+api_url = "http://{}/api/0/workflow/student/unbind".format(host)
 method = HTTPMethod.POST
 params = {
-    "parent_wxid": "wxid-my-test",
-    "parent_name": "For Test",
-    "phone_number": "777-888-9999",
-    "email": "test@klog.com",
-    "binding_code": "blfe488fggckigkkbio0",
+    "pid": "102030405060708090000001",
+    "parent_wxid": "wxid-0123456789",
 }
 
 http_req = HTTPRequest(api_url, method, params)
