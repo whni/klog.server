@@ -1,5 +1,8 @@
 {
     "serverPort": 80,
+	"runHttps": true,
+    "sslCertPath": "/etc/letsencrypt/live/klogserver.westus2.cloudapp.azure.com/cert.pem",
+    "sslKeyPath": "/etc/letsencrypt/live/klogserver.westus2.cloudapp.azure.com/privkey.pem",
     "loggingReleaseMode": false,
     "loggingLevel": "trace",
     "loggingDestination": "stdout",

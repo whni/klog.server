@@ -107,7 +107,10 @@ func main() {
 	}
 
 	logging.Infomf(logModMain, "Server is listening and serving on 0.0.0.0:%d", serverConfig.ServerPort)
-	r.Run(fmt.Sprintf(":%d", serverConfig.ServerPort))
-	logging.Warnmln(logModMain, "Server existed unexpectedly :(")
-
+	if serverConfig.RunHTTPS {
+		r.RunTLS(fmt.Sprintf(":%d", serverConfig.ServerPort), serverConfig.SSLCertPath, serverConfig.SSLKeyPath)
+	} else {
+		r.Run(fmt.Sprintf(":%d", serverConfig.ServerPort))
+	}
+	logging.Warnmln(logModMain, "Server existed unexpectedly -> please check server config")
 }
