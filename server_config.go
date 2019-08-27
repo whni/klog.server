@@ -25,6 +25,7 @@ type ServerConfig struct {
 	AzureStorageAccount        string `json:"azureStorageAccount"`
 	AzureStorageAccessKey      string `json:"azureStorageAccessKey"`
 	AzureStorageContainer      string `json:"azureStorageContainer"`
+	ParentWXLoginURL           string `json:"parentWXLoginURL"`
 	StudentBindingCodeLifeTime int    `json:"studentBindingCodeLifeTime"` // hour
 }
 

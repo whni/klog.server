@@ -15,6 +15,8 @@ const (
 	seResourceNotChange   = -iota
 	seDependencyIssue     = -iota
 	seCloudOpsError       = -iota
+	seDataParseError      = -iota
+	seWeChatLoginError    = -iota
 	seUnresolvedError     = -iota
 	seAPINotSupport       = -iota
 )
@@ -34,6 +36,8 @@ var serverErrorMessages = map[int]string{
 	seResourceNotChange:   "RESOURCE_NOT_CHANGED",
 	seDependencyIssue:     "DEPENDENCY_UNRESOLVED",
 	seCloudOpsError:       "CLOUD_OPS_ERROR",
+	seDataParseError:      "DATA_PARSE_ERROR",
+	seWeChatLoginError:    "WECHAT_LOGIN_ERROR",
 	seUnresolvedError:     "UNRESOLVED_SERVER_ERROR",
 	seAPINotSupport:       "API_NOT_SUPPORTED",
 }
