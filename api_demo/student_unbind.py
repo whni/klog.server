@@ -7,10 +7,10 @@ import os
 import json
         
 # url + method
-host = "127.0.0.1:80"
+host = "http://127.0.0.1:80"
 if len(sys.argv) > 1:
     host = sys.argv[1]
-api_url = "http://{}/api/0/workflow/student/unbind".format(host)
+api_url = "{}/api/0/workflow/student/unbind".format(host)
 method = HTTPMethod.POST
 params = {
     "pid": "102030405060708090000001",

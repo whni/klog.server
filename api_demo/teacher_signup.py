@@ -8,10 +8,10 @@ import json
 import hashlib
         
 # url + method
-host = "127.0.0.1:80"
+host = "http://127.0.0.1:80"
 if len(sys.argv) > 1:
     host = sys.argv[1]
-api_url = "http://{}/api/0/config/teacher".format(host)
+api_url = "{}/api/0/config/teacher".format(host)
 method = HTTPMethod.POST
 params = {
     "teacher_uid": "uid-for-test",
