@@ -353,7 +353,7 @@ db.cloudmedia.insertMany(
             media_url: "cloudstorageurl/binary_tree.c",
             rank_score: 12.31,
             student_pid: ObjectId("102030405060708090000001"),
-            create_ts: NumberLong(0),
+            create_ts: NumberLong(1566945630),
             content_length: NumberLong(0)
         },
         {
@@ -363,7 +363,7 @@ db.cloudmedia.insertMany(
             media_url: "cloudstorageurl/bitfield.c",
             rank_score: 93.2,
             student_pid: ObjectId("102030405060708090000002"),
-            create_ts: NumberLong(0),
+            create_ts: NumberLong(1566945000),
             content_length: NumberLong(0)
         },
         {
@@ -373,7 +373,7 @@ db.cloudmedia.insertMany(
             media_url: "cloudstorageurl/data_type.c",
             rank_score: 38.2,
             student_pid: ObjectId("102030405060708090000003"),
-            create_ts: NumberLong(0),
+            create_ts: NumberLong(1566945900),
             content_length: NumberLong(0)
         }
     ]

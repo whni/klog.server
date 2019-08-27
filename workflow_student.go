@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -84,6 +85,15 @@ func studentBindingParentHandler(ctx *gin.Context) {
 		return
 	}
 
+	// avoid parent repeated binding
+	studentForWXID, err := findStudentByParentWXID(studentInfo.ParentWXID)
+	if err == nil && studentForWXID != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Cannot binding parent wxID since parent (%s) has been already bound to student (%s)",
+			serverErrorMessages[seResourceConflict], studentForWXID.ParentName, studentForWXID.StudentName)
+		return
+	}
+
 	// find student by binding code
 	var studentFound *Student
 	studentFound, err = findStudentByBindingCode(studentInfo.BindingCode)
@@ -93,7 +103,7 @@ func studentBindingParentHandler(ctx *gin.Context) {
 		return
 	}
 
-	// avoid repeated binding
+	// avoid student repeated binding
 	if studentFound.ParentWXID != "" {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - Cannot binding parent wxID since parent (%s) has been already bound to student (%s)",
@@ -147,7 +157,7 @@ func studentUnbindingParentHandler(ctx *gin.Context) {
 		return
 	}
 
-	// find student by binding code
+	// find student by PID
 	var students []*Student
 	students, err = findStudent(studentInfo.PID)
 	if err != nil || len(students) == 0 {
@@ -178,5 +188,54 @@ func studentUnbindingParentHandler(ctx *gin.Context) {
 	updateStudent(studentFound)
 
 	response.Payload = studentFound
+	return
+}
+
+func studentMediaQueryHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
+
+	var mediaReq StudentMediaQueryReq
+	var err error
+	if err = json.Unmarshal(params.Data, &mediaReq); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
+
+	// find student by PID
+	var students []*Student
+	students, err = findStudent(mediaReq.StudentPID)
+	if err != nil || len(students) == 0 {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], mediaReq.StudentPID.Hex())
+		return
+	}
+
+	cloudMediaSlice, err := findCloudMediaByStudentPID(mediaReq.StudentPID)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Error occurs when searching cloud media for student (PID %s): %s",
+			serverErrorMessages[seResourceNotFound], mediaReq.StudentPID.Hex(), err.Error())
+		return
+	}
+
+	cloudMediaRes := []*CloudMedia{}
+	for i := range cloudMediaSlice {
+		if cloudMediaSlice[i].CreateTS <= mediaReq.EndTS && cloudMediaSlice[i].CreateTS >= mediaReq.StartTS {
+			cloudMediaRes = append(cloudMediaRes, cloudMediaSlice[i])
+		}
+	}
+
+	sort.Slice(cloudMediaRes, func(i, j int) bool {
+		return cloudMediaRes[i].CreateTS < cloudMediaRes[j].CreateTS
+	})
+
+	response.Payload = cloudMediaRes
 	return
 }

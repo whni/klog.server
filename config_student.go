@@ -206,7 +206,28 @@ func findStudentByBindingCode(bindingCode string) (*Student, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModTeacherHandler, "Found student from DB (studentPID=%s, bindingCode=%s)", student.PID.Hex(), bindingCode)
+	logging.Debugmf(logModStudentHandler, "Found student from DB (studentPID=%s, bindingCode=%s)", student.PID.Hex(), bindingCode)
+	return &student, nil
+}
+
+// find student by parent wechat id
+func findStudentByParentWXID(parentWXID string) (*Student, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModStudentHandler, err.Error())
+		}
+	}()
+
+	var student Student
+	findFilter := bson.D{{"parent_wxid", parentWXID}}
+	err = dbPool.Collection(DBCollectionStudent).FindOne(context.TODO(), findFilter).Decode(&student)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModStudentHandler, "Found student from DB (studentPID=%s, parentWXID=%s)", student.PID.Hex(), parentWXID)
 	return &student, nil
 }
 

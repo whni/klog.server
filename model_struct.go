@@ -47,8 +47,15 @@ type Student struct {
 	TeacherPID      primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
-// Parent WeChat Login struct
-type ParentWXLoginInfo struct {
+// StudentMediaQueryReq struct
+type StudentMediaQueryReq struct {
+	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	StartTS    int64              `json:"start_ts" bson:"start_ts"`
+	EndTS      int64              `json:"end_ts" bson:"end_ts"`
+}
+
+// ParentWeChatLoginInfo struct
+type ParentWeChatLoginInfo struct {
 	AppID  string `json:"appid"`
 	Secret string `json:"secret"`
 	JSCode string `json:"js_code"`
