@@ -258,7 +258,7 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 		return primitive.NilObjectID, err
 	}
 	cloudMedia.MediaURL = azMediaContainerURL.String() + "/" + cloudMedia.MediaName
-	cloudMedia.CreateTS = azProp.CreateTS // FIXME: or we can use current timestamp
+	cloudMedia.CreateTS = azProp.CreateTS // NOTE: or we can use current timestamp
 	cloudMedia.ContentLength = azProp.ContentLength
 
 	// media type check

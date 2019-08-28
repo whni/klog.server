@@ -83,6 +83,7 @@ db.students.insertMany(
         {
             _id: ObjectId("102030405060708090000001"),
             student_name: "Thomas Hu",
+            student_image_name: "",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Ed Sheeran",
@@ -95,6 +96,7 @@ db.students.insertMany(
         {
             _id: ObjectId("102030405060708090000002"),
             student_name: "Bruce Wang",
+            student_image_name: "",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Madison Beer",
@@ -107,6 +109,7 @@ db.students.insertMany(
         {
             _id: ObjectId("102030405060708090000003"),
             student_name: "Tiffiny Shawn",
+            student_image_name: "",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Skylar Grey",
@@ -119,6 +122,7 @@ db.students.insertMany(
         {
             _id: ObjectId("102030405060708090000004"),
             student_name: "Gintama Y.",
+            student_image_name: "",
             student_image_url: "",
             parent_wxid: "wxid-0123456789",
             parent_name: "Autumn Mendes",
@@ -131,6 +135,7 @@ db.students.insertMany(
         {
             _id: ObjectId("1020304050607080900000FF"),
             student_name: "Baby Cute",
+            student_image_name: "student1.jpg",
             student_image_url: "https://klogresourcediag.blob.core.windows.net/klog-cloud-media/student1.jpg",
             parent_wxid: "orgQa44wYyOpdShmXAsHtSfjMjeQ",
             parent_name: "Bruce Wayne",

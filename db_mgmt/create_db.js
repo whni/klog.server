@@ -115,12 +115,16 @@ db.createCollection("students", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["student_name", "student_image_url", "parent_wxid", "parent_name", "phone_number", "email", "binding_code", "binding_expire", "teacher_pid"],
+            required: ["student_name", "student_image_name", "student_image_url", "parent_wxid", "parent_name", "phone_number", "email", "binding_code", "binding_expire", "teacher_pid"],
             properties: {
                 student_name: {
                     bsonType: "string",
                     minLength: 2,
                     description: "required string (>= 2 length)"
+                },
+                student_image_name: {
+                    bsonType: "string",
+                    description: "required string"
                 },
                 student_image_url: {
                     bsonType: "string",

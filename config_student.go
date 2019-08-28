@@ -251,6 +251,19 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 		return primitive.NilObjectID, err
 	}
 
+	// student image check
+	if student.StudentImageName != "" {
+		_, azPropErr := azureStorageGetBlobProperties(azMediaContainerURL, student.StudentImageName)
+		if azPropErr != nil {
+			err = fmt.Errorf("[%s] - No student image properties (URL: %s/%s) found at cloud (please check cloud connection and blob contents)",
+				serverErrorMessages[seResourceNotFound], azMediaContainerURL.String(), student.StudentImageName)
+			return primitive.NilObjectID, err
+		}
+		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
+	} else {
+		student.StudentImageURL = ""
+	}
+
 	insertResult, err := dbPool.Collection(DBCollectionStudent).InsertOne(context.TODO(), student)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -276,6 +289,12 @@ func updateStudent(student *Student) error {
 		err = fmt.Errorf("[%s] - student PID is empty", serverErrorMessages[seInputJSONNotValid])
 		return err
 	}
+	studentSlice, err := findStudent(student.PID)
+	if err != nil || len(studentSlice) == 0 {
+		err = fmt.Errorf("[%s] - Could not find student (PID %s)", serverErrorMessages[seResourceNotFound], student.PID.Hex())
+		return err
+	}
+	studentFound := studentSlice[0]
 
 	// teacher PID check
 	if student.TeacherPID.IsZero() {
@@ -288,6 +307,22 @@ func updateStudent(student *Student) error {
 		return err
 	}
 
+	// update student image
+	if student.StudentImageName != studentFound.StudentImageName {
+		_, azPropErr := azureStorageGetBlobProperties(azMediaContainerURL, student.StudentImageName)
+		if azPropErr != nil {
+			err = fmt.Errorf("[%s] - No student image properties (URL: %s/%s) found at cloud (please check cloud connection and blob contents)",
+				serverErrorMessages[seResourceNotFound], azMediaContainerURL.String(), student.StudentImageName)
+			return err
+		}
+		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
+		// delete old student image
+		if studentFound.StudentImageName != "" {
+			azureStorageDeleteBlob(azMediaContainerURL, studentFound.StudentImageName)
+		}
+	}
+
+	// update student
 	var updateFilter = bson.D{{"_id", student.PID}}
 	var updateBSONDocument = bson.D{}
 	studentBSONData, err := bson.Marshal(student)
@@ -331,14 +366,22 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 
 	students, findErr := findStudent(pid)
 	if findErr != nil {
-		return 0, fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery])
+		return 0, fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
 	}
 
 	var deleteCnt int64
 	for i := range students {
 		_, deleteCloudMediaErr := deleteCloudMediaByStudentPID(students[i].PID)
 		if deleteCloudMediaErr != nil {
-			return int(deleteCnt), fmt.Errorf("[%s] - stop deleting student (PID %s) since cloud media could not be deleted: %s", deleteCloudMediaErr.Error())
+			return int(deleteCnt), fmt.Errorf("[%s] - stop deleting student (PID %s) since cloud media could not be deleted: %s",
+				serverErrorMessages[seCloudOpsError], pid.Hex(), deleteCloudMediaErr.Error())
+		}
+
+		if students[i].StudentImageName != "" {
+			if deleteStudentImageErr := azureStorageDeleteBlob(azMediaContainerURL, students[i].StudentImageName); deleteStudentImageErr != nil {
+				return int(deleteCnt), fmt.Errorf("[%s] - stop deleting student (PID %s) since student image could not be deleted: %s",
+					serverErrorMessages[seCloudOpsError], pid.Hex(), deleteStudentImageErr.Error())
+			}
 		}
 
 		deleteFilter := bson.D{{"_id", pid}}

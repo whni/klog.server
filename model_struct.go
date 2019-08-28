@@ -35,16 +35,17 @@ type Teacher struct {
 
 // Student struct
 type Student struct {
-	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	StudentName     string             `json:"student_name" bson:"student_name"`
-	StudentImageURL string             `json:"student_image_url" bson:"student_image_url"`
-	ParentWXID      string             `json:"parent_wxid" bson:"parent_wxid"`
-	ParentName      string             `json:"parent_name" bson:"parent_name"`
-	PhoneNumber     string             `json:"phone_number" bson:"phone_number"`
-	Email           string             `json:"email" bson:"email"`
-	BindingCode     string             `json:"binding_code" bson:"binding_code"`
-	BindingExpire   int64              `json:"binding_expire" bson:"binding_expire"`
-	TeacherPID      primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
+	PID              primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentName      string             `json:"student_name" bson:"student_name"`
+	StudentImageName string             `json:"student_image_name" bson:"student_image_name"`
+	StudentImageURL  string             `json:"student_image_url" bson:"student_image_url"`
+	ParentWXID       string             `json:"parent_wxid" bson:"parent_wxid"`
+	ParentName       string             `json:"parent_name" bson:"parent_name"`
+	PhoneNumber      string             `json:"phone_number" bson:"phone_number"`
+	Email            string             `json:"email" bson:"email"`
+	BindingCode      string             `json:"binding_code" bson:"binding_code"`
+	BindingExpire    int64              `json:"binding_expire" bson:"binding_expire"`
+	TeacherPID       primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
 // StudentMediaQueryReq struct

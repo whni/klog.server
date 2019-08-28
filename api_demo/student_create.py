@@ -18,7 +18,8 @@ student_params = [
     {
         "pid": "102030405060708090000001",
         "student_name": "Thomas Hu",
-        "student_image_url": "https://klogresourcediag.blob.core.windows.net/klog-cloud-media/student1.jpg",
+        "student_image_name": "student1.jpg",
+        "student_image_url": "",
         "parent_wxid": "",
         "parent_name": "",
         "phone_number": "",
@@ -30,7 +31,8 @@ student_params = [
     {
         "pid": "102030405060708090000002",
         "student_name": "Bruce Wang",
-        "student_image_url": "https://klogresourcediag.blob.core.windows.net/klog-cloud-media/student2.jpg",
+        "student_image_name": "student2.jpg",
+        "student_image_url": "",
         "parent_wxid": "wxid-test2",
         "parent_name": "Madison Beer",
         "phone_number": "777-888-9999",
@@ -42,6 +44,7 @@ student_params = [
     {
         "pid": "102030405060708090000003",
         "student_name": "Tiffiny Shawn",
+        "student_image_name": "",
         "student_image_url": "",
         "parent_wxid": "wxid-test3",
         "parent_name": "Skylar Grey",
@@ -54,6 +57,7 @@ student_params = [
     {
         "pid": "102030405060708090000004",
         "student_name": "Gintama Y.",
+        "student_image_name": "",
         "student_image_url": "",
         "parent_wxid": "wxid-test4",
         "parent_name": "Autumn Mendes",
