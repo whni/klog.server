@@ -21,10 +21,10 @@ for media_name in media_names:
         "media_name": media_name,
         "media_url": "https://klogresourcediag.blob.core.windows.net/klog-cloud-media/{}".format(media_name),
         "rank_score": random.uniform(50, 100),
-        "student_pid": "1020304050607080900000ff"
+        "student_pid": "102030405060708090000001"
     }
 
-    print("[cloudmedia for {}]".format(media_name))
+    print("[create cloudmedia for {}]".format(media_name))
     http_req = HTTPRequest(api_url, method, params)
     http_req.send()
     http_req.print_resp()

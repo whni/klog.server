@@ -15,7 +15,7 @@ if len(sys.argv) > 1:
 api_url = "{}/api/0/workflow/student/generatecode".format(host)
 method = HTTPMethod.POST
 params = {
-    "pid": "102030405060708090000001",
+    "pid": "102030405060708090000001",          # student pid
     "teacher_pid": "102030405060708090000001"
 }
 
@@ -28,10 +28,10 @@ binding_code = http_req.resp.json()["payload"]["binding_code"]
 api_url = "{}/api/0/workflow/student/bind".format(host)
 method = HTTPMethod.POST
 params = {
-    "parent_wxid": "wxid-my-test",
-    "parent_name": "Parent Test",
+    "parent_wxid": "orgQa44wYyOpdShmXAsHtSfjMjeQ",
+    "parent_name": "Bruce Wayne",
     "phone_number": "777-888-9999",
-    "email": "test@klog.com",
+    "email": "bruce@klog.com",
     "binding_code": binding_code
 }
 

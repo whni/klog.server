@@ -5,6 +5,7 @@ from http_request import HTTPMethod
 import sys
 import os
 import json
+import time
         
 # url + method
 host = "http://127.0.0.1:80"
@@ -17,7 +18,7 @@ method = HTTPMethod.POST
 params = {
     "parent_wxid": "orgQa44wYyOpdShmXAsHtSfjMjeQ",
 }
-
+print("[find student for parent]")
 http_req = HTTPRequest(api_url, method, params)
 http_req.send()
 http_req.print_resp()
@@ -30,9 +31,10 @@ method = HTTPMethod.POST
 params = {
     "student_pid": student["pid"],
     "start_ts": 0,
-    "end_ts": 1566945630,
+    "end_ts": int(time.time()),
 }
 
+print("[find cloud media for student]")
 http_req = HTTPRequest(api_url, method, params)
 http_req.send()
 http_req.print_resp()

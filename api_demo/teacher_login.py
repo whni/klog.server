@@ -5,6 +5,7 @@ from http_request import HTTPMethod
 import sys
 import os
 import json
+import hashlib
         
 # url + method
 host = "http://127.0.0.1:80"
@@ -14,7 +15,7 @@ api_url = "{}/api/0/workflow/teacher/login".format(host)
 method = HTTPMethod.POST
 params = {
     "teacher_uid": "uid-usa-1001",
-    "teacher_key": "no_key"
+    "teacher_key": hashlib.sha256("test_password".encode()).hexdigest(),
 }
 
 http_req = HTTPRequest(api_url, method, params)
