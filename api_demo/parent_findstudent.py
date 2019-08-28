@@ -15,7 +15,7 @@ if len(sys.argv) > 1:
 api_url = "{}/api/0/workflow/parent/findstudent".format(host)
 method = HTTPMethod.POST
 params = {
-    "parent_wxid": "wxid-0123456789",
+    "parent_wxid": "orgQa44wYyOpdShmXAsHtSfjMjeQ",
 }
 
 http_req = HTTPRequest(api_url, method, params)

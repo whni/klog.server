@@ -340,41 +340,18 @@ db.students.insertMany(
             binding_code: "",
             binding_expire: NumberLong(0),
             teacher_pid: ObjectId("102030405060708090000004")
+        },
+        {
+            _id: ObjectId("1020304050607080900000FF"),
+            student_name: "Baby Cute",
+            student_image_url: "https://klogresourcediag.blob.core.windows.net/klog-cloud-media/student1.jpg",
+            parent_wxid: "orgQa44wYyOpdShmXAsHtSfjMjeQ",
+            parent_name: "Bruce Wayne",
+            phone_number: "619-763-4183",
+            email: "brucexxx@klog.com",
+            binding_code: "",
+            binding_expire: NumberLong(0),
+            teacher_pid: ObjectId("102030405060708090000004")
         }
     ]
 );
-
-db.cloudmedia.insertMany(
-    [
-        {
-            _id: ObjectId("102030405060708090000001"),
-            media_type: "video",
-            media_name: "binary_tree.c",
-            media_url: "cloudstorageurl/binary_tree.c",
-            rank_score: 12.31,
-            student_pid: ObjectId("102030405060708090000001"),
-            create_ts: NumberLong(1566945630),
-            content_length: NumberLong(0)
-        },
-        {
-            _id: ObjectId("102030405060708090000002"),
-            media_type: "image",
-            media_name: "bitfield.c",
-            media_url: "cloudstorageurl/bitfield.c",
-            rank_score: 93.2,
-            student_pid: ObjectId("102030405060708090000002"),
-            create_ts: NumberLong(1566945000),
-            content_length: NumberLong(0)
-        },
-        {
-            _id: ObjectId("102030405060708090000003"),
-            media_type: "others",
-            media_name: "data_type.c",
-            media_url: "cloudstorageurl/data_type.c",
-            rank_score: 38.2,
-            student_pid: ObjectId("102030405060708090000003"),
-            create_ts: NumberLong(1566945900),
-            content_length: NumberLong(0)
-        }
-    ]
-)
