@@ -18,7 +18,7 @@ student_params = [
     {
         "pid": "102030405060708090000001",
         "student_name": "Thomas Hu",
-        "student_image_name": "student1.jpg",
+        "student_image_name": "",
         "student_image_url": "",
         "parent_wxid": "",
         "parent_name": "",
@@ -31,7 +31,7 @@ student_params = [
     {
         "pid": "102030405060708090000002",
         "student_name": "Bruce Wang",
-        "student_image_name": "student2.jpg",
+        "student_image_name": "",
         "student_image_url": "",
         "parent_wxid": "wxid-test2",
         "parent_name": "Madison Beer",

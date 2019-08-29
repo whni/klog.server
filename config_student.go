@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gin-gonic/gin"
 	"net/http"
 
@@ -17,6 +18,13 @@ var studentConfigHandlerTable = map[string]gin.HandlerFunc{
 	"post":   studentPostHandler,
 	"put":    studentPutHandler,
 	"delete": studentDeleteHandler,
+}
+
+func studentGetImageName(student *Student) string {
+	if student == nil {
+		return ""
+	}
+	return "image-student-" + student.PID.Hex() + ".jpg"
 }
 
 func studentGetHandler(ctx *gin.Context) {
@@ -251,14 +259,9 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 		return primitive.NilObjectID, err
 	}
 
-	// student image check
+	// student image name/url
+	student.StudentImageName = studentGetImageName(student)
 	if student.StudentImageName != "" {
-		_, azPropErr := azureStorageGetBlobProperties(azMediaContainerURL, student.StudentImageName)
-		if azPropErr != nil {
-			err = fmt.Errorf("[%s] - No student image properties (URL: %s/%s) found at cloud (please check cloud connection and blob contents)",
-				serverErrorMessages[seResourceNotFound], azMediaContainerURL.String(), student.StudentImageName)
-			return primitive.NilObjectID, err
-		}
 		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 	} else {
 		student.StudentImageURL = ""
@@ -289,12 +292,6 @@ func updateStudent(student *Student) error {
 		err = fmt.Errorf("[%s] - student PID is empty", serverErrorMessages[seInputJSONNotValid])
 		return err
 	}
-	studentSlice, err := findStudent(student.PID)
-	if err != nil || len(studentSlice) == 0 {
-		err = fmt.Errorf("[%s] - Could not find student (PID %s)", serverErrorMessages[seResourceNotFound], student.PID.Hex())
-		return err
-	}
-	studentFound := studentSlice[0]
 
 	// teacher PID check
 	if student.TeacherPID.IsZero() {
@@ -307,19 +304,12 @@ func updateStudent(student *Student) error {
 		return err
 	}
 
-	// update student image
-	if student.StudentImageName != studentFound.StudentImageName {
-		_, azPropErr := azureStorageGetBlobProperties(azMediaContainerURL, student.StudentImageName)
-		if azPropErr != nil {
-			err = fmt.Errorf("[%s] - No student image properties (URL: %s/%s) found at cloud (please check cloud connection and blob contents)",
-				serverErrorMessages[seResourceNotFound], azMediaContainerURL.String(), student.StudentImageName)
-			return err
-		}
+	// student image name/url
+	student.StudentImageName = studentGetImageName(student)
+	if student.StudentImageName != "" {
 		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
-		// delete old student image
-		if studentFound.StudentImageName != "" {
-			azureStorageDeleteBlob(azMediaContainerURL, studentFound.StudentImageName)
-		}
+	} else {
+		student.StudentImageURL = ""
 	}
 
 	// update student
@@ -366,21 +356,26 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 
 	students, findErr := findStudent(pid)
 	if findErr != nil {
-		return 0, fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
+		err = fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
+		return 0, err
 	}
 
 	var deleteCnt int64
 	for i := range students {
 		_, deleteCloudMediaErr := deleteCloudMediaByStudentPID(students[i].PID)
 		if deleteCloudMediaErr != nil {
-			return int(deleteCnt), fmt.Errorf("[%s] - stop deleting student (PID %s) since cloud media could not be deleted: %s",
+			err = fmt.Errorf("[%s] - stop deleting student (PID %s) since cloud media could not be deleted: %s",
 				serverErrorMessages[seCloudOpsError], pid.Hex(), deleteCloudMediaErr.Error())
+			return int(deleteCnt), err
 		}
 
 		if students[i].StudentImageName != "" {
 			if deleteStudentImageErr := azureStorageDeleteBlob(azMediaContainerURL, students[i].StudentImageName); deleteStudentImageErr != nil {
-				return int(deleteCnt), fmt.Errorf("[%s] - stop deleting student (PID %s) since student image could not be deleted: %s",
-					serverErrorMessages[seCloudOpsError], pid.Hex(), deleteStudentImageErr.Error())
+				if serr, ok := deleteStudentImageErr.(azblob.StorageError); !ok || serr.ServiceCode() != azblob.ServiceCodeBlobNotFound {
+					err = fmt.Errorf("[%s] - could not delete student image at cloud (PID: %s image name:%s image url:%s) due to error: [%s]",
+						serverErrorMessages[seCloudOpsError], students[i].PID.Hex(), students[i].StudentImageName, students[i].StudentImageURL, deleteStudentImageErr.Error())
+					return int(deleteCnt), err
+				}
 			}
 		}
 
