@@ -10,6 +10,13 @@ class HTTPMethod(Enum):
     PUT = 3
     DELETE = 4
 
+HTTPMethodStringMap = {
+    HTTPMethod.GET: "GET",
+    HTTPMethod.POST: "POST",
+    HTTPMethod.PUT: "PUT",
+    HTTPMethod.DELETE: "DELETE",
+}
+
 HTTPMethodMap = {
     HTTPMethod.GET: requests.get,
     HTTPMethod.POST: requests.post,
@@ -28,6 +35,7 @@ class HTTPRequest:
         req_handler = HTTPMethodMap[self.method]
         self.resp = None
         print("Send <Request>")
+        print("HTTP Method:", HTTPMethodStringMap[self.method])
         if self.method == HTTPMethod.GET or self.method == HTTPMethod.DELETE:
             self.resp = req_handler(url=self.api_url, params=self.params, timeout=3)
             api_url_full = self.api_url
