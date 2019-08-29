@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *.code-workspace
+.vscode
 klog.server
 
 # python

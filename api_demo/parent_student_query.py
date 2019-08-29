@@ -6,12 +6,11 @@ import sys
 import os
 import json
 import time
+from host_url import host_url_maker
         
-# url + method
-host = "http://127.0.0.1:80"
-if len(sys.argv) > 1:
-    host = sys.argv[1]
-
+# get host url
+host = host_url_maker(sys.argv)
+        
 # get student info
 api_url = "{}/api/0/workflow/parent/findstudent".format(host)
 method = HTTPMethod.POST

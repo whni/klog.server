@@ -177,12 +177,15 @@ func studentUnbindingParentHandler(ctx *gin.Context) {
 	if studentFound.ParentWXID != studentInfo.ParentWXID {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - Could not unbind parent wxID due to mismatched record (received %s recorded %s)", serverErrorMessages[seResourceNotMatched],
-			studentFound.ParentWXID, studentInfo.ParentWXID)
+			studentInfo.ParentWXID, studentFound.ParentWXID)
 		return
 	}
 
 	// update binding information
 	studentFound.ParentWXID = ""
+	studentFound.ParentName = ""
+	studentFound.Email = ""
+	studentFound.PhoneNumber = ""
 	studentFound.BindingCode = ""
 	studentFound.BindingExpire = 0
 	updateStudent(studentFound)

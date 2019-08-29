@@ -6,14 +6,14 @@ import sys
 import os
 import json
 import hashlib
+from host_url import host_url_maker
         
+# get host url
+host = host_url_maker(sys.argv)
+
 # url + method
-host = "http://127.0.0.1:80"
-if len(sys.argv) > 1:
-    host = sys.argv[1]
 api_url = "{}/api/0/config/student".format(host)
 method = HTTPMethod.POST
-
 student_params = [
     {
         "pid": "102030405060708090000001",

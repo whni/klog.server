@@ -27,9 +27,19 @@ class HTTPRequest:
     def send(self):
         req_handler = HTTPMethodMap[self.method]
         self.resp = None
+        print("Send <Request>")
         if self.method == HTTPMethod.GET or self.method == HTTPMethod.DELETE:
             self.resp = req_handler(url=self.api_url, params=self.params, timeout=3)
+            api_url_full = self.api_url
+            delimiter = "?"
+            for key, val in self.params.items():
+                api_url_full += delimiter + key + "=" + str(val)
+                delimiter = "&"
+            print("URL:", api_url_full)
         elif self.method == HTTPMethod.POST or self.method == HTTPMethod.PUT:
+            print("URL:", self.api_url)
+            print("Params:")
+            print(json.dumps(self.params, indent=4, ensure_ascii=False))
             self.resp = req_handler(url=self.api_url, json=self.params, timeout=3)
         else:
             print("Unsupported HTTP method: {}".format(self.method))

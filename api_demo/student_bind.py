@@ -5,11 +5,10 @@ from http_request import HTTPMethod
 import sys
 import os
 import json
+from host_url import host_url_maker
         
-# url + method
-host = "http://127.0.0.1:80"
-if len(sys.argv) > 1:
-    host = sys.argv[1]
+# get host url
+host = host_url_maker(sys.argv)
 
 # generate code
 api_url = "{}/api/0/workflow/student/generatecode".format(host)
