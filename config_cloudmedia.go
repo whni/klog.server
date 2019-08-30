@@ -187,7 +187,7 @@ func findCloudMedia(pid primitive.ObjectID) ([]*CloudMedia, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Found %d cloud media results from DB (PID=%v)", len(cloudMediaSlice), pid)
+	logging.Debugmf(logModCloudMediaHandler, "Found %d cloud media results from DB (PID=%v)", len(cloudMediaSlice), pid.Hex())
 	return cloudMediaSlice, nil
 }
 
@@ -226,7 +226,7 @@ func findCloudMediaByStudentPID(studentPID primitive.ObjectID) ([]*CloudMedia, e
 		return nil, err
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Found %d cloud media results from DB (studentPID=%v)", len(cloudMediaSlice), studentPID)
+	logging.Debugmf(logModCloudMediaHandler, "Found %d cloud media results from DB (studentPID=%v)", len(cloudMediaSlice), studentPID.Hex())
 	return cloudMediaSlice, nil
 }
 

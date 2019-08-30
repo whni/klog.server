@@ -185,7 +185,7 @@ func findTeacher(pid primitive.ObjectID) ([]*Teacher, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModTeacherHandler, "Found %d teacher results from DB (PID=%v)", len(teachers), pid)
+	logging.Debugmf(logModTeacherHandler, "Found %d teacher results from DB (PID=%v)", len(teachers), pid.Hex())
 	return teachers, nil
 }
 

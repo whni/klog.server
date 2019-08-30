@@ -193,7 +193,7 @@ func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%v)", len(students), pid)
+	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%v)", len(students), pid.Hex())
 	return students, nil
 }
 
@@ -260,10 +260,12 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 	}
 
 	// student image name/url
-	student.StudentImageName = studentGetImageName(student)
-	if student.StudentImageName != "" {
+	studentImageName := studentGetImageName(student)
+	if _, imagePropErr := azureStorageGetBlobProperties(azMediaContainerURL, studentImageName); imagePropErr == nil {
+		student.StudentImageName = studentImageName
 		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 	} else {
+		student.StudentImageName = ""
 		student.StudentImageURL = ""
 	}
 
@@ -305,10 +307,12 @@ func updateStudent(student *Student) error {
 	}
 
 	// student image name/url
-	student.StudentImageName = studentGetImageName(student)
-	if student.StudentImageName != "" {
+	studentImageName := studentGetImageName(student)
+	if _, imagePropErr := azureStorageGetBlobProperties(azMediaContainerURL, studentImageName); imagePropErr == nil {
+		student.StudentImageName = studentImageName
 		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 	} else {
+		student.StudentImageName = ""
 		student.StudentImageURL = ""
 	}
 

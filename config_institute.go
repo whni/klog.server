@@ -185,7 +185,7 @@ func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%v)", len(institutes), pid)
+	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%v)", len(institutes), pid.Hex())
 	return institutes, nil
 }
 
