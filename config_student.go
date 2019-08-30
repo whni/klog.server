@@ -157,7 +157,7 @@ func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModStudentMgmt, err.Error())
 		}
 	}()
 
@@ -193,7 +193,7 @@ func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Found %d student results from DB (PID=%v)", len(students), pid.Hex())
+	logging.Debugmf(logModStudentMgmt, "Found %d student results from DB (PID=%v)", len(students), pid.Hex())
 	return students, nil
 }
 
@@ -202,7 +202,7 @@ func findStudentByBindingCode(bindingCode string) (*Student, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModStudentMgmt, err.Error())
 		}
 	}()
 
@@ -214,7 +214,7 @@ func findStudentByBindingCode(bindingCode string) (*Student, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Found student from DB (studentPID=%s, bindingCode=%s)", student.PID.Hex(), bindingCode)
+	logging.Debugmf(logModStudentMgmt, "Found student from DB (studentPID=%s, bindingCode=%s)", student.PID.Hex(), bindingCode)
 	return &student, nil
 }
 
@@ -223,7 +223,7 @@ func findStudentByParentWXID(parentWXID string) (*Student, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModStudentMgmt, err.Error())
 		}
 	}()
 
@@ -235,7 +235,7 @@ func findStudentByParentWXID(parentWXID string) (*Student, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Found student from DB (studentPID=%s, parentWXID=%s)", student.PID.Hex(), parentWXID)
+	logging.Debugmf(logModStudentMgmt, "Found student from DB (studentPID=%s, parentWXID=%s)", student.PID.Hex(), parentWXID)
 	return &student, nil
 }
 
@@ -244,7 +244,7 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModStudentMgmt, err.Error())
 		}
 	}()
 
@@ -276,7 +276,7 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModStudentHandler, "Created student in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	logging.Debugmf(logModStudentMgmt, "Created student in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 	return lastInsertID, nil
 }
 
@@ -285,7 +285,7 @@ func updateStudent(student *Student) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModStudentMgmt, err.Error())
 		}
 	}()
 
@@ -337,7 +337,7 @@ func updateStudent(student *Student) error {
 		return err
 	}
 
-	logging.Debugmf(logModStudentHandler, "Update student (PID %s): matched %d modified %d",
+	logging.Debugmf(logModStudentMgmt, "Update student (PID %s): matched %d modified %d",
 		student.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
 		err = fmt.Errorf("[%s] - could not find student (PID %s)", serverErrorMessages[seResourceNotFound], student.PID.Hex())
@@ -354,7 +354,7 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModStudentHandler, err.Error())
+			logging.Errormf(logModStudentMgmt, err.Error())
 		}
 	}()
 
@@ -393,6 +393,6 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 		deleteCnt += deleteResult.DeletedCount
 	}
 
-	logging.Debugmf(logModStudentHandler, "Deleted %d student results from DB", deleteCnt)
+	logging.Debugmf(logModStudentMgmt, "Deleted %d student results from DB", deleteCnt)
 	return int(deleteCnt), nil
 }

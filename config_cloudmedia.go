@@ -151,7 +151,7 @@ func findCloudMedia(pid primitive.ObjectID) ([]*CloudMedia, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModCloudMediaHandler, err.Error())
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
 		}
 	}()
 
@@ -187,7 +187,7 @@ func findCloudMedia(pid primitive.ObjectID) ([]*CloudMedia, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Found %d cloud media results from DB (PID=%v)", len(cloudMediaSlice), pid.Hex())
+	logging.Debugmf(logModCloudMediaMgmt, "Found %d cloud media results from DB (PID=%v)", len(cloudMediaSlice), pid.Hex())
 	return cloudMediaSlice, nil
 }
 
@@ -196,7 +196,7 @@ func findCloudMediaByStudentPID(studentPID primitive.ObjectID) ([]*CloudMedia, e
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModCloudMediaHandler, err.Error())
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
 		}
 	}()
 
@@ -226,7 +226,7 @@ func findCloudMediaByStudentPID(studentPID primitive.ObjectID) ([]*CloudMedia, e
 		return nil, err
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Found %d cloud media results from DB (studentPID=%v)", len(cloudMediaSlice), studentPID.Hex())
+	logging.Debugmf(logModCloudMediaMgmt, "Found %d cloud media results from DB (studentPID=%v)", len(cloudMediaSlice), studentPID.Hex())
 	return cloudMediaSlice, nil
 }
 
@@ -235,7 +235,7 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModCloudMediaHandler, err.Error())
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
 		}
 	}()
 
@@ -274,7 +274,7 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModCloudMediaHandler, "Created cloud media in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	logging.Debugmf(logModCloudMediaMgmt, "Created cloud media in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 	return lastInsertID, nil
 }
 
@@ -283,7 +283,7 @@ func updateCloudMedia(cloudMedia *CloudMedia) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModCloudMediaHandler, err.Error())
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
 		}
 	}()
 
@@ -334,7 +334,7 @@ func updateCloudMedia(cloudMedia *CloudMedia) error {
 		return err
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Update cloud media (PID %s): matched %d modified %d",
+	logging.Debugmf(logModCloudMediaMgmt, "Update cloud media (PID %s): matched %d modified %d",
 		cloudMediaFound.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
 		err = fmt.Errorf("[%s] - could not find cloud media (PID %s)", serverErrorMessages[seResourceNotFound], cloudMediaFound.PID.Hex())
@@ -351,7 +351,7 @@ func deleteCloudMedia(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModCloudMediaHandler, err.Error())
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
 		}
 	}()
 
@@ -385,7 +385,7 @@ func deleteCloudMedia(pid primitive.ObjectID) (int, error) {
 		deleteCount += deleteResult.DeletedCount
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Deleted %d cloud media results from DB (cloud media PID %s)", deleteCount, pid.Hex())
+	logging.Debugmf(logModCloudMediaMgmt, "Deleted %d cloud media results from DB (cloud media PID %s)", deleteCount, pid.Hex())
 	return int(deleteCount), nil
 }
 
@@ -394,7 +394,7 @@ func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModCloudMediaHandler, err.Error())
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
 		}
 	}()
 
@@ -428,6 +428,6 @@ func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID) (int, error) {
 		deleteCount += deleteResult.DeletedCount
 	}
 
-	logging.Debugmf(logModCloudMediaHandler, "Deleted %d cloud media results from DB (studentPID %s)", deleteCount, studentPID.Hex())
+	logging.Debugmf(logModCloudMediaMgmt, "Deleted %d cloud media results from DB (studentPID %s)", deleteCount, studentPID.Hex())
 	return int(deleteCount), nil
 }

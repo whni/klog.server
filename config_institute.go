@@ -149,7 +149,7 @@ func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModInstituteMgmt, err.Error())
 		}
 	}()
 
@@ -185,7 +185,7 @@ func findInstitute(pid primitive.ObjectID) ([]*Institute, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Found %d institute results from DB (PID=%v)", len(institutes), pid.Hex())
+	logging.Debugmf(logModInstituteMgmt, "Found %d institute results from DB (PID=%v)", len(institutes), pid.Hex())
 	return institutes, nil
 }
 
@@ -194,7 +194,7 @@ func createInstitute(institute *Institute) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModInstituteMgmt, err.Error())
 		}
 	}()
 
@@ -205,7 +205,7 @@ func createInstitute(institute *Institute) (primitive.ObjectID, error) {
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModInstituteHandler, "Created institute in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	logging.Debugmf(logModInstituteMgmt, "Created institute in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 	return lastInsertID, nil
 }
 
@@ -214,7 +214,7 @@ func updateInstitute(institute *Institute) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModInstituteMgmt, err.Error())
 		}
 	}()
 
@@ -244,7 +244,7 @@ func updateInstitute(institute *Institute) error {
 		return err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Update institute (PID %s): matched %d modified %d",
+	logging.Debugmf(logModInstituteMgmt, "Update institute (PID %s): matched %d modified %d",
 		institute.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
 		err = fmt.Errorf("[%s] - could not find institute (PID %s)", serverErrorMessages[seResourceNotFound], institute.PID.Hex())
@@ -261,7 +261,7 @@ func deleteInstitute(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModInstituteHandler, err.Error())
+			logging.Errormf(logModInstituteMgmt, err.Error())
 		}
 	}()
 
@@ -289,6 +289,6 @@ func deleteInstitute(pid primitive.ObjectID) (int, error) {
 		return 0, err
 	}
 
-	logging.Debugmf(logModInstituteHandler, "Deleted %d institute results from DB", deleteResult.DeletedCount)
+	logging.Debugmf(logModInstituteMgmt, "Deleted %d institute results from DB", deleteResult.DeletedCount)
 	return int(deleteResult.DeletedCount), nil
 }

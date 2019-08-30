@@ -43,23 +43,23 @@ var ljGinLogger = &lumberjack.Logger{
 }
 
 const (
-	logModMain              = "MainModule"
-	logModGinContext        = "GinContext"
-	logModDBControl         = "DBControl"
-	logModInstituteHandler  = "InstituteHandler"
-	logModTeacherHandler    = "TeacherHandler"
-	logModStudentHandler    = "StudentHandler"
-	logModCloudMediaHandler = "CloudMediaHandler"
+	logModMain           = "MAIN_MODDULE"
+	logModGinContext     = "GIN_CONTEXT"
+	logModDBControl      = "DB_CONTROL"
+	logModInstituteMgmt  = "INSTITUTE_MGMT"
+	logModTeacherMgmt    = "TEACHER_MGMT"
+	logModStudentMgmt    = "STUDENT_MGMT"
+	logModCloudMediaMgmt = "CLOUDMEDIA_MGMT"
 )
 
 var logModEnabledTable = map[string]bool{
-	logModMain:              true,
-	logModGinContext:        true,
-	logModDBControl:         true,
-	logModInstituteHandler:  true,
-	logModTeacherHandler:    true,
-	logModStudentHandler:    true,
-	logModCloudMediaHandler: true,
+	logModMain:           true,
+	logModGinContext:     true,
+	logModDBControl:      true,
+	logModInstituteMgmt:  true,
+	logModTeacherMgmt:    true,
+	logModStudentMgmt:    true,
+	logModCloudMediaMgmt: true,
 }
 
 // Logging global customized logging module

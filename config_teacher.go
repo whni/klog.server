@@ -149,7 +149,7 @@ func findTeacher(pid primitive.ObjectID) ([]*Teacher, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModTeacherHandler, err.Error())
+			logging.Errormf(logModTeacherMgmt, err.Error())
 		}
 	}()
 
@@ -185,7 +185,7 @@ func findTeacher(pid primitive.ObjectID) ([]*Teacher, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModTeacherHandler, "Found %d teacher results from DB (PID=%v)", len(teachers), pid.Hex())
+	logging.Debugmf(logModTeacherMgmt, "Found %d teacher results from DB (PID=%v)", len(teachers), pid.Hex())
 	return teachers, nil
 }
 
@@ -194,7 +194,7 @@ func findTeacherByUID(teacherUID string) (*Teacher, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModTeacherHandler, err.Error())
+			logging.Errormf(logModTeacherMgmt, err.Error())
 		}
 	}()
 
@@ -206,7 +206,7 @@ func findTeacherByUID(teacherUID string) (*Teacher, error) {
 		return nil, err
 	}
 
-	logging.Debugmf(logModTeacherHandler, "Found teacher from DB (teacherUID=%s)", teacherUID)
+	logging.Debugmf(logModTeacherMgmt, "Found teacher from DB (teacherUID=%s)", teacherUID)
 	return &teacher, nil
 }
 
@@ -215,7 +215,7 @@ func createTeacher(teacher *Teacher) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModTeacherHandler, err.Error())
+			logging.Errormf(logModTeacherMgmt, err.Error())
 		}
 	}()
 
@@ -237,7 +237,7 @@ func createTeacher(teacher *Teacher) (primitive.ObjectID, error) {
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModTeacherHandler, "Created teacher in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	logging.Debugmf(logModTeacherMgmt, "Created teacher in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 	return lastInsertID, nil
 }
 
@@ -246,7 +246,7 @@ func updateTeacher(teacher *Teacher) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModTeacherHandler, err.Error())
+			logging.Errormf(logModTeacherMgmt, err.Error())
 		}
 	}()
 
@@ -287,7 +287,7 @@ func updateTeacher(teacher *Teacher) error {
 		return err
 	}
 
-	logging.Debugmf(logModTeacherHandler, "Update teacher (PID %s): matched %d modified %d",
+	logging.Debugmf(logModTeacherMgmt, "Update teacher (PID %s): matched %d modified %d",
 		teacher.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
 		err = fmt.Errorf("[%s] - could not find teacher (PID %s)", serverErrorMessages[seResourceNotFound], teacher.PID.Hex())
@@ -304,7 +304,7 @@ func deleteTeacher(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModTeacherHandler, err.Error())
+			logging.Errormf(logModTeacherMgmt, err.Error())
 		}
 	}()
 
@@ -332,6 +332,6 @@ func deleteTeacher(pid primitive.ObjectID) (int, error) {
 		return 0, err
 	}
 
-	logging.Debugmf(logModTeacherHandler, "Deleted %d teacher results from DB", deleteResult.DeletedCount)
+	logging.Debugmf(logModTeacherMgmt, "Deleted %d teacher results from DB", deleteResult.DeletedCount)
 	return int(deleteResult.DeletedCount), nil
 }
