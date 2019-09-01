@@ -261,7 +261,8 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 
 	// student image name/url
 	studentImageName := studentGetImageName(student)
-	if _, imagePropErr := azureStorageGetBlobProperties(azMediaContainerURL, studentImageName); imagePropErr == nil {
+	imageExist, imageErr := azureStorageBlobExist(azMediaContainerURL, studentImageName)
+	if imageErr == nil && imageExist {
 		student.StudentImageName = studentImageName
 		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 	} else {
@@ -308,7 +309,8 @@ func updateStudent(student *Student) error {
 
 	// student image name/url
 	studentImageName := studentGetImageName(student)
-	if _, imagePropErr := azureStorageGetBlobProperties(azMediaContainerURL, studentImageName); imagePropErr == nil {
+	imageExist, imageErr := azureStorageBlobExist(azMediaContainerURL, studentImageName)
+	if imageErr == nil && imageExist {
 		student.StudentImageName = studentImageName
 		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 	} else {
