@@ -259,10 +259,6 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 		return primitive.NilObjectID, err
 	}
 
-	// student image name/url
-	student.StudentImageName = studentGetImageName(student)
-	student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
-
 	insertResult, err := dbPool.Collection(DBCollectionStudent).InsertOne(context.TODO(), student)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -271,6 +267,13 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
 	logging.Debugmf(logModStudentMgmt, "Created student in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+
+	// update student image name/url
+	student.PID = lastInsertID
+	student.StudentImageName = studentGetImageName(student)
+	student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
+	updateStudent(student)
+
 	return lastInsertID, nil
 }
 
