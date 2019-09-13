@@ -24,7 +24,7 @@ func studentGetImageName(student *Student) string {
 	if student == nil {
 		return ""
 	}
-	return "image-student-" + student.PID.Hex() + ".jpg"
+	return "image-student-profile-" + student.PID.Hex() + ".jpg"
 }
 
 func studentGetHandler(ctx *gin.Context) {
@@ -260,15 +260,8 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 	}
 
 	// student image name/url
-	studentImageName := studentGetImageName(student)
-	imageExist, imageErr := azureStorageBlobExist(azMediaContainerURL, studentImageName)
-	if imageErr == nil && imageExist {
-		student.StudentImageName = studentImageName
-		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
-	} else {
-		student.StudentImageName = ""
-		student.StudentImageURL = ""
-	}
+	student.StudentImageName = studentGetImageName(student)
+	student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 
 	insertResult, err := dbPool.Collection(DBCollectionStudent).InsertOne(context.TODO(), student)
 	if err != nil {
@@ -308,15 +301,8 @@ func updateStudent(student *Student) error {
 	}
 
 	// student image name/url
-	studentImageName := studentGetImageName(student)
-	imageExist, imageErr := azureStorageBlobExist(azMediaContainerURL, studentImageName)
-	if imageErr == nil && imageExist {
-		student.StudentImageName = studentImageName
-		student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
-	} else {
-		student.StudentImageName = ""
-		student.StudentImageURL = ""
-	}
+	student.StudentImageName = studentGetImageName(student)
+	student.StudentImageURL = azMediaContainerURL.String() + "/" + student.StudentImageName
 
 	// update student
 	var updateFilter = bson.D{{"_id", student.PID}}
