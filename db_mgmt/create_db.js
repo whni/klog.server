@@ -164,7 +164,6 @@ db.createCollection("students", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.cloudmedia.createIndex({"media_name": 1}, {unique: true});
 
 // cloudmedia collection
 db.createCollection("cloudmedia", {
@@ -210,7 +209,7 @@ db.createCollection("cloudmedia", {
     validationLevel: "strict",
     validationAction: "error"
 });
-
+db.cloudmedia.createIndex({"media_name": 1}, {unique: true});
 
 
 // db info
