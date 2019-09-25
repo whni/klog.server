@@ -1,9 +1,9 @@
 {
     "serverHTTPPort": 80,
-    "runHttps": false,
+    "runHttps": true,
     "serverHTTPSecurePort": 443,
-    "sslCertPath": "/etc/letsencrypt/live/klogserver.westus2.cloudapp.azure.com/cert.pem",
-    "sslKeyPath": "/etc/letsencrypt/live/klogserver.westus2.cloudapp.azure.com/privkey.pem",
+    "sslCertPath": "/etc/letsencrypt/live/klogservice.westus2.cloudapp.azure.com/cert.pem",
+    "sslKeyPath": "/etc/letsencrypt/live/klogservice.westus2.cloudapp.azure.com/privkey.pem",
     "loggingReleaseMode": false,
     "loggingLevel": "trace",
     "loggingDestination": "stdout",
@@ -11,8 +11,8 @@
     "DBName": "klog",
     "DBUsername": "klog_user",
     "DBPassword": "klog_pwd",
-    "azureStorageAccount": "klogresourcediag",
-    "azureStorageAccessKey": "lWE+Egtb3azMUGHXHT8nS6wfLEz2uAYuhajpuNhO+pJmhBVmGq6BNyZ4mjkyAYNXqbpbmxRMlz6eKM5CJaaZ4g==",
+    "azureStorageAccount": "klogresourcediag159",
+    "azureStorageAccessKey": "Cnt8kGFoMUf51jwRqSgITtUr3ocHTcNn8lnsh4joggqq5IS6BYzRN3gcZ39DTaYVa84DFG61CfYJsDXRGsOEwA==",
     "azureStorageContainer": "klog-cloud-media",
     "parentWeChatLoginURL": "https://api.weixin.qq.com/sns/jscode2session",
     "studentBindingCodeLifeTime": 72
