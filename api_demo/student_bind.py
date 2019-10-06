@@ -23,6 +23,7 @@ http_req.send()
 http_req.print_resp()
 
 # binding
+
 binding_code = http_req.resp.json()["payload"]["binding_code"]
 api_url = "{}/api/0/workflow/student/bind".format(host)
 method = HTTPMethod.POST

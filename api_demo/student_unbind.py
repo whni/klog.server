@@ -14,8 +14,8 @@ host = host_url_maker(sys.argv)
 api_url = "{}/api/0/workflow/student/unbind".format(host)
 method = HTTPMethod.POST
 params = {
-    "pid": "102030405060708090000001",
-    "parent_wxid": "orgQa44wYyOpdShmXAsHtSfjMjeQ",
+    "pid": "102030405060708090000002",
+    "parent_wxid": "wxid-test2",
 }
 
 http_req = HTTPRequest(api_url, method, params)
