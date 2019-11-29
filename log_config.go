@@ -50,6 +50,7 @@ const (
 	logModInstituteMgmt  = "INSTITUTE_MGMT"
 	logModTeacherMgmt    = "TEACHER_MGMT"
 	logModCourseMgmt     = "COURSE_MGMT"
+	logModRelativeMgmt   = "RELATIVE_MGMT"
 	logModStudentMgmt    = "STUDENT_MGMT"
 	logModCloudMediaMgmt = "CLOUDMEDIA_MGMT"
 )
@@ -61,6 +62,7 @@ var logModEnabledTable = map[string]bool{
 	logModInstituteMgmt:  true,
 	logModTeacherMgmt:    true,
 	logModCourseMgmt:     true,
+	logModRelativeMgmt:   true,
 	logModStudentMgmt:    true,
 	logModCloudMediaMgmt: true,
 }

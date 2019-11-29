@@ -65,6 +65,25 @@ type Student struct {
 	TeacherPID       primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
 }
 
+// StudentNew struct
+type StudentNew struct {
+	PID              primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentName      string             `json:"student_name" bson:"student_name"`
+	StudentImageName string             `json:"student_image_name" bson:"student_image_name"`
+	StudentImageURL  string             `json:"student_image_url" bson:"student_image_url"`
+	BindingCode      string             `json:"binding_code" bson:"binding_code"`
+	BindingExpire    int64              `json:"binding_expire" bson:"binding_expire"`
+}
+
+// Relative struct
+type Relative struct {
+	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	RelativeName string             `json:"relative_name" bson:"relative_name"`
+	RelativeWXID string             `json:"relative_wxid" bson:"relative_wxid"`
+	PhoneNumber  string             `json:"phone_number" bson:"phone_number"`
+	Email        string             `json:"email" bson:"email"`
+}
+
 // StudentMediaQueryReq struct
 type StudentMediaQueryReq struct {
 	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
