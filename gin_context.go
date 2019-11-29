@@ -14,6 +14,7 @@ import (
 var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/institute":  instituteConfigHandlerTable,
 	"/api/0/config/teacher":    teacherConfigHandlerTable,
+	"/api/0/config/course":     courseConfigHandlerTable,
 	"/api/0/config/student":    studentConfigHandlerTable,
 	"/api/0/config/cloudmedia": cloudMediaConfigHandlerTable,
 }

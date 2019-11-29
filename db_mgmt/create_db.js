@@ -124,7 +124,6 @@ db.createCollection("courses", {
     validationAction: "error"
 });
 db.courses.createIndex({"course_uid": 1}, {unique: true});
-db.courses.createIndex({"course_name": 1}, {unique: true});
 
 
 // teacher collection

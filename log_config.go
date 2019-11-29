@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/sys/unix"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"logrus"
 	"os"
 	"path"
 	"runtime"
 	"strconv"
+
+	"golang.org/x/sys/unix"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var loggingLevelMap = map[string]logrus.Level{
@@ -48,6 +49,7 @@ const (
 	logModDBControl      = "DB_CONTROL"
 	logModInstituteMgmt  = "INSTITUTE_MGMT"
 	logModTeacherMgmt    = "TEACHER_MGMT"
+	logModCourseMgmt     = "COURSE_MGMT"
 	logModStudentMgmt    = "STUDENT_MGMT"
 	logModCloudMediaMgmt = "CLOUDMEDIA_MGMT"
 )
@@ -58,6 +60,7 @@ var logModEnabledTable = map[string]bool{
 	logModDBControl:      true,
 	logModInstituteMgmt:  true,
 	logModTeacherMgmt:    true,
+	logModCourseMgmt:     true,
 	logModStudentMgmt:    true,
 	logModCloudMediaMgmt: true,
 }

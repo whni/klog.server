@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 const (
 	DBCollectionInstitute  = "institutes"
 	DBCollectionTeacher    = "teachers"
+	DBCollectionCourse     = "courses"
 	DBCollectionStudent    = "students"
 	DBCollectionCloudMedia = "cloudmedia"
 )

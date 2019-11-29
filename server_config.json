@@ -1,6 +1,6 @@
 {
     "serverHTTPPort": 80,
-    "runHttps": true,
+    "runHttps": false,
     "serverHTTPSecurePort": 443,
     "sslCertPath": "/etc/letsencrypt/live/klogservice.westus2.cloudapp.azure.com/cert.pem",
     "sslKeyPath": "/etc/letsencrypt/live/klogservice.westus2.cloudapp.azure.com/privkey.pem",

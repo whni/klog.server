@@ -27,10 +27,27 @@ type Teacher struct {
 	TeacherUID   string             `json:"teacher_uid" bson:"teacher_uid"`
 	TeacherKey   string             `json:"teacher_key" bson:"teacher_key"`
 	TeacherName  string             `json:"teacher_name" bson:"teacher_name"`
-	ClassName    string             `json:"class_name" bson:"class_name"`
 	PhoneNumber  string             `json:"phone_number" bson:"phone_number"`
 	Email        string             `json:"email" bson:"email"`
 	InstitutePID primitive.ObjectID `json:"institute_pid" bson:"institute_pid"`
+}
+
+// CourseTarget struct
+type CourseTarget struct {
+	Tag  string `json:"tag" bson:"tag"`
+	Desc string `json:"desc" bson:"desc"`
+}
+
+// Course struct
+type Course struct {
+	PID           primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	CourseUID     string             `json:"course_uid" bson:"course_uid"`
+	CourseName    string             `json:"course_name" bson:"course_name"`
+	CourseIntro   string             `json:"course_intro" bson:"course_intro"`
+	CourseTargets []CourseTarget     `json:"course_targets" bson:"course_targets"`
+	TeacherPID    primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
+	AssistantPID  primitive.ObjectID `json:"assistant_pid" bson:"assistant_pid"`
+	InstitutePID  primitive.ObjectID `json:"institute_pid" bson:"institute_pid"`
 }
 
 // Student struct

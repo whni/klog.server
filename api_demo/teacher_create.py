@@ -21,7 +21,6 @@ teacher_params = [
         "teacher_uid": "uid-usa-1001",
         "teacher_name": "Nicole Taylor",
         "teacher_key": hashlib.sha256("test_password".encode()).hexdigest(),
-        "class_name": "GoldenEye",
         "phone_number": "123-456-9876",
         "email": "nigoo@klog.com",
         "institute_pid": "102030405060708090000001"
@@ -31,7 +30,6 @@ teacher_params = [
         "teacher_uid": "uid-usa-1002",
         "teacher_name": "Wayne Grace",
         "teacher_key": hashlib.sha256("test_password".encode()).hexdigest(),
-        "class_name": "FastWind",
         "phone_number": "123-456-9876",
         "email": "wayne@klog.com",
         "institute_pid": "102030405060708090000001"
@@ -41,7 +39,6 @@ teacher_params = [
         "teacher_uid": "uid-usa-1003",
         "teacher_name": "Fantasy God",
         "teacher_key": hashlib.sha256("test_password".encode()).hexdigest(),
-        "class_name": "CloudTop",
         "phone_number": "000-111-2222",
         "email": "fanfan@klog.com",
         "institute_pid": "102030405060708090000002"
@@ -51,7 +48,6 @@ teacher_params = [
         "teacher_uid": "uid-usa-1004",
         "teacher_name": "倪炜恒",
         "teacher_key": hashlib.sha256("test_password".encode()).hexdigest(),
-        "class_name": "UnderWorld",
         "phone_number": "619-763-1020",
         "email": "summer@klog.com",
         "institute_pid": "102030405060708090000002"
