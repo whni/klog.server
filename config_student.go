@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gin-gonic/gin"
-	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -248,17 +249,6 @@ func createStudent(student *Student) (primitive.ObjectID, error) {
 		}
 	}()
 
-	// teacher PID check
-	if student.TeacherPID.IsZero() {
-		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
-		return primitive.NilObjectID, err
-	}
-	teachers, err := findTeacher(student.TeacherPID)
-	if err != nil || len(teachers) == 0 {
-		err = fmt.Errorf("[%s] - No teachers found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
-		return primitive.NilObjectID, err
-	}
-
 	insertResult, err := dbPool.Collection(DBCollectionStudent).InsertOne(context.TODO(), student)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -289,17 +279,6 @@ func updateStudent(student *Student) error {
 	// student PID check
 	if student.PID.IsZero() {
 		err = fmt.Errorf("[%s] - student PID is empty", serverErrorMessages[seInputJSONNotValid])
-		return err
-	}
-
-	// teacher PID check
-	if student.TeacherPID.IsZero() {
-		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
-		return err
-	}
-	teachers, err := findTeacher(student.TeacherPID)
-	if err != nil || len(teachers) == 0 {
-		err = fmt.Errorf("[%s] - No teacher found with PID %s", serverErrorMessages[seResourceNotFound], student.TeacherPID.Hex())
 		return err
 	}
 

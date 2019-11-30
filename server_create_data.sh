@@ -2,9 +2,14 @@
 
 python3 api_demo/institute_create.py
 python3 api_demo/teacher_create.py
+python3 api_demo/course_create.py
 python3 api_demo/student_create.py
-python3 api_demo/cloudmedia_create.py
+python3 api_demo/relative_create.py
 
-python3 api_demo/student_bind.py
-python3 api_demo/parent_student_query.py
+python3 api_demo/student_relative_ref_create.py
+python3 api_demo/student_course_ref_create.py
+#python3 api_demo/cloudmedia_create.py
+
+#python3 api_demo/student_bind.py
+#python3 api_demo/parent_student_query.py
 

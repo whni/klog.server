@@ -20,52 +20,32 @@ student_params = [
         "student_name": "Thomas Hu",
         "student_image_name": "",
         "student_image_url": "",
-        "parent_wxid": "",
-        "parent_name": "",
-        "phone_number": "",
-        "email": "",
         "binding_code": "",
-        "binding_expire": 0,
-        "teacher_pid": "102030405060708090000001"
+        "binding_expire": 0
     },
     {
         "pid": "102030405060708090000002",
         "student_name": "Bruce Wang",
         "student_image_name": "",
         "student_image_url": "",
-        "parent_wxid": "wxid-test2",
-        "parent_name": "Madison Beer",
-        "phone_number": "777-888-9999",
-        "email": "beer@google.com",
         "binding_code": "",
-        "binding_expire": 0,
-        "teacher_pid": "102030405060708090000002"
+        "binding_expire": 0
     },
     {
         "pid": "102030405060708090000003",
         "student_name": "Tiffiny Shawn",
         "student_image_name": "",
         "student_image_url": "",
-        "parent_wxid": "wxid-test3",
-        "parent_name": "Skylar Grey",
-        "phone_number": "777-888-9999",
-        "email": "skylar@facebook.com",
         "binding_code": "",
-        "binding_expire": 0,
-        "teacher_pid": "102030405060708090000003"
+        "binding_expire": 0
     },
     {
         "pid": "102030405060708090000004",
         "student_name": "Gintama Y.",
         "student_image_name": "",
         "student_image_url": "",
-        "parent_wxid": "wxid-test4",
-        "parent_name": "Autumn Mendes",
-        "phone_number": "777-888-9999",
-        "email": "autumn@xxx.com",
         "binding_code": "",
-        "binding_expire": 0,
-        "teacher_pid": "102030405060708090000004"
+        "binding_expire": 0
     }
 ]
 

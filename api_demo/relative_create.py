@@ -15,22 +15,15 @@ host = host_url_maker(sys.argv)
 api_url = "{}/api/0/config/relative".format(host)
 method = HTTPMethod.POST
 
-relative_params = [
-    {
-        "pid": "102030405060708090000001",
-        "relative_name": "Relative 1",
-        "relative_wxid": "relative_wxid_1",
-        "phone_number": "123-456-7890",
-        "email": "relative_1@gmail.com"
-    },
-    {
-        "pid": "102030405060708090000002",
-        "relative_name": "Relative 2",
-        "relative_wxid": "relative_wxid_2",
-        "phone_number": "987-654-1230",
-        "email": "relative_2@gmail.com"
-    }
-]
+relative_params = []
+for i in range(1, 7):
+    relative = {}
+    relative["pid"] = "1020304050607080900000{:02d}".format(i)
+    relative["relative_name"] = "Relative {}".format(i)
+    relative["relative_wxid"] = "relative_wxid_{}".format(i)
+    relative["phone_number"] = "123-123-12{:02d}".format(i)
+    relative["email"] = "relative_{}@klog.com".format(i)
+    relative_params.append(relative)
 
 
 for params in relative_params:

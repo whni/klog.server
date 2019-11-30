@@ -53,6 +53,7 @@ const (
 	logModRelativeMgmt   = "RELATIVE_MGMT"
 	logModStudentMgmt    = "STUDENT_MGMT"
 	logModCloudMediaMgmt = "CLOUDMEDIA_MGMT"
+	logModReferenceMgmt  = "REFERENCE_MGMT"
 )
 
 var logModEnabledTable = map[string]bool{
@@ -65,6 +66,7 @@ var logModEnabledTable = map[string]bool{
 	logModRelativeMgmt:   true,
 	logModStudentMgmt:    true,
 	logModCloudMediaMgmt: true,
+	logModReferenceMgmt:  true,
 }
 
 // Logging global customized logging module

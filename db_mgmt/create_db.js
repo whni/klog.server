@@ -3,7 +3,7 @@ db = conn.getDB("klog");
 db.dropDatabase();
 
 // institute collection
-db.createCollection("institutes", {
+db.createCollection("institute", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -59,12 +59,12 @@ db.createCollection("institutes", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.institutes.createIndex({"institute_uid": 1}, {unique: true});
-db.institutes.createIndex({"institute_name": 1}, {unique: true});
+db.institute.createIndex({"institute_uid": 1}, {unique: true});
+db.institute.createIndex({"institute_name": 1}, {unique: true});
 
 
 // course collection
-db.createCollection("courses", {
+db.createCollection("course", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -123,11 +123,11 @@ db.createCollection("courses", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.courses.createIndex({"course_uid": 1}, {unique: true});
+db.course.createIndex({"course_uid": 1}, {unique: true});
 
 
 // teacher collection
-db.createCollection("teachers", {
+db.createCollection("teacher", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -166,11 +166,11 @@ db.createCollection("teachers", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.teachers.createIndex({"teacher_uid": 1}, {unique: true});
+db.teacher.createIndex({"teacher_uid": 1}, {unique: true});
 
 
 // student collection
-db.createCollection("students", {
+db.createCollection("student", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -206,7 +206,7 @@ db.createCollection("students", {
 
 
 // relative collection
-db.createCollection("relatives", {
+db.createCollection("relative", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -236,7 +236,138 @@ db.createCollection("relatives", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.relatives.createIndex({"relative_wxid": 1}, {unique: true});
+db.relative.createIndex({"relative_wxid": 1}, {unique: true});
+
+
+// course_record collection
+db.createCollection("course_record", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["student_pid", "course_pid", "target_tag", "record_ts", "is_makeup"],
+            properties: {
+                student_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                course_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                target_tag: {
+                    bsonType: "string",
+                    description: "required string - related to course target tag"
+                },
+                record_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                is_makeup: {
+                    bsonType: "bool",
+                    description: "required boolean type to indicate if this is a makeup course record"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+db.course_record.createIndex( { "student_pid": 1, "course_pid": 1 }, { unique: true } );
+
+
+// course_comment collection
+db.createCollection("course_comment", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["course_record_pid", "comment_person_pid", "comment_person_type", "comment_ts", "comment_body"],
+            properties: {
+                course_record_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                comment_person_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId of the person who gives this comment"
+                },
+                comment_person_type: {
+                    bsonType: "string",
+                    enum: ["teacher", "relative", "others"],
+                    description: "required person type string: teacher/relative/others"
+                },
+                comment_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                comment_body: {
+                    bsonType: "string",
+                    description: "required comment body string"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+
+
+// cloudmedia collection
+db.createCollection("cloudmedia", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["student_pid", "course_record_pid", "media_type", "media_name", "media_url", "rank_score", "media_tags", "create_ts", "content_length"],
+            properties: {
+                student_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                course_record_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                media_type: {
+                    bsonType: "string",
+                    enum: ["video", "image", "others"],
+                    description: "required string - video/image/others"
+                },
+                media_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    description: "required string (media blob name)"
+                },
+                media_url: {
+                    bsonType: "string",
+                    minLength: 1,
+                    description: "required string (media blob full url)"
+                },
+                media_tags: {
+                    bsonType: ["array"],
+                    items: {
+                        bsonType: "string",
+                        description: "required tag string"
+                    },
+                    description: "media understanding tags"
+                },
+                rank_score: {
+                    bsonType: "double",
+                    description: "required double/float64"
+                },
+                create_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                content_length: {
+                    bsonType: "long",
+                    description: "required int64"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+db.cloudmedia.createIndex({"media_name": 1}, {unique: true});
 
 
 // student-relative reference
@@ -270,138 +401,12 @@ db.createCollection("student_relative_ref", {
 });
 db.student_relative_ref.createIndex( { "student_pid": 1, "relative_pid": 1 }, { unique: true } );
 
-
-// cloudmedia collection
-db.createCollection("cloudmedia", {
-    validator: {
-        $jsonSchema: {
-            bsonType: "object",
-            required: ["media_type", "media_name", "media_url", "rank_score", "student_pid", "course_pid", "create_ts", "content_length"],
-            properties: {
-                media_type: {
-                    bsonType: "string",
-                    enum: ["video", "image", "others"],
-                    description: "required string - video/image/others"
-                },
-                media_name: {
-                    bsonType: "string",
-                    minLength: 1,
-                    description: "required string (media blob name)"
-                },
-                media_url: {
-                    bsonType: "string",
-                    minLength: 1,
-                    description: "required string (media blob full url)"
-                },
-                rank_score: {
-                    bsonType: "double",
-                    description: "required double/float64"
-                },
-                student_pid: {
-                    bsonType: "objectId",
-                    description: "required ObjectId"
-                },
-                course_pid: {
-                    bsonType: "objectId",
-                    description: "required ObjectId"
-                },
-                create_ts: {
-                    bsonType: "long",
-                    description: "required int64 (unix timestamp)"
-                },
-                content_length: {
-                    bsonType: "long",
-                    description: "required int64"
-                }
-            }
-        }
-    },
-    validationLevel: "strict",
-    validationAction: "error"
-});
-db.cloudmedia.createIndex({"media_name": 1}, {unique: true});
-
-
-// course_comment collection
-db.createCollection("course_comment", {
-    validator: {
-        $jsonSchema: {
-            bsonType: "object",
-            required: ["student_pid", "course_pid", "comment_person_pid", "comment_person_type", "comment_ts", "comment_body"],
-            properties: {
-                student_pid: {
-                    bsonType: "objectId",
-                    description: "required ObjectId"
-                },
-                course_pid: {
-                    bsonType: "objectId",
-                    description: "required ObjectId"
-                },
-                comment_person_pid: {
-                    bsonType: "objectId",
-                    description: "required ObjectId of the person who gives this comment"
-                },
-                comment_person_type: {
-                    bsonType: "string",
-                    description: "required person type string: teacher/relative"
-                },
-                comment_ts: {
-                    bsonType: "long",
-                    description: "required int64 (unix timestamp)"
-                },
-                comment_body: {
-                    bsonType: "string",
-                    description: "required comment body string"
-                }
-            }
-        }
-    },
-    validationLevel: "strict",
-    validationAction: "error"
-});
-
-
-// course_record collection
-db.createCollection("course_records", {
-    validator: {
-        $jsonSchema: {
-            bsonType: "object",
-            required: ["class_ts", "comment_pids", "media_pids"],
-            properties: {
-                class_ts: {
-                    bsonType: "long",
-                    description: "required int64 (unix timestamp)"
-                },
-                comment_pids: {
-                    bsonType: ["array"],
-                    items: {
-                        bsonType: "objectId",
-                        description: "required ObjectId of class comment"
-                    },
-                    description: "required comment pid array for this class record"
-                },
-                media_pids: {
-                    bsonType: ["array"],
-                    items: {
-                        bsonType: "objectId",
-                        description: "required ObjectId of cloudmedia"
-                    },
-                    description: "required media pid array for this class record"
-                }
-            }
-        }
-    },
-    validationLevel: "strict",
-    validationAction: "error"
-});
-
-
 // course-student reference
-db.createCollection("course_student_ref", {
+db.createCollection("student_course_ref", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["course_pid", "student_pid", "course_record_pids"],
+            required: ["course_pid", "student_pid"],
             properties: {
                 course_pid: {
                     bsonType: "objectId",
@@ -410,14 +415,6 @@ db.createCollection("course_student_ref", {
                 student_pid: {
                     bsonType: "objectId",
                     description: "required ObjectId"
-                },
-                record_pids: {
-                    bsonType: ["array"],
-                    items: {
-                        bsonType: "objectId",
-                        description: "required ObjectId of course record pids"
-                    },
-                    description: "course record pid array"
                 }
             }
         }
@@ -425,7 +422,7 @@ db.createCollection("course_student_ref", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.course_student_ref.createIndex( { "course_pid": 1, "student_pid": 1 }, { unique: true } );
+db.student_course_ref.createIndex( { "course_pid": 1, "student_pid": 1 }, { unique: true } );
 
 
 // db info

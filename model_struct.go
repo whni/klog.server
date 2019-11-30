@@ -56,21 +56,6 @@ type Student struct {
 	StudentName      string             `json:"student_name" bson:"student_name"`
 	StudentImageName string             `json:"student_image_name" bson:"student_image_name"`
 	StudentImageURL  string             `json:"student_image_url" bson:"student_image_url"`
-	ParentWXID       string             `json:"parent_wxid" bson:"parent_wxid"`
-	ParentName       string             `json:"parent_name" bson:"parent_name"`
-	PhoneNumber      string             `json:"phone_number" bson:"phone_number"`
-	Email            string             `json:"email" bson:"email"`
-	BindingCode      string             `json:"binding_code" bson:"binding_code"`
-	BindingExpire    int64              `json:"binding_expire" bson:"binding_expire"`
-	TeacherPID       primitive.ObjectID `json:"teacher_pid" bson:"teacher_pid"`
-}
-
-// StudentNew struct
-type StudentNew struct {
-	PID              primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	StudentName      string             `json:"student_name" bson:"student_name"`
-	StudentImageName string             `json:"student_image_name" bson:"student_image_name"`
-	StudentImageURL  string             `json:"student_image_url" bson:"student_image_url"`
 	BindingCode      string             `json:"binding_code" bson:"binding_code"`
 	BindingExpire    int64              `json:"binding_expire" bson:"binding_expire"`
 }
@@ -82,6 +67,69 @@ type Relative struct {
 	RelativeWXID string             `json:"relative_wxid" bson:"relative_wxid"`
 	PhoneNumber  string             `json:"phone_number" bson:"phone_number"`
 	Email        string             `json:"email" bson:"email"`
+}
+
+// CourseRecord struct
+type CourseRecord struct {
+	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	CoursePID  primitive.ObjectID `json:"course_pid" bson:"course_pid"`
+	TargetTag  string             `json:"target_tag" bson:"target_tag"`
+	RecordTS   int64              `json:"record_ts" bson:"record_ts"`
+	IsMakeUp   bool               `json:"is_makeup" bson:"is_makeup"`
+}
+
+const (
+	CommentPersonTypeTeacher  = "teacher"
+	CommentPersonTypeRelative = "relative"
+	CommentPersonTypeOthers   = "others"
+)
+
+// CourseComment struct
+type CourseComment struct {
+	PID               primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	CourseRecordPID   primitive.ObjectID `json:"course_record_pid" bson:"course_record_pid"`
+	CommentPersonPID  primitive.ObjectID `json:"comment_person_pid" bson:"comment_person_pid"`
+	CommentPersonType string             `json:"comment_person_type" bson:"comment_person_type"`
+	CommentTS         int64              `json:"comment_ts" bson:"comment_ts"`
+	CommentBody       string             `json:"comment_body" bson:"comment_body"`
+}
+
+// CloudMedia struct
+type CloudMedia struct {
+	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentPID      primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	CourseRecordPID primitive.ObjectID `json:"course_record_pid" bson:"course_record_pid"`
+	MediaType       string             `json:"media_type" bson:"media_type"`
+	MediaName       string             `json:"media_name" bson:"media_name"`
+	MediaURL        string             `json:"media_url" bson:"media_url"`
+	RankScore       float64            `json:"rank_score" bson:"rank_score"`
+	MediaTags       []string           `json:"media_tags" bson:"media_tags"`
+	CreateTS        int64              `json:"create_ts" bson:"create_ts"`
+	ContentLength   int64              `json:"content_length" bson:"content_length"`
+}
+
+// StudentRelativeRef struct
+type StudentRelativeRef struct {
+	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentPID   primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	RelativePID  primitive.ObjectID `json:"relative_pid" bson:"relative_pid"`
+	Relationship string             `json:"relationship" bson:"relationship"`
+	IsMain       bool               `json:"is_main" bson:"is_main"`
+}
+
+// StudentCourseRef struct
+type StudentCourseRef struct {
+	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentPID primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	CoursePID  primitive.ObjectID `json:"course_pid" bson:"course_pid"`
+}
+
+// AzureBlobProp struct
+type AzureBlobProp struct {
+	BlobName      string
+	CreateTS      int64
+	ContentLength int64
 }
 
 // StudentMediaQueryReq struct
@@ -108,23 +156,4 @@ var cloudMediaTypeMap = map[string]bool{
 	CloudMediaTypeVideo:  true,
 	CloudMediaTypeImage:  true,
 	CloudMediaTypeOthers: true,
-}
-
-// CloudMedia struct
-type CloudMedia struct {
-	PID           primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
-	MediaType     string             `json:"media_type" bson:"media_type"`
-	MediaName     string             `json:"media_name" bson:"media_name"`
-	MediaURL      string             `json:"media_url" bson:"media_url"`
-	RankScore     float64            `json:"rank_score" bson:"rank_score"`
-	CreateTS      int64              `json:"create_ts" bson:"create_ts"`
-	ContentLength int64              `json:"content_length" bson:"content_length"`
-	StudentPID    primitive.ObjectID `json:"student_pid" bson:"student_pid"`
-}
-
-// AzureBlobProp struct
-type AzureBlobProp struct {
-	BlobName      string
-	CreateTS      int64
-	ContentLength int64
 }

@@ -10,12 +10,14 @@ import (
 )
 
 const (
-	DBCollectionInstitute  = "institutes"
-	DBCollectionTeacher    = "teachers"
-	DBCollectionCourse     = "courses"
-	DBCollectionRelative   = "relatives"
-	DBCollectionStudent    = "students"
-	DBCollectionCloudMedia = "cloudmedia"
+	DBCollectionInstitute          = "institute"
+	DBCollectionTeacher            = "teacher"
+	DBCollectionCourse             = "course"
+	DBCollectionRelative           = "relative"
+	DBCollectionStudent            = "student"
+	DBCollectionCloudMedia         = "cloudmedia"
+	DBCollectionStudentRelativeRef = "student_relative_ref"
+	DBCollectionStudentCourseRef   = "student_course_ref"
 )
 
 var dbPool *mongo.Database

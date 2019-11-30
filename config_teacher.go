@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -309,21 +310,10 @@ func deleteTeacher(pid primitive.ObjectID) (int, error) {
 	}()
 
 	var deleteFilter bson.D
-	var studentFindFilter bson.D
 	if pid.IsZero() {
 		deleteFilter = bson.D{{}}
-		studentFindFilter = bson.D{{}}
 	} else {
 		deleteFilter = bson.D{{"_id", pid}}
-		studentFindFilter = bson.D{{"teacher_pid", pid}}
-	}
-
-	// check student dependency
-	var student Student
-	if dbPool.Collection(DBCollectionStudent).FindOne(context.TODO(), studentFindFilter).Decode(&student) == nil {
-		err = fmt.Errorf("[%s] - student-teacher dependency unresolved (e.g. student PID %s teacher PID %s)",
-			serverErrorMessages[seDependencyIssue], student.PID.Hex(), student.TeacherPID.Hex())
-		return 0, err
 	}
 
 	deleteResult, err := dbPool.Collection(DBCollectionTeacher).DeleteMany(context.TODO(), deleteFilter)
