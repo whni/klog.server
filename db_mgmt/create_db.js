@@ -272,7 +272,6 @@ db.createCollection("course_record", {
     validationLevel: "strict",
     validationAction: "error"
 });
-db.course_record.createIndex( { "student_pid": 1, "course_pid": 1 }, { unique: true } );
 
 
 // course_comment collection

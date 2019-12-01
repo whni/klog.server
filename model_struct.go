@@ -79,12 +79,6 @@ type CourseRecord struct {
 	IsMakeUp   bool               `json:"is_makeup" bson:"is_makeup"`
 }
 
-const (
-	CommentPersonTypeTeacher  = "teacher"
-	CommentPersonTypeRelative = "relative"
-	CommentPersonTypeOthers   = "others"
-)
-
 // CourseComment struct
 type CourseComment struct {
 	PID               primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
@@ -144,6 +138,16 @@ type ParentWeChatLoginInfo struct {
 	AppID  string `json:"appid"`
 	Secret string `json:"secret"`
 	JSCode string `json:"js_code"`
+}
+
+const (
+	CommentPersonTypeTeacher  = "teacher"
+	CommentPersonTypeRelative = "relative"
+)
+
+var CommentPersonTypeMap = map[string]bool{
+	CommentPersonTypeTeacher:  true,
+	CommentPersonTypeRelative: true,
 }
 
 const (

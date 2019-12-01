@@ -241,13 +241,23 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 
 	// student PID check
 	if cloudMedia.StudentPID.IsZero() {
-		err = fmt.Errorf("[%s] - No student PID associated", serverErrorMessages[seResourceNotFound])
+		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
 	students, err := findStudent(cloudMedia.StudentPID)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No associate student found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.StudentPID.Hex())
 		return primitive.NilObjectID, err
+	}
+
+	// course record PID check (pid = nil -> not related to any course record)
+	if !cloudMedia.CourseRecordPID.IsZero() {
+		var courseRecords []*CourseRecord
+		courseRecords, err = findCourseRecord(cloudMedia.CourseRecordPID)
+		if err != nil || len(courseRecords) == 0 {
+			err = fmt.Errorf("[%s] - No course record found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.CourseRecordPID.Hex())
+			return primitive.NilObjectID, err
+		}
 	}
 
 	// check if media exists at cloud and fill media information
@@ -310,9 +320,22 @@ func updateCloudMedia(cloudMedia *CloudMedia) error {
 		return err
 	}
 
-	// NOTE: only update student PID and rank score
+	// course record PID check (pid = nil -> not related to any course record)
+	if !cloudMedia.CourseRecordPID.IsZero() {
+		var courseRecords []*CourseRecord
+		courseRecords, err = findCourseRecord(cloudMedia.CourseRecordPID)
+		if err != nil || len(courseRecords) == 0 {
+			err = fmt.Errorf("[%s] - No course record found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.CourseRecordPID.Hex())
+			return err
+		}
+	}
+
+	// NOTE: only update partial attributes
 	cloudMediaFound.StudentPID = cloudMedia.StudentPID
+	cloudMediaFound.CourseRecordPID = cloudMedia.CourseRecordPID
 	cloudMediaFound.RankScore = cloudMedia.RankScore
+	cloudMediaFound.MediaTags = []string{}
+	cloudMediaFound.MediaTags = append(cloudMediaFound.MediaTags, cloudMedia.MediaTags...)
 
 	var updateFilter = bson.D{{"_id", cloudMediaFound.PID}}
 	var updateBSONDocument = bson.D{}

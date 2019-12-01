@@ -13,6 +13,8 @@ const (
 	DBCollectionInstitute          = "institute"
 	DBCollectionTeacher            = "teacher"
 	DBCollectionCourse             = "course"
+	DBCollectionCourseRecord       = "course_record"
+	DBCollectionCourseComment      = "course_comment"
 	DBCollectionRelative           = "relative"
 	DBCollectionStudent            = "student"
 	DBCollectionCloudMedia         = "cloudmedia"

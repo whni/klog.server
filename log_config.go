@@ -44,29 +44,33 @@ var ljGinLogger = &lumberjack.Logger{
 }
 
 const (
-	logModMain           = "MAIN_MODDULE"
-	logModGinContext     = "GIN_CONTEXT"
-	logModDBControl      = "DB_CONTROL"
-	logModInstituteMgmt  = "INSTITUTE_MGMT"
-	logModTeacherMgmt    = "TEACHER_MGMT"
-	logModCourseMgmt     = "COURSE_MGMT"
-	logModRelativeMgmt   = "RELATIVE_MGMT"
-	logModStudentMgmt    = "STUDENT_MGMT"
-	logModCloudMediaMgmt = "CLOUDMEDIA_MGMT"
-	logModReferenceMgmt  = "REFERENCE_MGMT"
+	logModMain              = "MAIN_MODDULE"
+	logModGinContext        = "GIN_CONTEXT"
+	logModDBControl         = "DB_CONTROL"
+	logModInstituteMgmt     = "INSTITUTE_MGMT"
+	logModTeacherMgmt       = "TEACHER_MGMT"
+	logModCourseMgmt        = "COURSE_MGMT"
+	logModCourseRecordMgmt  = "COURSE_RECORD_MGMT"
+	logModCourseCommentMgmt = "COURSE_COMMENT_MGMT"
+	logModRelativeMgmt      = "RELATIVE_MGMT"
+	logModStudentMgmt       = "STUDENT_MGMT"
+	logModCloudMediaMgmt    = "CLOUDMEDIA_MGMT"
+	logModReferenceMgmt     = "REFERENCE_MGMT"
 )
 
 var logModEnabledTable = map[string]bool{
-	logModMain:           true,
-	logModGinContext:     true,
-	logModDBControl:      true,
-	logModInstituteMgmt:  true,
-	logModTeacherMgmt:    true,
-	logModCourseMgmt:     true,
-	logModRelativeMgmt:   true,
-	logModStudentMgmt:    true,
-	logModCloudMediaMgmt: true,
-	logModReferenceMgmt:  true,
+	logModMain:              true,
+	logModGinContext:        true,
+	logModDBControl:         true,
+	logModInstituteMgmt:     true,
+	logModTeacherMgmt:       true,
+	logModCourseMgmt:        true,
+	logModCourseRecordMgmt:  true,
+	logModCourseCommentMgmt: true,
+	logModRelativeMgmt:      true,
+	logModStudentMgmt:       true,
+	logModCloudMediaMgmt:    true,
+	logModReferenceMgmt:     true,
 }
 
 // Logging global customized logging module

@@ -271,6 +271,12 @@ func updateStudentCourseRef(reference *StudentCourseRef) error {
 		}
 	}()
 
+	// reference PID check
+	if reference.PID.IsZero() {
+		err = fmt.Errorf("[%s] - student-course reference PID is empty", serverErrorMessages[seInputJSONNotValid])
+		return err
+	}
+
 	// student PID check
 	if reference.StudentPID.IsZero() {
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])

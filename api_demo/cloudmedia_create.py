@@ -19,11 +19,13 @@ media_names = ["student1_image1.gif", "student1_image2.gif", "student1_image3.gi
 #media_names = ["student2_video1.mp4", "student2_video2.mp4", "student2_video3.mp4", "student2_video4.mp4"]
 for media_name in media_names:
     params = {
+        "student_pid": "102030405060708090000001",
+        "course_record_pid": "102030405060708090000001",
         "media_type": "image",
         "media_name": media_name,
         "media_url": "https://klogresourcediag159.blob.core.windows.net/klog-cloud-media/{}".format(media_name),
         "rank_score": random.uniform(50, 100),
-        "student_pid": "102030405060708090000001"
+        "media_tags": ["sport", "running"]
     }
 
     print("[create cloudmedia for {}]".format(media_name))
