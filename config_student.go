@@ -328,6 +328,22 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
+	// check course-student dependency
+	studentCourseReferences, err := findStudentCourseRef(pid, primitive.NilObjectID)
+	if err == nil && len(studentCourseReferences) > 0 {
+		err = fmt.Errorf("[%s] - student-course dependency unresolved (e.g. student PID %s course PID %s)",
+			serverErrorMessages[seDependencyIssue], studentCourseReferences[0].StudentPID.Hex(), studentCourseReferences[0].CoursePID.Hex())
+		return 0, err
+	}
+
+	// check relative-student dependency
+	studentRelativeReferences, err := findStudentRelativeRef(pid, primitive.NilObjectID)
+	if err == nil && len(studentRelativeReferences) > 0 {
+		err = fmt.Errorf("[%s] - student-relative dependency unresolved (e.g. student PID %s relative PID %s)",
+			serverErrorMessages[seDependencyIssue], studentRelativeReferences[0].StudentPID.Hex(), studentRelativeReferences[0].RelativePID.Hex())
+		return 0, err
+	}
+
 	students, findErr := findStudent(pid)
 	if findErr != nil {
 		err = fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
@@ -336,10 +352,10 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 
 	var deleteCnt int64
 	for i := range students {
-		_, deleteCloudMediaErr := deleteCloudMediaByStudentPID(students[i].PID)
+		_, deleteCloudMediaErr := deleteCloudMediaByStudentPID(students[i].PID, false) // onlyNilCourseRecord = true to delete all cloud media
 		if deleteCloudMediaErr != nil {
 			err = fmt.Errorf("[%s] - stop deleting student (PID %s) since cloud media could not be deleted: %s",
-				serverErrorMessages[seCloudOpsError], pid.Hex(), deleteCloudMediaErr.Error())
+				serverErrorMessages[seCloudOpsError], students[i].PID.Hex(), deleteCloudMediaErr.Error())
 			return int(deleteCnt), err
 		}
 
@@ -353,7 +369,7 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 			}
 		}
 
-		deleteFilter := bson.D{{"_id", pid}}
+		deleteFilter := bson.D{{"_id", students[i].PID}}
 		deleteResult, err := dbPool.Collection(DBCollectionStudent).DeleteMany(context.TODO(), deleteFilter)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())

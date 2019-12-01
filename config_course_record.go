@@ -392,19 +392,81 @@ func deleteCourseRecord(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
-	var deleteFilter bson.D
-	if pid.IsZero() {
-		deleteFilter = bson.D{{}}
-	} else {
-		deleteFilter = bson.D{{"_id", pid}}
-	}
-
-	deleteResult, err := dbPool.Collection(DBCollectionCourseRecord).DeleteMany(context.TODO(), deleteFilter)
-	if err != nil {
-		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+	courseRecords, findErr := findCourseRecord(pid)
+	if findErr != nil {
+		err = fmt.Errorf("[%s] - could not delete course records (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
 		return 0, err
 	}
 
-	logging.Debugmf(logModCourseRecordMgmt, "Deleted %d course records from DB", deleteResult.DeletedCount)
-	return int(deleteResult.DeletedCount), nil
+	var deleteCnt int64
+	for i := range courseRecords {
+		_, deleteCommentErr := deleteCourseCommentByRecordPID(courseRecords[i].PID)
+		if deleteCommentErr != nil {
+			err = fmt.Errorf("[%s] - stop deleting course record (PID %s) since course comment could not be deleted: %s",
+				serverErrorMessages[seCloudOpsError], courseRecords[i].PID, deleteCommentErr.Error())
+			return int(deleteCnt), err
+		}
+		_, deleteMediaErr := deleteCloudMediaByRecordPID(courseRecords[i].PID)
+		if deleteMediaErr != nil {
+			err = fmt.Errorf("[%s] - stop deleting course record (PID %s) since cloud media could not be deleted: %s",
+				serverErrorMessages[seCloudOpsError], courseRecords[i].PID, deleteMediaErr.Error())
+			return int(deleteCnt), err
+		}
+
+		deleteFilter := bson.D{{"_id", courseRecords[i].PID}}
+		deleteResult, err := dbPool.Collection(DBCollectionCourseRecord).DeleteMany(context.TODO(), deleteFilter)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return 0, err
+		}
+
+		deleteCnt += deleteResult.DeletedCount
+	}
+
+	logging.Debugmf(logModCourseRecordMgmt, "Deleted %d course records from DB", deleteCnt)
+	return int(deleteCnt), nil
+}
+
+// delete course record by student/course pid, return #delete entries, error
+func deleteCourseRecordByStudentPIDAndCoursePID(studentPID primitive.ObjectID, coursePID primitive.ObjectID) (int, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCourseRecordMgmt, err.Error())
+		}
+	}()
+
+	courseRecords, findErr := findCourseRecordByStudentPIDAndCoursePID(studentPID, coursePID)
+	if findErr != nil {
+		err = fmt.Errorf("[%s] - could not delete cloud media DB entries due to query error", serverErrorMessages[seResourceNotFound])
+		return 0, err
+	}
+
+	var deleteCnt int64
+	for i := range courseRecords {
+		_, deleteCommentErr := deleteCourseCommentByRecordPID(courseRecords[i].PID)
+		if deleteCommentErr != nil {
+			err = fmt.Errorf("[%s] - stop deleting course record (student PID %s course PID %s) since course comment could not be deleted: %s",
+				serverErrorMessages[seCloudOpsError], courseRecords[i].StudentPID, courseRecords[i].CoursePID, deleteCommentErr.Error())
+			return int(deleteCnt), err
+		}
+		_, deleteMediaErr := deleteCloudMediaByRecordPID(courseRecords[i].PID)
+		if deleteMediaErr != nil {
+			err = fmt.Errorf("[%s] - stop deleting course record (student PID %s course PID %s) since cloud media could not be deleted: %s",
+				serverErrorMessages[seCloudOpsError], courseRecords[i].StudentPID, courseRecords[i].CoursePID, deleteMediaErr.Error())
+			return int(deleteCnt), err
+		}
+
+		deleteFilter := bson.D{{"_id", courseRecords[i].PID}}
+		deleteResult, err := dbPool.Collection(DBCollectionCourseRecord).DeleteMany(context.TODO(), deleteFilter)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return 0, err
+		}
+
+		deleteCnt += deleteResult.DeletedCount
+	}
+
+	logging.Debugmf(logModCourseRecordMgmt, "Deleted %d course records from DB", deleteCnt)
+	return int(deleteCnt), nil
 }

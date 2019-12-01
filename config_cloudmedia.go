@@ -192,7 +192,7 @@ func findCloudMedia(pid primitive.ObjectID) ([]*CloudMedia, error) {
 }
 
 // find cloud media by student pid, return cloud media slice, error
-func findCloudMediaByStudentPID(studentPID primitive.ObjectID) ([]*CloudMedia, error) {
+func findCloudMediaByStudentPID(studentPID primitive.ObjectID, onlyNilCourseRecord bool) ([]*CloudMedia, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -202,6 +202,9 @@ func findCloudMediaByStudentPID(studentPID primitive.ObjectID) ([]*CloudMedia, e
 
 	var findOptions = options.Find()
 	var findFilter = bson.D{{"student_pid", studentPID}}
+	if onlyNilCourseRecord {
+		findFilter = append(findFilter, bson.E{"course_record_pid", primitive.NilObjectID})
+	}
 
 	findCursor, err := dbPool.Collection(DBCollectionCloudMedia).Find(context.TODO(), findFilter, findOptions)
 	if err != nil {
@@ -227,6 +230,45 @@ func findCloudMediaByStudentPID(studentPID primitive.ObjectID) ([]*CloudMedia, e
 	}
 
 	logging.Debugmf(logModCloudMediaMgmt, "Found %d cloud media results from DB (studentPID=%v)", len(cloudMediaSlice), studentPID.Hex())
+	return cloudMediaSlice, nil
+}
+
+// find cloud media by course record pid, return cloud media slice, error
+func findCloudMediaByRecordPID(courseRecordPID primitive.ObjectID) ([]*CloudMedia, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
+		}
+	}()
+
+	var findOptions = options.Find()
+	var findFilter = bson.D{{"course_record_pid", courseRecordPID}}
+
+	findCursor, err := dbPool.Collection(DBCollectionCloudMedia).Find(context.TODO(), findFilter, findOptions)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	cloudMediaSlice := []*CloudMedia{}
+	for findCursor.Next(context.TODO()) {
+		var cloudMedia CloudMedia
+		err = findCursor.Decode(&cloudMedia)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return nil, err
+		}
+		cloudMediaSlice = append(cloudMediaSlice, &cloudMedia)
+	}
+
+	err = findCursor.Err()
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModCloudMediaMgmt, "Found %d cloud media results from DB (courseRecordPID=%v)", len(cloudMediaSlice), courseRecordPID.Hex())
 	return cloudMediaSlice, nil
 }
 
@@ -256,6 +298,11 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 		courseRecords, err = findCourseRecord(cloudMedia.CourseRecordPID)
 		if err != nil || len(courseRecords) == 0 {
 			err = fmt.Errorf("[%s] - No course record found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.CourseRecordPID.Hex())
+			return primitive.NilObjectID, err
+		}
+		if courseRecords[0].StudentPID != cloudMedia.StudentPID {
+			err = fmt.Errorf("[%s] - Student PID %s does not match course record (PID %s) student PID %s", serverErrorMessages[seResourceNotMatched],
+				cloudMedia.StudentPID, cloudMedia.CourseRecordPID.Hex(), courseRecords[0].StudentPID)
 			return primitive.NilObjectID, err
 		}
 	}
@@ -328,6 +375,11 @@ func updateCloudMedia(cloudMedia *CloudMedia) error {
 			err = fmt.Errorf("[%s] - No course record found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.CourseRecordPID.Hex())
 			return err
 		}
+		if courseRecords[0].StudentPID != cloudMedia.StudentPID {
+			err = fmt.Errorf("[%s] - Student PID %s does not match course record (PID %s) student PID %s", serverErrorMessages[seResourceNotMatched],
+				cloudMedia.StudentPID, cloudMedia.CourseRecordPID.Hex(), courseRecords[0].StudentPID)
+			return err
+		}
 	}
 
 	// NOTE: only update partial attributes
@@ -388,7 +440,7 @@ func deleteCloudMedia(pid primitive.ObjectID) (int, error) {
 	var deleteCount int64
 	for i := range cloudMediaSlice {
 		cloudMedia := cloudMediaSlice[i]
-		azBlobDeleteErr := azureStorageDeleteBlob(azMediaContainerURL, cloudMedia.MediaName)
+		var azBlobDeleteErr error = azureStorageDeleteBlob(azMediaContainerURL, cloudMedia.MediaName)
 		// return if error occurs (except blob not found)
 		if azBlobDeleteErr != nil {
 			if serr, ok := azBlobDeleteErr.(azblob.StorageError); !ok || serr.ServiceCode() != azblob.ServiceCodeBlobNotFound {
@@ -413,7 +465,7 @@ func deleteCloudMedia(pid primitive.ObjectID) (int, error) {
 }
 
 // delete cloud media by student pid, return #delete entries, error
-func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID) (int, error) {
+func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID, onlyNilCourseRecord bool) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -422,7 +474,7 @@ func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID) (int, error) {
 	}()
 
 	// try to delete media files at cloud side
-	cloudMediaSlice, findErr := findCloudMediaByStudentPID(studentPID)
+	cloudMediaSlice, findErr := findCloudMediaByStudentPID(studentPID, onlyNilCourseRecord)
 	if findErr != nil {
 		err = fmt.Errorf("[%s] - could not delete cloud media DB entries due to query error", serverErrorMessages[seResourceNotFound])
 		return 0, err
@@ -431,7 +483,7 @@ func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID) (int, error) {
 	var deleteCount int64
 	for i := range cloudMediaSlice {
 		cloudMedia := cloudMediaSlice[i]
-		azBlobDeleteErr := azureStorageDeleteBlob(azMediaContainerURL, cloudMedia.MediaName)
+		var azBlobDeleteErr error = azureStorageDeleteBlob(azMediaContainerURL, cloudMedia.MediaName)
 		// return if error occurs (except blob not found)
 		if azBlobDeleteErr != nil {
 			if serr, ok := azBlobDeleteErr.(azblob.StorageError); !ok || serr.ServiceCode() != azblob.ServiceCodeBlobNotFound {
@@ -452,5 +504,48 @@ func deleteCloudMediaByStudentPID(studentPID primitive.ObjectID) (int, error) {
 	}
 
 	logging.Debugmf(logModCloudMediaMgmt, "Deleted %d cloud media results from DB (studentPID %s)", deleteCount, studentPID.Hex())
+	return int(deleteCount), nil
+}
+
+// delete cloud media by course record pid, return #delete entries, error
+func deleteCloudMediaByRecordPID(courseRecordPID primitive.ObjectID) (int, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCloudMediaMgmt, err.Error())
+		}
+	}()
+
+	// try to delete media files at cloud side
+	cloudMediaSlice, findErr := findCloudMediaByRecordPID(courseRecordPID)
+	if findErr != nil {
+		err = fmt.Errorf("[%s] - could not delete cloud media DB entries due to query error", serverErrorMessages[seResourceNotFound])
+		return 0, err
+	}
+
+	var deleteCount int64
+	for i := range cloudMediaSlice {
+		cloudMedia := cloudMediaSlice[i]
+		var azBlobDeleteErr error = azureStorageDeleteBlob(azMediaContainerURL, cloudMedia.MediaName)
+		// return if error occurs (except blob not found)
+		if azBlobDeleteErr != nil {
+			if serr, ok := azBlobDeleteErr.(azblob.StorageError); !ok || serr.ServiceCode() != azblob.ServiceCodeBlobNotFound {
+				err = fmt.Errorf("[%s] - could not delete cloud media blob at cloud (PID: %s name:%s type:%s) due to error: [%s]",
+					serverErrorMessages[seCloudOpsError], cloudMedia.PID.Hex(), cloudMedia.MediaName, cloudMedia.MediaType, azBlobDeleteErr.Error())
+				return int(deleteCount), err
+			}
+		}
+
+		deleteFilter := bson.D{{"_id", cloudMedia.PID}}
+		deleteResult, err := dbPool.Collection(DBCollectionCloudMedia).DeleteMany(context.TODO(), deleteFilter)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return int(deleteCount), err
+		}
+
+		deleteCount += deleteResult.DeletedCount
+	}
+
+	logging.Debugmf(logModCloudMediaMgmt, "Deleted %d cloud media results from DB (courseRecordPID %s)", deleteCount, courseRecordPID.Hex())
 	return int(deleteCount), nil
 }

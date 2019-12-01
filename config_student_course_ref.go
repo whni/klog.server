@@ -341,20 +341,31 @@ func deleteStudentCourseRef(studentPID primitive.ObjectID, coursePID primitive.O
 		}
 	}()
 
-	var deleteFilter bson.D = bson.D{}
-	if !studentPID.IsZero() {
-		deleteFilter = append(deleteFilter, bson.E{"student_pid", studentPID})
-	}
-	if !coursePID.IsZero() {
-		deleteFilter = append(deleteFilter, bson.E{"course_pid", coursePID})
-	}
-
-	deleteResult, err := dbPool.Collection(DBCollectionStudentCourseRef).DeleteMany(context.TODO(), deleteFilter)
-	if err != nil {
-		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+	studentCourseReferences, findErr := findStudentCourseRef(studentPID, coursePID)
+	if findErr != nil {
+		err = fmt.Errorf("[%s] - could not delete student-course reference DB entries due to query error", serverErrorMessages[seResourceNotFound])
 		return 0, err
 	}
 
-	logging.Debugmf(logModReferenceMgmt, "Deleted %d student results from DB", deleteResult.DeletedCount)
-	return int(deleteResult.DeletedCount), nil
+	var deleteCnt int64
+	for i := range studentCourseReferences {
+		_, deleteRecordErr := deleteCourseRecordByStudentPIDAndCoursePID(studentCourseReferences[i].StudentPID, studentCourseReferences[i].CoursePID)
+		if deleteRecordErr != nil {
+			err = fmt.Errorf("[%s] - stop deleting course-record reference (student PID %s course PID %s) since course record could not be deleted: %s",
+				serverErrorMessages[seCloudOpsError], studentCourseReferences[i].StudentPID, studentCourseReferences[i].CoursePID, deleteRecordErr.Error())
+			return int(deleteCnt), err
+		}
+
+		deleteFilter := bson.D{{"_id", studentCourseReferences[i].PID}}
+		deleteResult, err := dbPool.Collection(DBCollectionStudentCourseRef).DeleteMany(context.TODO(), deleteFilter)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return 0, err
+		}
+
+		deleteCnt += deleteResult.DeletedCount
+	}
+
+	logging.Debugmf(logModReferenceMgmt, "Deleted %d student-course references from DB", deleteCnt)
+	return int(deleteCnt), nil
 }

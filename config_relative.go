@@ -266,11 +266,17 @@ func deleteRelative(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
-	var deleteFilter bson.D
-	if pid.IsZero() {
-		deleteFilter = bson.D{{}}
-	} else {
-		deleteFilter = bson.D{{"_id", pid}}
+	// check relative-student dependency
+	studentRelativeReferences, err := findStudentRelativeRef(primitive.NilObjectID, pid)
+	if err == nil && len(studentRelativeReferences) > 0 {
+		err = fmt.Errorf("[%s] - student-relative dependency unresolved (e.g. student PID %s relative PID %s)",
+			serverErrorMessages[seDependencyIssue], studentRelativeReferences[0].StudentPID.Hex(), studentRelativeReferences[0].RelativePID.Hex())
+		return 0, err
+	}
+
+	var deleteFilter bson.D = bson.D{}
+	if !pid.IsZero() {
+		deleteFilter = append(deleteFilter, bson.E{"_id", pid})
 	}
 
 	deleteResult, err := dbPool.Collection(DBCollectionRelative).DeleteMany(context.TODO(), deleteFilter)

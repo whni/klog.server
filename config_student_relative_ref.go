@@ -400,6 +400,6 @@ func deleteStudentRelativeRef(studentPID primitive.ObjectID, relativePID primiti
 		return 0, err
 	}
 
-	logging.Debugmf(logModReferenceMgmt, "Deleted %d student results from DB", deleteResult.DeletedCount)
+	logging.Debugmf(logModReferenceMgmt, "Deleted %d student-relative references from DB", deleteResult.DeletedCount)
 	return int(deleteResult.DeletedCount), nil
 }

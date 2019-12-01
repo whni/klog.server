@@ -227,7 +227,7 @@ func studentMediaQueryHandler(ctx *gin.Context) {
 		return
 	}
 
-	cloudMediaSlice, err := findCloudMediaByStudentPID(mediaReq.StudentPID)
+	cloudMediaSlice, err := findCloudMediaByStudentPID(mediaReq.StudentPID, false)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - Error occurs when searching cloud media for student (PID %s): %s",

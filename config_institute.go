@@ -265,21 +265,26 @@ func deleteInstitute(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
-	var deleteFilter bson.D
-	var teacherFindFilter bson.D
-	if pid.IsZero() {
-		deleteFilter = bson.D{{}}
-		teacherFindFilter = bson.D{{}}
-	} else {
-		deleteFilter = bson.D{{"_id", pid}}
-		teacherFindFilter = bson.D{{"institute_pid", pid}}
+	var deleteFilter bson.D = bson.D{}
+	var dependencyFindFilter bson.D = bson.D{}
+	if !pid.IsZero() {
+		deleteFilter = append(deleteFilter, bson.E{"_id", pid})
+		dependencyFindFilter = append(dependencyFindFilter, bson.E{"institute_pid", pid})
 	}
 
 	// check teacher dependency
 	var teacher Teacher
-	if dbPool.Collection(DBCollectionTeacher).FindOne(context.TODO(), teacherFindFilter).Decode(&teacher) == nil {
+	if dbPool.Collection(DBCollectionTeacher).FindOne(context.TODO(), dependencyFindFilter).Decode(&teacher) == nil {
 		err = fmt.Errorf("[%s] - teacher-institute dependency unresolved (e.g. teacher PID %s institute PID %s)",
 			serverErrorMessages[seDependencyIssue], teacher.PID.Hex(), teacher.InstitutePID.Hex())
+		return 0, err
+	}
+
+	// check course dependency
+	var course Course
+	if dbPool.Collection(DBCollectionCourse).FindOne(context.TODO(), dependencyFindFilter).Decode(&course) == nil {
+		err = fmt.Errorf("[%s] - course-institute dependency unresolved (e.g. course PID %s institute PID %s)",
+			serverErrorMessages[seDependencyIssue], course.PID.Hex(), course.InstitutePID.Hex())
 		return 0, err
 	}
 

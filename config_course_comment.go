@@ -190,6 +190,45 @@ func findCourseComment(pid primitive.ObjectID) ([]*CourseComment, error) {
 	return courseComments, nil
 }
 
+// find course comment by course record pid, return course comment slice, error
+func findCourseCommentByRecordPID(courseRecordPID primitive.ObjectID) ([]*CourseComment, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCourseCommentMgmt, err.Error())
+		}
+	}()
+
+	var findOptions = options.Find()
+	var findFilter = bson.D{{"course_record_pid", courseRecordPID}}
+
+	findCursor, err := dbPool.Collection(DBCollectionCourseComment).Find(context.TODO(), findFilter, findOptions)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	courseComments := []*CourseComment{}
+	for findCursor.Next(context.TODO()) {
+		var courseComment CourseComment
+		err = findCursor.Decode(&courseComment)
+		if err != nil {
+			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+			return nil, err
+		}
+		courseComments = append(courseComments, &courseComment)
+	}
+
+	err = findCursor.Err()
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModCourseCommentMgmt, "Found %d course comments from DB (course record PID=%v)", len(courseComments), courseRecordPID.Hex())
+	return courseComments, nil
+}
+
 // create course comment, return PID, error
 func createCourseComment(courseComment *CourseComment) (primitive.ObjectID, error) {
 	var err error
@@ -348,5 +387,25 @@ func deleteCourseComment(pid primitive.ObjectID) (int, error) {
 	}
 
 	logging.Debugmf(logModInstituteMgmt, "Deleted %d course comments from DB", deleteResult.DeletedCount)
+	return int(deleteResult.DeletedCount), nil
+}
+
+// delete course comment by record pid, return #delete entries, error
+func deleteCourseCommentByRecordPID(courseRecordPID primitive.ObjectID) (int, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModCourseCommentMgmt, err.Error())
+		}
+	}()
+
+	deleteFilter := bson.D{{"course_record_pid", courseRecordPID}}
+	deleteResult, err := dbPool.Collection(DBCollectionCourseComment).DeleteMany(context.TODO(), deleteFilter)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return 0, err
+	}
+
+	logging.Debugmf(logModInstituteMgmt, "Deleted %d course comments from DB (course record PID %s)", deleteResult.DeletedCount, courseRecordPID.Hex())
 	return int(deleteResult.DeletedCount), nil
 }

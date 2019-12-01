@@ -309,11 +309,26 @@ func deleteTeacher(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
-	var deleteFilter bson.D
-	if pid.IsZero() {
-		deleteFilter = bson.D{{}}
-	} else {
-		deleteFilter = bson.D{{"_id", pid}}
+	var deleteFilter bson.D = bson.D{}
+	var teacherFindFilter bson.D = bson.D{}
+	var assistantFindFilter bson.D = bson.D{}
+	if !pid.IsZero() {
+		deleteFilter = append(deleteFilter, bson.E{"_id", pid})
+		teacherFindFilter = append(teacherFindFilter, bson.E{"teacher_pid", pid})
+		assistantFindFilter = append(assistantFindFilter, bson.E{"assistant_pid", pid})
+	}
+
+	// check course dependency
+	var course Course
+	if dbPool.Collection(DBCollectionCourse).FindOne(context.TODO(), teacherFindFilter).Decode(&course) == nil {
+		err = fmt.Errorf("[%s] - teacher-course dependency unresolved (e.g. teacher PID %s course PID %s)",
+			serverErrorMessages[seDependencyIssue], course.TeacherPID.Hex(), course.PID.Hex())
+		return 0, err
+	}
+	if dbPool.Collection(DBCollectionCourse).FindOne(context.TODO(), assistantFindFilter).Decode(&course) == nil {
+		err = fmt.Errorf("[%s] - assistant-course dependency unresolved (e.g. assistant PID %s course PID %s)",
+			serverErrorMessages[seDependencyIssue], course.AssistantPID.Hex(), course.PID.Hex())
+		return 0, err
 	}
 
 	deleteResult, err := dbPool.Collection(DBCollectionTeacher).DeleteMany(context.TODO(), deleteFilter)

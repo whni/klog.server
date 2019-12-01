@@ -359,23 +359,18 @@ func deleteCourse(pid primitive.ObjectID) (int, error) {
 		}
 	}()
 
-	var deleteFilter bson.D
-	// var studentFindFilter bson.D
-	if pid.IsZero() {
-		deleteFilter = bson.D{{}}
-		// studentFindFilter = bson.D{{}}
-	} else {
-		deleteFilter = bson.D{{"_id", pid}}
-		// studentFindFilter = bson.D{{"student_pid", pid}}
+	// check course-student dependency
+	studentCourseReferences, err := findStudentCourseRef(primitive.NilObjectID, pid)
+	if err == nil && len(studentCourseReferences) > 0 {
+		err = fmt.Errorf("[%s] - student-course dependency unresolved (e.g. student PID %s course PID %s)",
+			serverErrorMessages[seDependencyIssue], studentCourseReferences[0].StudentPID.Hex(), studentCourseReferences[0].CoursePID.Hex())
+		return 0, err
 	}
 
-	// check student dependency
-	// var student Student
-	// if dbPool.Collection(DBCollectionStudent).FindOne(context.TODO(), studentFindFilter).Decode(&student) == nil {
-	// 	err = fmt.Errorf("[%s] - student-teacher dependency unresolved (e.g. student PID %s teacher PID %s)",
-	// 		serverErrorMessages[seDependencyIssue], student.PID.Hex(), student.TeacherPID.Hex())
-	// 	return 0, err
-	// }
+	var deleteFilter bson.D = bson.D{}
+	if !pid.IsZero() {
+		deleteFilter = append(deleteFilter, bson.E{"_id", pid})
+	}
 
 	deleteResult, err := dbPool.Collection(DBCollectionCourse).DeleteMany(context.TODO(), deleteFilter)
 	if err != nil {
