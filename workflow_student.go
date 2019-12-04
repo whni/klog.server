@@ -103,7 +103,7 @@ func studentBindingRelativeHandler(ctx *gin.Context) {
 	relativeFound, err = findRelativeByWXID(studentRelativeBindInfo.RelativeWXID)
 	if err != nil || relativeFound == nil {
 		response.Status = http.StatusConflict
-		response.Message = fmt.Sprintf("[%s] - No relative found with wechat id \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeBindInfo.BindingCode)
+		response.Message = fmt.Sprintf("[%s] - No relative found with wechat id \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeBindInfo.RelativeWXID)
 		return
 	}
 
@@ -135,7 +135,8 @@ func studentBindingRelativeHandler(ctx *gin.Context) {
 		reference.Relationship = studentRelativeBindInfo.Relationship
 	}
 
-	referencePID, err := createStudentRelativeRef(&reference)
+	var referencePID = primitive.NilObjectID
+	referencePID, err = createStudentRelativeRef(&reference)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - %s --> could not bind student (PID %s) and relative (PID %s)", serverErrorMessages[seResourceConflict],
@@ -177,7 +178,8 @@ func studentUnbindingRelativeHandler(ctx *gin.Context) {
 		return
 	}
 
-	deleteCnt, err := deleteStudentRelativeRef(studentRelativeBindInfo.StudentPID, primitive.NilObjectID)
+	var deleteCnt int = 0
+	deleteCnt, err = deleteStudentRelativeRef(studentRelativeBindInfo.StudentPID, primitive.NilObjectID)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - Error occurs during unbind student (PID %s) relative references - %s",

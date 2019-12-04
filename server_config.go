@@ -25,7 +25,7 @@ type ServerConfig struct {
 	AzureStorageAccount        string `json:"azureStorageAccount"`
 	AzureStorageAccessKey      string `json:"azureStorageAccessKey"`
 	AzureStorageContainer      string `json:"azureStorageContainer"`
-	ParentWeChatLoginURL       string `json:"parentWeChatLoginURL"`
+	RelativeWeChatLoginURL     string `json:"relativeWeChatLoginURL"`
 	StudentBindingCodeLifeTime int    `json:"studentBindingCodeLifeTime"` // hour
 }
 

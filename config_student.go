@@ -219,27 +219,6 @@ func findStudentByBindingCode(bindingCode string) (*Student, error) {
 	return &student, nil
 }
 
-// find student by parent wechat id
-func findStudentByParentWXID(parentWXID string) (*Student, error) {
-	var err error
-	defer func() {
-		if err != nil {
-			logging.Errormf(logModStudentMgmt, err.Error())
-		}
-	}()
-
-	var student Student
-	findFilter := bson.D{{"parent_wxid", parentWXID}}
-	err = dbPool.Collection(DBCollectionStudent).FindOne(context.TODO(), findFilter).Decode(&student)
-	if err != nil {
-		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
-		return nil, err
-	}
-
-	logging.Debugmf(logModStudentMgmt, "Found student from DB (studentPID=%s, parentWXID=%s)", student.PID.Hex(), parentWXID)
-	return &student, nil
-}
-
 // create student, return PID, error
 func createStudent(student *Student) (primitive.ObjectID, error) {
 	var err error

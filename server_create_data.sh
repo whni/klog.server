@@ -13,6 +13,7 @@ python3 api_demo/course_record_create.py
 python3 api_demo/course_comment_create.py
 python3 api_demo/cloudmedia_create.py
 
-#python3 api_demo/student_bind.py
-#python3 api_demo/parent_student_query.py
+python3 api_demo/student_unbind.py
+python3 api_demo/student_bind.py
+python3 api_demo/relative_student_query.py
 

@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// parent wechat login
-func parentWeChatLoginHandler(ctx *gin.Context) {
+// relative wechat login
+func relativeWeChatLoginHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -17,17 +19,17 @@ func parentWeChatLoginHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var parentWeChatLoginInfo ParentWeChatLoginInfo
+	var relativeWeChatLoginInfo RelativeWeChatLoginInfo
 	var err error
-	if err = json.Unmarshal(params.Data, &parentWeChatLoginInfo); err != nil {
+	if err = json.Unmarshal(params.Data, &relativeWeChatLoginInfo); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	// check student parent wxID and binding code
-	wxLoginURL := fmt.Sprintf("%s?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code", serverConfig.ParentWeChatLoginURL,
-		parentWeChatLoginInfo.AppID, parentWeChatLoginInfo.Secret, parentWeChatLoginInfo.JSCode)
+	// check student relative wxID and binding code
+	wxLoginURL := fmt.Sprintf("%s?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code", serverConfig.RelativeWeChatLoginURL,
+		relativeWeChatLoginInfo.AppID, relativeWeChatLoginInfo.Secret, relativeWeChatLoginInfo.JSCode)
 	wxLoginResp, err := http.Get(wxLoginURL)
 	if err != nil {
 		response.Status = http.StatusBadRequest
@@ -57,13 +59,13 @@ func parentWeChatLoginHandler(ctx *gin.Context) {
 	}
 
 	response.Payload = map[string]string{
-		"parent_wxid": fmt.Sprintf("%v", openID),
+		"relative_wxid": fmt.Sprintf("%v", openID),
 	}
 	return
 }
 
-// parent search student
-func parentFindBoundStudentHandler(ctx *gin.Context) {
+// relative search student
+func relativeFindBoundStudentHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -72,28 +74,39 @@ func parentFindBoundStudentHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var parentWXIDMap = map[string]string{}
+	var relativeWXIDMap = map[string]string{}
 	var err error
-	if err = json.Unmarshal(params.Data, &parentWXIDMap); err != nil {
+	if err = json.Unmarshal(params.Data, &relativeWXIDMap); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
-	parentWXID, parentWXIDExist := parentWXIDMap["parent_wxid"]
-	if !parentWXIDExist {
+	relativeWXID, relativeWXIDExist := relativeWXIDMap["relative_wxid"]
+	if !relativeWXIDExist {
 		response.Status = http.StatusBadRequest
-		response.Message = fmt.Sprintf("[%s] - Could not retrieve parent_wxid", serverErrorMessages[seInputJSONNotValid])
+		response.Message = fmt.Sprintf("[%s] - Could not retrieve relative_wxid", serverErrorMessages[seInputJSONNotValid])
 		return
 	}
 
-	student, err := findStudentByParentWXID(parentWXID)
-	if err != nil || student == nil {
+	// find relative by wechat id
+	var relativeFound *Relative
+	relativeFound, err = findRelativeByWXID(relativeWXID)
+	if err != nil || relativeFound == nil {
 		response.Status = http.StatusConflict
-		response.Message = fmt.Sprintf("[%s] - Could not find student with given parent_wxid %s", serverErrorMessages[seResourceNotFound], parentWXID)
+		response.Message = fmt.Sprintf("[%s] - No relative found with wechat id \"%s\"", serverErrorMessages[seResourceNotFound], relativeWXID)
 		return
 	}
 
-	response.Payload = student
+	var references []*StudentRelativeRef
+	references, err = findStudentRelativeRef(primitive.NilObjectID, relativeFound.PID)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - %s -> could not search student-relative references with given relative_wxid %s",
+			serverErrorMessages[seResourceNotFound], err.Error(), relativeWXID)
+		return
+	}
+
+	response.Payload = references
 	return
 }

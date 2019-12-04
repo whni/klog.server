@@ -14,6 +14,6 @@
     "azureStorageAccount": "klogresourcediag159",
     "azureStorageAccessKey": "Cnt8kGFoMUf51jwRqSgITtUr3ocHTcNn8lnsh4joggqq5IS6BYzRN3gcZ39DTaYVa84DFG61CfYJsDXRGsOEwA==",
     "azureStorageContainer": "klog-cloud-media",
-    "parentWeChatLoginURL": "https://api.weixin.qq.com/sns/jscode2session",
+    "relativeWeChatLoginURL": "https://api.weixin.qq.com/sns/jscode2session",
     "studentBindingCodeLifeTime": 72
 }

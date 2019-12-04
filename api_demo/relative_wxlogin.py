@@ -11,7 +11,7 @@ from host_url import host_url_maker
 host = host_url_maker(sys.argv)
 
 # url + method
-api_url = "{}/api/0/workflow/parent/wxlogin".format(host)
+api_url = "{}/api/0/workflow/relative/wxlogin".format(host)
 method = HTTPMethod.POST
 params = {
     "appid": "wx03932c08a933f9a9",

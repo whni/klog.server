@@ -141,8 +141,8 @@ type StudentMediaQueryReq struct {
 	EndTS      int64              `json:"end_ts" bson:"end_ts"`
 }
 
-// ParentWeChatLoginInfo struct
-type ParentWeChatLoginInfo struct {
+// RelativeWeChatLoginInfo struct
+type RelativeWeChatLoginInfo struct {
 	AppID  string `json:"appid"`
 	Secret string `json:"secret"`
 	JSCode string `json:"js_code"`
