@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func studentGenerateCodeHandler(ctx *gin.Context) {
@@ -20,44 +21,48 @@ func studentGenerateCodeHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var studentInfo Student
+	var studentRelativeBindInfo StudentRelativeBindInfo
 	var err error
-	if err = json.Unmarshal(params.Data, &studentInfo); err != nil {
+	if err = json.Unmarshal(params.Data, &studentRelativeBindInfo); err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
 		return
 	}
 
 	// check input student PID
-	if studentInfo.PID.IsZero() {
+	if studentRelativeBindInfo.StudentPID.IsZero() {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - Please specified student PID", serverErrorMessages[seInputJSONNotValid])
 		return
 	}
-	// // check input student PID and teacher PID
-	// if studentInfo.PID.IsZero() || studentInfo.TeacherPID.IsZero() {
-	// 	response.Status = http.StatusConflict
-	// 	response.Message = fmt.Sprintf("[%s] - Please specified student PID and teacher PID", serverErrorMessages[seInputJSONNotValid])
-	// 	return
-	// }
 
 	// find student by PID
 	var students []*Student
-	students, err = findStudent(studentInfo.PID)
+	students, err = findStudent(studentRelativeBindInfo.StudentPID)
 	if err != nil || len(students) == 0 {
 		response.Status = http.StatusConflict
-		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], studentInfo.PID.Hex())
+		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], studentRelativeBindInfo.StudentPID.Hex())
 		return
 	}
-
-	// match student PID and teacher PID
 	var studentFound = students[0]
-	// if studentInfo.TeacherPID.Hex() != studentFound.TeacherPID.Hex() {
-	// 	response.Status = http.StatusConflict
-	// 	response.Message = fmt.Sprintf("[%s] - teacher PID not matched (input:%s, found:%s)", serverErrorMessages[seResourceNotMatched],
-	// 		studentInfo.TeacherPID.Hex(), studentFound.TeacherPID.Hex())
-	// 	return
-	// }
+
+	// do not generate code if a main relative relationship exists
+	studentReferences, err := findStudentRelativeRef(studentFound.PID, primitive.NilObjectID)
+	var mainReference *StudentRelativeRef = nil
+	if err == nil && len(studentReferences) > 0 {
+		for i := 0; i < len(studentReferences); i++ {
+			if studentReferences[i].IsMain {
+				mainReference = studentReferences[i]
+				break
+			}
+		}
+	}
+	if mainReference != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Student (PID %s) already has a main relative binding (PID %s) -> no binding code generated",
+			serverErrorMessages[seResourceConflict], studentFound.PID.Hex(), mainReference.RelativePID.Hex())
+		return
+	}
 
 	// generate binding code
 	studentFound.BindingCode = xid.New().String()
@@ -68,137 +73,120 @@ func studentGenerateCodeHandler(ctx *gin.Context) {
 	return
 }
 
-func studentBindingParentHandler(ctx *gin.Context) {
-	// 	params := ginContextRequestParameter(ctx)
-	// 	response := GinResponse{
-	// 		Status: http.StatusOK,
-	// 	}
-	// 	defer func() {
-	// 		ginContextProcessResponse(ctx, &response)
-	// 	}()
+// bind student with a main relative
+func studentBindingRelativeHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
 
-	// 	var studentInfo Student
-	// 	var err error
-	// 	if err = json.Unmarshal(params.Data, &studentInfo); err != nil {
-	// 		response.Status = http.StatusBadRequest
-	// 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
-	// 		return
-	// 	}
+	var studentRelativeBindInfo StudentRelativeBindInfo
+	var err error
+	if err = json.Unmarshal(params.Data, &studentRelativeBindInfo); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
 
-	// 	// check student parent wxID and binding code
-	// 	if studentInfo.ParentWXID == "" || studentInfo.BindingCode == "" {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - Please specified valid parent wxID and binding code for student", serverErrorMessages[seInputJSONNotValid])
-	// 		return
-	// 	}
+	// check student binding code and relative wechat id
+	if studentRelativeBindInfo.RelativeWXID == "" || studentRelativeBindInfo.BindingCode == "" {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Please specified valid relative_wxid and binding_code", serverErrorMessages[seInputJSONNotValid])
+		return
+	}
 
-	// 	// avoid parent repeated binding
-	// 	studentForWXID, err := findStudentByParentWXID(studentInfo.ParentWXID)
-	// 	if err == nil && studentForWXID != nil {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - Cannot binding parent wxID since parent (%s) has been already bound to student (%s)",
-	// 			serverErrorMessages[seResourceConflict], studentForWXID.ParentName, studentForWXID.StudentName)
-	// 		return
-	// 	}
+	// find relative by wechat id
+	var relativeFound *Relative
+	relativeFound, err = findRelativeByWXID(studentRelativeBindInfo.RelativeWXID)
+	if err != nil || relativeFound == nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No relative found with wechat id \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeBindInfo.BindingCode)
+		return
+	}
 
-	// 	// find student by binding code
-	// 	var studentFound *Student
-	// 	studentFound, err = findStudentByBindingCode(studentInfo.BindingCode)
-	// 	if err != nil || studentFound == nil {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - No student found with binding code %s", serverErrorMessages[seResourceNotFound], studentInfo.BindingCode)
-	// 		return
-	// 	}
+	// find student by binding code
+	var studentFound *Student
+	studentFound, err = findStudentByBindingCode(studentRelativeBindInfo.BindingCode)
+	if err != nil || studentFound == nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No student found with binding code \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeBindInfo.BindingCode)
+		return
+	}
 
-	// 	// avoid student repeated binding
-	// 	if studentFound.ParentWXID != "" {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - Cannot binding parent wxID since parent (%s) has been already bound to student (%s)",
-	// 			serverErrorMessages[seResourceConflict], studentFound.ParentName, studentFound.StudentName)
-	// 		return
-	// 	}
+	// check if binding code is expired
+	var curTS = int64(time.Now().Unix())
+	if curTS > studentFound.BindingExpire {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Binding code (%s) for student (PID %s) is expired at %v", serverErrorMessages[seResourceExpired],
+			studentFound.BindingCode, studentFound.PID.Hex(), time.Unix(studentFound.BindingExpire, 0).Format(time.RFC3339))
+		return
+	}
 
-	// 	// check if binding code is expired
-	// 	var curTS = int64(time.Now().Unix())
-	// 	if curTS > studentFound.BindingExpire {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - Binding code (%s) for student (PID %s) is expired at %v", serverErrorMessages[seResourceExpired],
-	// 			studentFound.BindingCode, studentFound.PID.Hex(), time.Unix(studentFound.BindingExpire, 0).Format(time.RFC3339))
-	// 		return
-	// 	}
+	var reference StudentRelativeRef
+	reference.StudentPID = studentFound.PID
+	reference.RelativePID = relativeFound.PID
+	reference.IsMain = true
+	if studentRelativeBindInfo.Relationship == "" {
+		reference.Relationship = "Unknown"
+	} else {
+		reference.Relationship = studentRelativeBindInfo.Relationship
+	}
 
-	// 	// update binding information
-	// 	studentFound.ParentWXID = studentInfo.ParentWXID
-	// 	studentFound.ParentName = studentInfo.ParentName
-	// 	studentFound.PhoneNumber = studentInfo.PhoneNumber
-	// 	studentFound.Email = studentInfo.Email
-	// 	studentFound.BindingCode = ""
-	// 	studentFound.BindingExpire = 0
-	// 	updateStudent(studentFound)
+	referencePID, err := createStudentRelativeRef(&reference)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - %s --> could not bind student (PID %s) and relative (PID %s)", serverErrorMessages[seResourceConflict],
+			err.Error(), studentFound.PID.Hex(), relativeFound.PID.Hex())
+		return
+	}
 
-	// 	response.Payload = studentFound
-	// 	return
+	// remove binding code from student information
+	studentFound.BindingCode = ""
+	studentFound.BindingExpire = 0
+	updateStudent(studentFound)
+
+	response.Payload = referencePID
+	return
 }
 
-func studentUnbindingParentHandler(ctx *gin.Context) {
-	// 	params := ginContextRequestParameter(ctx)
-	// 	response := GinResponse{
-	// 		Status: http.StatusOK,
-	// 	}
-	// 	defer func() {
-	// 		ginContextProcessResponse(ctx, &response)
-	// 	}()
+// unbind all relatives for a student (delete main relative-> other should be deleted)
+func studentUnbindingRelativeHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
 
-	// 	var studentInfo Student
-	// 	var err error
-	// 	if err = json.Unmarshal(params.Data, &studentInfo); err != nil {
-	// 		response.Status = http.StatusBadRequest
-	// 		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
-	// 		return
-	// 	}
+	var studentRelativeBindInfo StudentRelativeBindInfo
+	var err error
+	if err = json.Unmarshal(params.Data, &studentRelativeBindInfo); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
 
-	// 	// check student parent wxID and binding code
-	// 	if studentInfo.ParentWXID == "" || studentInfo.PID.IsZero() {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - Please specified valid parent wxID and student PID", serverErrorMessages[seInputJSONNotValid])
-	// 		return
-	// 	}
+	// check student PID
+	if studentRelativeBindInfo.StudentPID.IsZero() {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Please specified valid student PID", serverErrorMessages[seInputJSONNotValid])
+		return
+	}
 
-	// 	// find student by PID
-	// 	var students []*Student
-	// 	students, err = findStudent(studentInfo.PID)
-	// 	if err != nil || len(students) == 0 {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], studentInfo.PID.Hex())
-	// 		return
-	// 	}
-	// 	studentFound := students[0]
+	deleteCnt, err := deleteStudentRelativeRef(studentRelativeBindInfo.StudentPID, primitive.NilObjectID)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - Error occurs during unbind student (PID %s) relative references - %s",
+			serverErrorMessages[seInputJSONNotValid], studentRelativeBindInfo.StudentPID.Hex(), err.Error())
+		return
+	}
 
-	// 	// check parent wxid
-	// 	if studentFound.ParentWXID == "" {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - No need to unbind parent wxID since nothing is in record", serverErrorMessages[seResourceNotFound])
-	// 		return
-	// 	}
-
-	// 	if studentFound.ParentWXID != studentInfo.ParentWXID {
-	// 		response.Status = http.StatusConflict
-	// 		response.Message = fmt.Sprintf("[%s] - Could not unbind parent wxID due to mismatched record (received %s recorded %s)", serverErrorMessages[seResourceNotMatched],
-	// 			studentInfo.ParentWXID, studentFound.ParentWXID)
-	// 		return
-	// 	}
-
-	// 	// update binding information
-	// 	studentFound.ParentWXID = ""
-	// 	studentFound.ParentName = ""
-	// 	studentFound.Email = ""
-	// 	studentFound.PhoneNumber = ""
-	// 	studentFound.BindingCode = ""
-	// 	studentFound.BindingExpire = 0
-	// 	updateStudent(studentFound)
-
-	// 	response.Payload = studentFound
-	// 	return
+	response.Payload = fmt.Sprintf("Unbind %d relatives for student (PID %s)", deleteCnt, studentRelativeBindInfo.StudentPID.Hex())
+	return
 }
 
 func studentMediaQueryHandler(ctx *gin.Context) {

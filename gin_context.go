@@ -27,8 +27,8 @@ var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 var ginWorkflowAPITable = map[string]gin.HandlerFunc{
 	"/api/0/workflow/teacher/login":        teacherLoginHandler,
 	"/api/0/workflow/student/generatecode": studentGenerateCodeHandler,
-	"/api/0/workflow/student/bind":         studentBindingParentHandler,
-	"/api/0/workflow/student/unbind":       studentUnbindingParentHandler,
+	"/api/0/workflow/student/bind":         studentBindingRelativeHandler,
+	"/api/0/workflow/student/unbind":       studentUnbindingRelativeHandler,
 	"/api/0/workflow/student/mediaquery":   studentMediaQueryHandler,
 	"/api/0/workflow/parent/wxlogin":       parentWeChatLoginHandler,
 	"/api/0/workflow/parent/findstudent":   parentFindBoundStudentHandler,

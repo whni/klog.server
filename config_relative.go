@@ -190,6 +190,28 @@ func findRelative(pid primitive.ObjectID) ([]*Relative, error) {
 	return relatives, nil
 }
 
+// find relative by wechat id, return relative slice, error
+func findRelativeByWXID(relativeWXID string) (*Relative, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModRelativeMgmt, err.Error())
+		}
+	}()
+
+	var relative Relative
+	var findFilter = bson.D{{"relative_wxid", relativeWXID}}
+	err = dbPool.Collection(DBCollectionRelative).FindOne(context.TODO(), findFilter).Decode(&relative)
+	if err != nil {
+		err = fmt.Errorf("[%s] - could not find relative by wechat id %s [errinfo %s]", serverErrorMessages[seDBResourceQuery],
+			relativeWXID, err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModRelativeMgmt, "Found relative from DB (WXID %s PID=%s)", relativeWXID, relative.PID.Hex())
+	return &relative, nil
+}
+
 // create relative, return PID, error
 func createRelative(relative *Relative) (primitive.ObjectID, error) {
 	var err error

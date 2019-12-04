@@ -112,6 +112,14 @@ type StudentRelativeRef struct {
 	IsMain       bool               `json:"is_main" bson:"is_main"`
 }
 
+// StudentRelativeBindInfo struct
+type StudentRelativeBindInfo struct {
+	StudentPID   primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	RelativeWXID string             `json:"relative_wxid" bson:"relative_wxid"`
+	BindingCode  string             `json:"binding_code" bson:"binding_code"`
+	Relationship string             `json:"relationship" bson:"relationship"`
+}
+
 // StudentCourseRef struct
 type StudentCourseRef struct {
 	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`

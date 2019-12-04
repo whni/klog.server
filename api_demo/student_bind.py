@@ -14,8 +14,7 @@ host = host_url_maker(sys.argv)
 api_url = "{}/api/0/workflow/student/generatecode".format(host)
 method = HTTPMethod.POST
 params = {
-    "pid": "102030405060708090000001",          # student pid
-    "teacher_pid": "102030405060708090000001"
+    "student_pid": "102030405060708090000001",          # student pid
 }
 
 http_req = HTTPRequest(api_url, method, params)
@@ -23,15 +22,12 @@ http_req.send()
 http_req.print_resp()
 
 # binding
-
 binding_code = http_req.resp.json()["payload"]["binding_code"]
 api_url = "{}/api/0/workflow/student/bind".format(host)
 method = HTTPMethod.POST
 params = {
-    "parent_wxid": "orgQa44wYyOpdShmXAsHtSfjMjeQ",
-    "parent_name": "Bruce Wayne",
-    "phone_number": "777-888-9999",
-    "email": "bruce@klog.com",
+    "relative_wxid": "relative_wxid_1",
+    "relationship": "Mother",
     "binding_code": binding_code
 }
 
