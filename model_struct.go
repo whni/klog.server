@@ -120,6 +120,15 @@ type StudentRelativeBindInfo struct {
 	Relationship string             `json:"relationship" bson:"relationship"`
 }
 
+// StudentRelativeEditInfo struct
+type StudentRelativeEditInfo struct {
+	StudentPID      primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	RelativeWXID    string             `json:"relative_wxid" bson:"relative_wxid"`
+	SecRelativeWXID string             `json:"sec_relative_wxid" bson:"sec_relative_wxid"`
+	Relationship    string             `json:"relationship" bson:"relationship"`
+	Operation       string             `json:"operation" bson:"operation"`
+}
+
 // StudentCourseRef struct
 type StudentCourseRef struct {
 	PID        primitive.ObjectID `json:"pid" bson:"_id,omitempty"`

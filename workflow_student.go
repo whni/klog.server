@@ -74,7 +74,7 @@ func studentGenerateCodeHandler(ctx *gin.Context) {
 }
 
 // bind student with a main relative
-func studentBindingRelativeHandler(ctx *gin.Context) {
+func studentBindingMainRelativeHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -154,7 +154,7 @@ func studentBindingRelativeHandler(ctx *gin.Context) {
 }
 
 // unbind all relatives for a student (delete main relative-> other should be deleted)
-func studentUnbindingRelativeHandler(ctx *gin.Context) {
+func studentUnbindingAllRelativeHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,

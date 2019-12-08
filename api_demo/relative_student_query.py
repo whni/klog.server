@@ -30,6 +30,34 @@ else:
     print("No student-relative references found for wechat id: {}".format(params["relative_wxid"]))
     exit(0)
 
+# edit student-relative info as student-main-relative
+api_url = "{}/api/0/workflow/relative/extra/edit".format(host)
+method = HTTPMethod.POST
+params = {
+    "student_pid":          "102030405060708090000002",
+    "relative_wxid":        "relative_wxid_2",
+    "sec_relative_wxid":    "relative_wxid_3",
+    "relationship":         "uncle",
+    "operation":            "add",
+}
+print("[add student and relative record]")
+http_req = HTTPRequest(api_url, method, params)
+http_req.send()
+http_req.print_resp()
+
+api_url = "{}/api/0/workflow/relative/extra/edit".format(host)
+method = HTTPMethod.POST
+params = {
+    "student_pid":          "102030405060708090000002",
+    "relative_wxid":        "relative_wxid_2",
+    "sec_relative_wxid":    "relative_wxid_3",
+    "relationship":         "uncle",
+    "operation":            "delete",
+}
+print("[add student and relative record]")
+http_req = HTTPRequest(api_url, method, params)
+http_req.send()
+http_req.print_resp()
 
 # get cloud media for student
 api_url = "{}/api/0/workflow/student/mediaquery".format(host)

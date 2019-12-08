@@ -110,3 +110,102 @@ func relativeFindBoundStudentHandler(ctx *gin.Context) {
 	response.Payload = references
 	return
 }
+
+// main relative add or delete other relative
+func relativeExtraEditHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
+
+	var studentRelativeEditInfo StudentRelativeEditInfo
+	var err error
+	if err = json.Unmarshal(params.Data, &studentRelativeEditInfo); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
+
+	if studentRelativeEditInfo.StudentPID.IsZero() ||
+		studentRelativeEditInfo.RelativeWXID == "" || studentRelativeEditInfo.SecRelativeWXID == "" ||
+		(studentRelativeEditInfo.Operation != "add" && studentRelativeEditInfo.Operation != "delete") {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - Could not retrieve relative_wxid", serverErrorMessages[seInputJSONNotValid])
+		return
+	}
+
+	// find relative by wechat id
+	var relativeFound *Relative
+	relativeFound, err = findRelativeByWXID(studentRelativeEditInfo.RelativeWXID)
+	if err != nil || relativeFound == nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No relative found with wechat id \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeEditInfo.RelativeWXID)
+		return
+	}
+	// check relative is main
+	studentReferences, err := findStudentRelativeRef(studentRelativeEditInfo.StudentPID, relativeFound.PID)
+
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - %s -> could not search student-relative references with given relative_wxid %s",
+			serverErrorMessages[seResourceNotFound], err.Error(), studentRelativeEditInfo.RelativeWXID)
+		return
+	}
+
+	if len(studentReferences) == 0 || !studentReferences[0].IsMain {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - %s -> could not search student-main-relative references with given relative_wxid %s",
+			serverErrorMessages[seResourceNotFound], err.Error(), studentRelativeEditInfo.RelativeWXID)
+		return
+	}
+	// find second relative by wechat id, if none, create a new one for add case or return for del case
+	var secRelativeFound *Relative
+	secRelativeFound, err = findRelativeByWXID(studentRelativeEditInfo.SecRelativeWXID)
+	if err != nil || (secRelativeFound == nil && studentRelativeEditInfo.Operation == "delete") {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No relative found with wechat id \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeEditInfo.SecRelativeWXID)
+		return
+	}
+	// create a new one
+	if secRelativeFound == nil && studentRelativeEditInfo.Operation == "add" {
+		var secRelative Relative
+		secRelative.RelativeWXID = studentRelativeEditInfo.SecRelativeWXID
+		_, err = createRelative(&secRelative)
+		if err != nil {
+			response.Status = http.StatusConflict
+			response.Message = err.Error()
+			return
+		}
+		secRelativeFound, err = findRelativeByWXID(studentRelativeEditInfo.SecRelativeWXID)
+		if err != nil {
+			response.Status = http.StatusConflict
+			response.Message = fmt.Sprintf("[%s] - No relative found with wechat id after created \"%s\"", serverErrorMessages[seResourceNotFound], studentRelativeEditInfo.SecRelativeWXID)
+			return
+		}
+	}
+	var reference StudentRelativeRef
+	reference.StudentPID = studentRelativeEditInfo.StudentPID
+	reference.RelativePID = secRelativeFound.PID
+	reference.IsMain = false
+	reference.Relationship = studentRelativeEditInfo.Relationship
+
+	if studentRelativeEditInfo.Operation == "add" {
+		_, err = createStudentRelativeRef(&reference)
+	} else {
+		_, err = deleteStudentRelativeRef(reference.StudentPID, reference.RelativePID)
+	}
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - could not %s student-relative references with given student_id %s, relative_wxid %s and secrelative_wxid %s",
+			serverErrorMessages[seResourceNotChange], studentRelativeEditInfo.Operation, studentRelativeEditInfo.StudentPID,
+			studentRelativeEditInfo.RelativeWXID, studentRelativeEditInfo.SecRelativeWXID)
+	}
+
+	response.Payload = fmt.Sprintf("[%s] - success %s student-relative references with given student_id %s, relative_wxid %s and secrelative_wxid %s",
+		serverErrorMessages[seNoError], studentRelativeEditInfo.Operation, studentRelativeEditInfo.StudentPID,
+		studentRelativeEditInfo.RelativeWXID, studentRelativeEditInfo.SecRelativeWXID)
+	return
+}
