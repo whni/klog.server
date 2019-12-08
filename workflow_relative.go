@@ -187,15 +187,18 @@ func relativeExtraEditHandler(ctx *gin.Context) {
 		}
 	}
 	var reference StudentRelativeRef
+	var referencePID primitive.ObjectID
 	reference.StudentPID = studentRelativeEditInfo.StudentPID
 	reference.RelativePID = secRelativeFound.PID
 	reference.IsMain = false
 	reference.Relationship = studentRelativeEditInfo.Relationship
 
 	if studentRelativeEditInfo.Operation == "add" {
-		_, err = createStudentRelativeRef(&reference)
+		referencePID, err = createStudentRelativeRef(&reference)
+		response.Payload = referencePID
 	} else {
 		_, err = deleteStudentRelativeRef(reference.StudentPID, reference.RelativePID)
+		response.Payload = 1
 	}
 	if err != nil {
 		response.Status = http.StatusConflict
@@ -203,9 +206,5 @@ func relativeExtraEditHandler(ctx *gin.Context) {
 			serverErrorMessages[seResourceNotChange], studentRelativeEditInfo.Operation, studentRelativeEditInfo.StudentPID,
 			studentRelativeEditInfo.RelativeWXID, studentRelativeEditInfo.SecRelativeWXID)
 	}
-
-	response.Payload = fmt.Sprintf("[%s] - success %s student-relative references with given student_id %s, relative_wxid %s and secrelative_wxid %s",
-		serverErrorMessages[seNoError], studentRelativeEditInfo.Operation, studentRelativeEditInfo.StudentPID,
-		studentRelativeEditInfo.RelativeWXID, studentRelativeEditInfo.SecRelativeWXID)
 	return
 }
