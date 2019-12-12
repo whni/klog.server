@@ -40,8 +40,29 @@ func studentGetHandler(ctx *gin.Context) {
 	var students []*Student
 	var err error
 	var pid primitive.ObjectID
+	var findFilter bson.M
+	//findFilter = bson.D{{}}
 	if params.PID == "all" {
 		pid = primitive.NilObjectID
+		if params.FKEY == "course_pid" {
+			var fid primitive.ObjectID
+			fid, err = primitive.ObjectIDFromHex(params.FID)
+			if err != nil {
+				response.Status = http.StatusBadRequest
+				response.Message = fmt.Sprintf("[%s] - Please specifiy a valid FID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+				return
+			}
+			// read from course-student collection to find all student list
+			//findFilter = append(findFilter, bson.E{"course_pid", fid})
+			var studentCourseReferences []*StudentCourseRef
+			var studentPids []primitive.ObjectID
+			studentCourseReferences, err = findStudentCourseRef(primitive.NilObjectID, fid)
+			for i := 0; i < len(studentCourseReferences); i++ {
+				studentPids = append(studentPids, studentCourseReferences[i].StudentPID)
+			}
+			findFilter = bson.M{"_id": bson.M{"$in": studentPids}}
+
+		}
 	} else {
 		pid, err = primitive.ObjectIDFromHex(params.PID)
 		if err != nil {
@@ -49,10 +70,12 @@ func studentGetHandler(ctx *gin.Context) {
 			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
 			return
 		}
+		findFilter = bson.M{"_id": pid}
+		//append(findFilter, bson.E{"_id", pid})
 	}
 
 	// pid: nil objectid for all, others for specified one
-	students, err = findStudent(pid)
+	students, err = findStudent(pid, findFilter)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -154,7 +177,7 @@ func studentDeleteHandler(ctx *gin.Context) {
 }
 
 // find student, return student slice, error
-func findStudent(pid primitive.ObjectID) ([]*Student, error) {
+func findStudent(pid primitive.ObjectID, findFilter bson.M) ([]*Student, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -163,12 +186,12 @@ func findStudent(pid primitive.ObjectID) ([]*Student, error) {
 	}()
 
 	var findOptions = options.Find()
-	var findFilter bson.D
+	//var findFilter bson.D
 	if pid.IsZero() {
-		findFilter = bson.D{{}}
+		//findFilter = bson.D{{}}
 	} else {
 		findOptions.SetLimit(1)
-		findFilter = bson.D{{"_id", pid}}
+		//findFilter = bson.D{{"_id", pid}}
 	}
 
 	findCursor, err := dbPool.Collection(DBCollectionStudent).Find(context.TODO(), findFilter, findOptions)
@@ -323,7 +346,9 @@ func deleteStudent(pid primitive.ObjectID) (int, error) {
 		return 0, err
 	}
 
-	students, findErr := findStudent(pid)
+	var findFilter bson.M
+
+	students, findErr := findStudent(pid, findFilter)
 	if findErr != nil {
 		err = fmt.Errorf("[%s] - could not delete student (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
 		return 0, err

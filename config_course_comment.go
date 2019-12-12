@@ -250,9 +250,11 @@ func createCourseComment(courseComment *CourseComment) (primitive.ObjectID, erro
 	}
 
 	// person type check
+	var findFilter bson.D
+	findFilter = bson.D{{}}
 	if courseComment.CommentPersonType == CommentPersonTypeTeacher {
 		var teachers []*Teacher
-		teachers, err = findTeacher(courseComment.CommentPersonPID)
+		teachers, err = findTeacher(courseComment.CommentPersonPID, findFilter)
 		if err != nil || len(teachers) == 0 {
 			err = fmt.Errorf("[%s] - No comment person (%s) found with PID %s", serverErrorMessages[seResourceNotFound],
 				courseComment.CommentPersonType, courseComment.CourseRecordPID.Hex())
@@ -310,9 +312,11 @@ func updateCourseComment(courseComment *CourseComment) error {
 	}
 
 	// person type check
+	var findFilter bson.D
+	findFilter = bson.D{{}}
 	if courseComment.CommentPersonType == CommentPersonTypeTeacher {
 		var teachers []*Teacher
-		teachers, err = findTeacher(courseComment.CommentPersonPID)
+		teachers, err = findTeacher(courseComment.CommentPersonPID, findFilter)
 		if err != nil || len(teachers) == 0 {
 			err = fmt.Errorf("[%s] - No comment person (%s) found with PID %s", serverErrorMessages[seResourceNotFound],
 				courseComment.CommentPersonType, courseComment.CourseRecordPID.Hex())

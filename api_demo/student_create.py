@@ -54,3 +54,13 @@ for params in student_params:
     http_req = HTTPRequest(api_url, method, params)
     http_req.send()
     http_req.print_resp()
+
+# Query student
+api_url = "{}/api/0/config/student?pid=all&fkey=course_pid&fid=102030405060708090000001".format(host)
+method = HTTPMethod.GET
+params = {}
+
+print("[Query student]")
+http_req = HTTPRequest(api_url, method, params)
+http_req.send()
+http_req.print_resp()

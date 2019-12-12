@@ -286,7 +286,9 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	students, err := findStudent(cloudMedia.StudentPID)
+	var findFilter bson.M
+
+	students, err := findStudent(cloudMedia.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No associate student found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.StudentPID.Hex())
 		return primitive.NilObjectID, err
@@ -361,7 +363,8 @@ func updateCloudMedia(cloudMedia *CloudMedia) error {
 		err = fmt.Errorf("[%s] - No student PID associated", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	students, err := findStudent(cloudMedia.StudentPID)
+	var findFilter bson.M
+	students, err := findStudent(cloudMedia.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No associated student found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.StudentPID.Hex())
 		return err

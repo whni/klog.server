@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -37,8 +38,9 @@ func studentGenerateCodeHandler(ctx *gin.Context) {
 	}
 
 	// find student by PID
+	var findFilter bson.M
 	var students []*Student
-	students, err = findStudent(studentRelativeBindInfo.StudentPID)
+	students, err = findStudent(studentRelativeBindInfo.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], studentRelativeBindInfo.StudentPID.Hex())
@@ -209,8 +211,9 @@ func studentMediaQueryHandler(ctx *gin.Context) {
 	}
 
 	// find student by PID
+	var findFilter bson.M
 	var students []*Student
-	students, err = findStudent(mediaReq.StudentPID)
+	students, err = findStudent(mediaReq.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		response.Status = http.StatusConflict
 		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], mediaReq.StudentPID.Hex())

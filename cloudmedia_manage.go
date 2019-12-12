@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Azure/azure-storage-blob-go/azblob"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -14,8 +15,10 @@ func cloudMediaRecycle() error {
 	}()
 
 	// DB student images
+	var findFilter bson.M
+
 	var students []*Student
-	students, err = findStudent(primitive.NilObjectID)
+	students, err = findStudent(primitive.NilObjectID, findFilter)
 	if err != nil {
 		return err
 	}

@@ -233,7 +233,8 @@ func createStudentRelativeRef(reference *StudentRelativeRef) (primitive.ObjectID
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	students, err := findStudent(reference.StudentPID)
+	var findFilter bson.M
+	students, err := findStudent(reference.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No students found with PID %s", serverErrorMessages[seResourceNotFound], reference.StudentPID.Hex())
 		return primitive.NilObjectID, err
@@ -304,7 +305,8 @@ func updateStudentRelativeRef(reference *StudentRelativeRef) error {
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	students, err := findStudent(reference.StudentPID)
+	var findFilter bson.M
+	students, err := findStudent(reference.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No students found with PID %s", serverErrorMessages[seResourceNotFound], reference.StudentPID.Hex())
 		return err

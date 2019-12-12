@@ -236,7 +236,9 @@ func createCourse(course *Course) (primitive.ObjectID, error) {
 		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	teachers, err := findTeacher(course.TeacherPID)
+	var findFilter bson.D
+	findFilter = bson.D{{}}
+	teachers, err := findTeacher(course.TeacherPID, findFilter)
 	if err != nil || len(teachers) == 0 {
 		err = fmt.Errorf("[%s] - No teachers found with PID %s", serverErrorMessages[seResourceNotFound], course.TeacherPID.Hex())
 		return primitive.NilObjectID, err
@@ -249,7 +251,7 @@ func createCourse(course *Course) (primitive.ObjectID, error) {
 			return primitive.NilObjectID, err
 		}
 
-		assistants, err := findTeacher(course.AssistantPID)
+		assistants, err := findTeacher(course.AssistantPID, findFilter)
 		if err != nil || len(assistants) == 0 {
 			err = fmt.Errorf("[%s] - No assistants found with PID %s", serverErrorMessages[seResourceNotFound], course.AssistantPID.Hex())
 			return primitive.NilObjectID, err
@@ -298,7 +300,9 @@ func updateCourse(course *Course) error {
 		err = fmt.Errorf("[%s] - No teacher PID specified", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	teachers, err := findTeacher(course.TeacherPID)
+	var findFilter bson.D
+	findFilter = bson.D{{}}
+	teachers, err := findTeacher(course.TeacherPID, findFilter)
 	if err != nil || len(teachers) == 0 {
 		err = fmt.Errorf("[%s] - No teachers found with PID %s", serverErrorMessages[seResourceNotFound], course.TeacherPID.Hex())
 		return err
@@ -311,7 +315,7 @@ func updateCourse(course *Course) error {
 			return err
 		}
 
-		assistants, err := findTeacher(course.AssistantPID)
+		assistants, err := findTeacher(course.AssistantPID, findFilter)
 		if err != nil || len(assistants) == 0 {
 			err = fmt.Errorf("[%s] - No assistants found with PID %s", serverErrorMessages[seResourceNotFound], course.AssistantPID.Hex())
 			return err

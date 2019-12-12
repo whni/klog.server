@@ -41,6 +41,8 @@ type GinParameter struct {
 	Token string // auth token
 	PID   string // primary id
 	SID   string // secondary id
+	FKEY  string // filter key
+	FID   string // filter id
 	Data  []byte // data content
 }
 
@@ -59,6 +61,8 @@ func ginContextRequestParameter(ctx *gin.Context) *GinParameter {
 
 	var primaryKey = ctx.Request.URL.Query().Get("pid")
 	var secondarykey = ctx.Request.URL.Query().Get("sid")
+	var filterKey = ctx.Request.URL.Query().Get("fkey")
+	var filterId = ctx.Request.URL.Query().Get("fid")
 
 	var bodyData []byte = nil
 	switch strings.ToLower(ctx.Request.Method) {
@@ -71,7 +75,7 @@ func ginContextRequestParameter(ctx *gin.Context) *GinParameter {
 	default:
 	}
 
-	return &GinParameter{tokenString, primaryKey, secondarykey, bodyData}
+	return &GinParameter{tokenString, primaryKey, secondarykey, filterKey, filterId, bodyData}
 }
 
 func ginContextProcessResponse(ctx *gin.Context, response *GinResponse) {

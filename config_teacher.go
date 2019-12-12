@@ -32,8 +32,20 @@ func teacherGetHandler(ctx *gin.Context) {
 	var teachers []*Teacher
 	var err error
 	var pid primitive.ObjectID
+	var findFilter bson.D
+	findFilter = bson.D{{}}
 	if params.PID == "all" {
 		pid = primitive.NilObjectID
+		if params.FKEY == "institute_pid" {
+			var fid primitive.ObjectID
+			fid, err = primitive.ObjectIDFromHex(params.FID)
+			if err != nil {
+				response.Status = http.StatusBadRequest
+				response.Message = fmt.Sprintf("[%s] - Please specifiy a valid FID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+				return
+			}
+			findFilter = append(findFilter, bson.E{"institute_pid", fid})
+		}
 	} else {
 		pid, err = primitive.ObjectIDFromHex(params.PID)
 		if err != nil {
@@ -41,10 +53,11 @@ func teacherGetHandler(ctx *gin.Context) {
 			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
 			return
 		}
+		findFilter = append(findFilter, bson.E{"_id", pid})
 	}
 
 	// pid: nil objectid for all, others for specified one
-	teachers, err = findTeacher(pid)
+	teachers, err = findTeacher(pid, findFilter)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -146,7 +159,7 @@ func teacherDeleteHandler(ctx *gin.Context) {
 }
 
 // find teacher, return teacher slice, error
-func findTeacher(pid primitive.ObjectID) ([]*Teacher, error) {
+func findTeacher(pid primitive.ObjectID, findFilter bson.D) ([]*Teacher, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -155,12 +168,12 @@ func findTeacher(pid primitive.ObjectID) ([]*Teacher, error) {
 	}()
 
 	var findOptions = options.Find()
-	var findFilter bson.D
+	//var findFilter bson.D
 	if pid.IsZero() {
-		findFilter = bson.D{{}}
+		//findFilter = bson.D{{}}
 	} else {
 		findOptions.SetLimit(1)
-		findFilter = bson.D{{"_id", pid}}
+		//findFilter = bson.D{{"_id", pid}}
 	}
 
 	findCursor, err := dbPool.Collection(DBCollectionTeacher).Find(context.TODO(), findFilter, findOptions)
