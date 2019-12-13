@@ -424,6 +424,74 @@ db.createCollection("student_course_ref", {
 db.student_course_ref.createIndex( { "course_pid": 1, "student_pid": 1 }, { unique: true } );
 
 
+// course collection
+db.createCollection("template", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: [ "template_name", "template_tags", "template_music", "template_begin_movie", "template_end_movie", "template_json", "template_clip_number_needed", "template_clip_time_content", "template_clip_time_opening", "template_clip_time_ending", "template_filter"],
+            properties: {
+                template_name: {
+                    bsonType: "string",
+                    minLength: 2,
+                    description: "required string (>= 2 length)"
+                },
+                template_tags: {
+                    bsonType: ["array"],
+                    items: {
+                        bsonType: "string",
+                        description: "required tag string"
+                    },
+                    description: "template group tags"
+                },
+                template_music: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_begin_movie: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_end_movie: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_json: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_clip_number_needed: {
+                    bsonType: "int",
+                    description: "required int"
+                },
+                template_clip_time_content: {
+                    bsonType: ["array"],
+                    items: {
+                        bsonType: "int",
+                        description: "required time duration time"
+                    },
+                    description: "template clip duration time"
+                },
+                template_clip_time_opening: {
+                    bsonType: "int",
+                    description: "required int"
+                },
+                template_clip_time_ending: {
+                    bsonType: "int",
+                    description: "required int"
+                },
+                template_filter: {
+                    bsonType: "string",
+                    description: "required string"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+db.course.createIndex({"template_name": 1}, {unique: true});
+
 // db info
 print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);
 
