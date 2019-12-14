@@ -30,7 +30,7 @@ for i in range(len(media_name_array)):
             "media_name": media_name,
             "media_url": "https://klogresourcediag159.blob.core.windows.net/klog-cloud-media/{}".format(media_name),
             "rank_score": random.uniform(50, 100),
-            "media_tags": ["sport", "running"]
+            "media_tags": ["sport", "running","thred", "exercise"]
         }
 
         print("[create cloudmedia for {}]".format(media_name))
