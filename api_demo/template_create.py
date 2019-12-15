@@ -1039,7 +1039,7 @@ for params in template_params:
 
 # Query template
 # url + method
-api_url = "{}/api/0/config/template?pid=all".format(host)
+api_url = "{}/api/0/config/template?pid=all&fkey=template_name&fid=008_Festival_general".format(host)
 method = HTTPMethod.GET
 params = {}
 print("[Query template]")
