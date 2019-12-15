@@ -467,10 +467,21 @@ db.createCollection("template", {
                 template_clip_time_content: {
                     bsonType: ["array"],
                     items: {
-                        bsonType: "int",
-                        description: "required time duration time"
+                        bsonType: "object",
+                        required: ["clip_duration", "clip_sequence"],
+                        description: "required object with clip_duration/clip_sequence fields",
+                        properties: {
+                            clip_duration: {
+                                bsonType: "int",
+                                description: "clip duration",
+                            },
+                            clip_sequence: {
+                                bsonType: "int",
+                                description: "clip sequence",
+                            }
+                        }
                     },
-                    description: "template clip duration time"
+                    description: "template clip content array"
                 },
                 template_clip_time_opening: {
                     bsonType: "int",

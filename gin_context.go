@@ -20,6 +20,7 @@ var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/relative":                   relativeConfigHandlerTable,
 	"/api/0/config/student":                    studentConfigHandlerTable,
 	"/api/0/config/cloudmedia":                 cloudMediaConfigHandlerTable,
+	"/api/0/config/template":                   templateConfigHandlerTable,
 	"/api/0/config/reference/student_relative": studentRelativeRefConfigHandlerTable,
 	"/api/0/config/reference/student_course":   studentCourseRefConfigHandlerTable,
 }

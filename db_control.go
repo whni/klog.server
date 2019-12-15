@@ -18,6 +18,7 @@ const (
 	DBCollectionRelative           = "relative"
 	DBCollectionStudent            = "student"
 	DBCollectionCloudMedia         = "cloudmedia"
+	DBCollectionTemplate           = "template"
 	DBCollectionStudentRelativeRef = "student_relative_ref"
 	DBCollectionStudentCourseRef   = "student_course_ref"
 )

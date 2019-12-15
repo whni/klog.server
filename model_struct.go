@@ -179,6 +179,11 @@ var cloudMediaTypeMap = map[string]bool{
 	CloudMediaTypeOthers: true,
 }
 
+type ClipContent struct {
+	ClipDuration int `json:"clip_duration" bson:"clip_duration"`
+	ClipSequence int `json:"clip_sequence" bson:"clip_sequence"`
+}
+
 // Template struct
 type Template struct {
 	PID                      primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
@@ -189,7 +194,7 @@ type Template struct {
 	TemplateEndMovie         string             `json:"template_end_movie" bson:"template_end_movie"`
 	TemplateJSON             string             `json:"template_json" bson:"template_json"`
 	TemplateClipNumberNeeded int                `json:"template_clip_number_needed" bson:"template_clip_number_needed"`
-	TemplateClipTimeContent  []int              `json:"template_clip_time_content" bson:"template_clip_time_content"`
+	TemplateClipTimeContent  []ClipContent      `json:"template_clip_time_content" bson:"template_clip_time_content"`
 	TemplateClipTimeOpening  int                `json:"template_clip_time_opening" bson:"template_clip_time_opening"`
 	TemplateClipTimeEnding   int                `json:"template_clip_time_ending" bson:"template_clip_time_ending"`
 	TemplateFilter           string             `json:"template_filter" bson:"template_filter"`
