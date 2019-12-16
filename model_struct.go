@@ -180,22 +180,22 @@ var cloudMediaTypeMap = map[string]bool{
 }
 
 type ClipContent struct {
-	ClipDuration int `json:"clip_duration" bson:"clip_duration"`
-	ClipSequence int `json:"clip_sequence" bson:"clip_sequence"`
+	ClipContent  string `json:"clip_content" bson:"clip_content"`
+	ClipDuration int    `json:"clip_duration" bson:"clip_duration"`
+	ClipSequence int    `json:"clip_sequence" bson:"clip_sequence"`
+	Type         string `json:"type" bson:"type"`
 }
 
 // Template struct
 type Template struct {
 	PID                      primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	TemplateClipNumberNeeded int                `json:"template_clip_number_needed" bson:"template_clip_number_needed"`
+	TemplateClipNumberTotal  int                `json:"template_clip_number_total" bson:"template_clip_number_total"`
+	TemplateClipTimeContent  []ClipContent      `json:"template_clip_time_content" bson:"template_clip_time_content"`
+	TemplateFilter           string             `json:"template_filter" bson:"template_filter"`
+	TemplateJSON             string             `json:"template_json" bson:"template_json"`
+	TemplateMP4Movie         string             `json:"template_mp4_movie" bson:"template_mp4_movie"`
+	TemplateMusic            string             `json:"template_music" bson:"template_music"`
 	TemplateName             string             `json:"template_name" bson:"template_name"`
 	TemplateTags             []string           `json:"template_tags" bson:"template_tags"`
-	TemplateMusic            string             `json:"template_music" bson:"template_music"`
-	TemplateBeginMovie       string             `json:"template_begin_movie" bson:"template_begin_movie"`
-	TemplateEndMovie         string             `json:"template_end_movie" bson:"template_end_movie"`
-	TemplateJSON             string             `json:"template_json" bson:"template_json"`
-	TemplateClipNumberNeeded int                `json:"template_clip_number_needed" bson:"template_clip_number_needed"`
-	TemplateClipTimeContent  []ClipContent      `json:"template_clip_time_content" bson:"template_clip_time_content"`
-	TemplateClipTimeOpening  int                `json:"template_clip_time_opening" bson:"template_clip_time_opening"`
-	TemplateClipTimeEnding   int                `json:"template_clip_time_ending" bson:"template_clip_time_ending"`
-	TemplateFilter           string             `json:"template_filter" bson:"template_filter"`
 }

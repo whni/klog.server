@@ -429,8 +429,59 @@ db.createCollection("template", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: [ "template_name", "template_tags", "template_music", "template_begin_movie", "template_end_movie", "template_json", "template_clip_number_needed", "template_clip_time_content", "template_clip_time_opening", "template_clip_time_ending", "template_filter"],
+            required: [ "template_clip_number_needed", "template_clip_number_total", "template_clip_time_content","template_filter","template_json", "template_mp4_movie", "template_music", "template_name", "template_tags"],
             properties: {
+                template_clip_number_needed: {
+                    bsonType: "int",
+                    description: "required int"
+                },
+                template_clip_number_total: {
+                    bsonType: "int",
+                    description: "required int"
+                },
+                template_clip_time_content: {
+                    bsonType: ["array"],
+                    items: {
+                        bsonType: "object",
+                        required: ["clip_content","clip_duration", "clip_sequence","type"],
+                        description: "required object with clip_duration/clip_sequence fields",
+                        properties: {
+                            clip_content: {
+                                bsonType: "string",
+                                description: "clip content",
+                            },
+                            clip_duration: {
+                                bsonType: "int",
+                                description: "clip duration",
+                            },
+                            clip_sequence: {
+                                bsonType: "int",
+                                description: "clip sequence",
+                            },
+                            type: {
+                                bsonType: "string",
+                                description: "clip type",
+                            }
+                        }
+                    },
+                    description: "template clip content array"
+                },
+                template_filter: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_json: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_mp4_movie: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                template_music: {
+                    bsonType: "string",
+                    description: "required string"
+                }, 
                 template_name: {
                     bsonType: "string",
                     minLength: 2,
@@ -442,66 +493,15 @@ db.createCollection("template", {
                         bsonType: "string",
                         description: "required tag string"
                     },
-                    description: "template group tags"
-                },
-                template_music: {
-                    bsonType: "string",
-                    description: "required string"
-                },
-                template_begin_movie: {
-                    bsonType: "string",
-                    description: "required string"
-                },
-                template_end_movie: {
-                    bsonType: "string",
-                    description: "required string"
-                },
-                template_json: {
-                    bsonType: "string",
-                    description: "required string"
-                },
-                template_clip_number_needed: {
-                    bsonType: "int",
-                    description: "required int"
-                },
-                template_clip_time_content: {
-                    bsonType: ["array"],
-                    items: {
-                        bsonType: "object",
-                        required: ["clip_duration", "clip_sequence"],
-                        description: "required object with clip_duration/clip_sequence fields",
-                        properties: {
-                            clip_duration: {
-                                bsonType: "int",
-                                description: "clip duration",
-                            },
-                            clip_sequence: {
-                                bsonType: "int",
-                                description: "clip sequence",
-                            }
-                        }
-                    },
-                    description: "template clip content array"
-                },
-                template_clip_time_opening: {
-                    bsonType: "int",
-                    description: "required int"
-                },
-                template_clip_time_ending: {
-                    bsonType: "int",
-                    description: "required int"
-                },
-                template_filter: {
-                    bsonType: "string",
-                    description: "required string"
-                }
+                    description: "template desc tags"
+                }     
             }
         }
     },
     validationLevel: "strict",
     validationAction: "error"
 });
-db.course.createIndex({"template_name": 1}, {unique: true});
+db.template.createIndex({"template_name": 1}, {unique: true});
 
 // db info
 print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);

@@ -17,3 +17,4 @@ python3 api_demo/student_unbind.py
 python3 api_demo/student_bind.py
 python3 api_demo/relative_student_query.py
 
+python3 api_demo/template_create.py

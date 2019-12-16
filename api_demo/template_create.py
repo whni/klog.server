@@ -20,25 +20,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
-                "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_content": "template_food.zip",
+                "clip_duration": 5,
+                "clip_sequence": 1,
+                "type": "json"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
-                "clip_duration": 5,
-                "clip_sequence": 4
-            }
-        ],
-        "template_clip_time_json": [
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 3,
+                "type": "video"
+            },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 1
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_food.zip",
         "template_mp4_movie": "null",
@@ -56,33 +61,42 @@ template_params = [
         "template_clip_number_total": 6,
         "template_clip_time_content": [
             {
-                "clip_duration": 4,
-                "clip_sequence": 2
-            },
-            {
-                "clip_duration": 4,
-                "clip_sequence": 3
-            },
-            {
+                "clip_content": "template_food.zip",
                 "clip_duration": 5,
-                "clip_sequence": 4
+                "clip_sequence": 1,
+                "type": "json"
             },
             {
-                "clip_duration": 5,
-                "clip_sequence": 5
-            },
-            {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 6
+                "clip_sequence": 2,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 3,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 5,
+                "clip_sequence": 4,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 5,
+                "clip_sequence": 5,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 6,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": [
-            {
-                "clip_duration": 5,
-                "clip_sequence": 1
-            }
-        ],
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_food.zip",
         "template_mp4_movie": "null",
@@ -95,45 +109,58 @@ template_params = [
         ]
     },
     {
-        "template_clip_number_needed": 5,
+        "template_clip_number_needed": 7,
         "template_clip_number_total": 8,
         "template_clip_time_content": [
             {
-                "clip_duration": 4,
-                "clip_sequence": 2
-            },
-            {
-                "clip_duration": 4,
-                "clip_sequence": 3
-            },
-            {
+                "clip_content": "template_food.zip",
                 "clip_duration": 5,
-                "clip_sequence": 4
+                "clip_sequence": 1,
+                "type": "json"
             },
             {
-                "clip_duration": 5,
-                "clip_sequence": 5
-            },
-            {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 6
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 7
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 8
+                "clip_sequence": 4,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 5,
+                "clip_sequence": 5,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 6,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 7,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 5,
+                "clip_sequence": 8,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": [
-            {
-                "clip_duration": 5,
-                "clip_sequence": 1
-            }
-        ],
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_food.zip",
         "template_mp4_movie": "null",
@@ -150,28 +177,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 5
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "Vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_StreamLive.zip",
         "template_mp4_movie": "null",
@@ -188,26 +223,34 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
-                "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_content": "girl_selfie_1.mp4",
+                "clip_duration": 7,
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 3
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 4
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 5
-            }
-        ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": [
+                "clip_sequence": 4,
+                "type": "video"
+            },
             {
-                "1": "girl_selfie_1.mp4"
+                "clip_content": "user",
+                "clip_duration": 2,
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
         "template_filter": "vanilla",
@@ -226,28 +269,40 @@ template_params = [
         "template_clip_number_total": 6,
         "template_clip_time_content": [
             {
+                "clip_content": "boy_selfie_1.mp4",
+                "clip_duration": 6,
+                "clip_sequence": 1,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "boy_selfie_2.mp4",
+                "clip_duration": 2,
+                "clip_sequence": 3,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
                 "clip_duration": 1,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "boy_selfie_3.mp4",
+                "clip_duration": 2,
+                "clip_sequence": 5,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
                 "clip_duration": 1,
-                "clip_sequence": 6
-            }
-        ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": [
-            {
-                "1": "boy_selfie_1.mp4"
-            },
-            {
-                "3": "boy_selfie_2.mp4"
-            },
-            {
-                "5": "boy_selfie_3.mp4"
+                "clip_sequence": 6,
+                "type": "video"
             }
         ],
         "template_filter": "vanilla",
@@ -266,24 +321,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "null",
         "template_mp4_movie": "null",
@@ -300,24 +361,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "null",
         "template_mp4_movie": "null",
@@ -334,28 +401,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 1,
-                "clip_sequence": 5
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "null",
         "template_mp4_movie": "null",
@@ -372,28 +447,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 1,
-                "clip_sequence": 5
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "null",
         "template_mp4_movie": "null",
@@ -410,18 +493,22 @@ template_params = [
         "template_clip_number_total": 3,
         "template_clip_time_content": [
             {
-                "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_content": "pet_cat_opening.mp4",
+                "clip_duration": 4,
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
-                "clip_duration": 1,
-                "clip_sequence": 3
-            }
-        ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": [
+                "clip_content": "user",
+                "clip_duration": 2,
+                "clip_sequence": 2,
+                "type": "video"
+            },
             {
-                "1": "pet_cat_opening.mp4"
+                "clip_content": "user",
+                "clip_duration": 1,
+                "clip_sequence": 3,
+                "type": "video"
             }
         ],
         "template_filter": "vanilla",
@@ -440,20 +527,24 @@ template_params = [
         "template_clip_number_total": 3,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_decoration.zip",
         "template_mp4_movie": "null",
@@ -470,24 +561,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_decoration.zip",
         "template_mp4_movie": "null",
@@ -504,24 +601,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_Sun_Moon.zip",
         "template_mp4_movie": "null",
@@ -538,20 +641,24 @@ template_params = [
         "template_clip_number_total": 3,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_decoration.zip",
         "template_mp4_movie": "null",
@@ -568,32 +675,42 @@ template_params = [
         "template_clip_number_total": 6,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 5
+                "clip_sequence": 5,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 6
+                "clip_sequence": 6,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_decoration.zip",
         "template_mp4_movie": "null",
@@ -610,24 +727,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_TextUnderline_kid.json",
         "template_mp4_movie": "null",
@@ -644,24 +767,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_TextUnderline_Travel.json",
         "template_mp4_movie": "null",
@@ -678,28 +807,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 5
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_TextUnderline_Travel2.json",
         "template_mp4_movie": "null",
@@ -716,24 +853,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "null",
         "template_mp4_movie": "null",
@@ -750,29 +893,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
-                "clip_duration": 6,
-                "clip_sequence": 2
-            },
-            {
+                "clip_content": "template_travel_world_long.json",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 1,
+                "type": "json"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 4
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 5
+                "clip_sequence": 3,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 6,
+                "clip_sequence": 4,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": [
-            {
-                "clip_duration": 4,
-                "clip_sequence": 1
-            }
-        ],
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_travel_world_long.json",
         "template_mp4_movie": "null",
@@ -789,29 +939,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
-                "clip_duration": 6,
-                "clip_sequence": 2
-            },
-            {
+                "clip_content": "template_travel_world_short.json",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 1,
+                "type": "json"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 4
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 5
+                "clip_sequence": 3,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 6,
+                "clip_sequence": 4,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": [
-            {
-                "clip_duration": 4,
-                "clip_sequence": 1
-            }
-        ],
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_travel_world_short.json",
         "template_mp4_movie": "null",
@@ -828,28 +985,36 @@ template_params = [
         "template_clip_number_total": 5,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 5
+                "clip_sequence": 5,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "null",
         "template_mp4_movie": "null",
@@ -866,24 +1031,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 5,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_city_zimu_1.json",
         "template_mp4_movie": "null",
@@ -900,24 +1071,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 6,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_city_zimu_2.json",
         "template_mp4_movie": "null",
@@ -934,24 +1111,30 @@ template_params = [
         "template_clip_number_total": 4,
         "template_clip_time_content": [
             {
+                "clip_content": "user",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 2
+                "clip_sequence": 2,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 3,
-                "clip_sequence": 3
+                "clip_sequence": 3,
+                "type": "video"
             },
             {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 4
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": "null",
         "template_filter": "vanilla",
         "template_json": "https://klogresourcediag159.blob.core.windows.net/story-template/template_decoration.zip",
         "template_mp4_movie": "null",
@@ -968,19 +1151,22 @@ template_params = [
         "template_clip_number_total": 3,
         "template_clip_time_content": [
             {
+                "clip_content": "template_thanksgiving_opening.mp4",
                 "clip_duration": 4,
-                "clip_sequence": 2
+                "clip_sequence": 1,
+                "type": "video"
             },
             {
-                "clip_duration": 3,
-                "clip_sequence": 3
-            }
-        ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": [
-            {
+                "clip_content": "user",
                 "clip_duration": 4,
-                "clip_sequence": 1
+                "clip_sequence": 2,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 3,
+                "clip_sequence": 3,
+                "type": "video"
             }
         ],
         "template_filter": "vanilla",
@@ -999,23 +1185,28 @@ template_params = [
         "template_clip_number_total": 3,
         "template_clip_time_content": [
             {
-                "clip_duration": 6,
-                "clip_sequence": 2
-            },
-            {
-                "clip_duration": 6,
-                "clip_sequence": 3
-            },
-            {
-                "clip_duration": 4,
-                "clip_sequence": 4
-            }
-        ],
-        "template_clip_time_json": "null",
-        "template_clip_time_mp4": [
-            {
+                "clip_content": "template_general_festival_opening.mp4",
                 "clip_duration": 2,
-                "clip_sequence": 1
+                "clip_sequence": 1,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 6,
+                "clip_sequence": 2,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 6,
+                "clip_sequence": 3,
+                "type": "video"
+            },
+            {
+                "clip_content": "user",
+                "clip_duration": 4,
+                "clip_sequence": 4,
+                "type": "video"
             }
         ],
         "template_filter": "vanilla",
