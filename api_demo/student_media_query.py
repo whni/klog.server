@@ -2,6 +2,7 @@
 
 from http_request import HTTPRequest
 from http_request import HTTPMethod
+from azure.storage.blob import BlobServiceClient
 import sys
 import os
 import json

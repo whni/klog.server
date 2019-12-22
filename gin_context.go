@@ -21,6 +21,7 @@ var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/student":                    studentConfigHandlerTable,
 	"/api/0/config/cloudmedia":                 cloudMediaConfigHandlerTable,
 	"/api/0/config/template":                   templateConfigHandlerTable,
+	"/api/0/config/story":                      storyConfigHandlerTable,
 	"/api/0/config/reference/student_relative": studentRelativeRefConfigHandlerTable,
 	"/api/0/config/reference/student_course":   studentCourseRefConfigHandlerTable,
 }
@@ -31,6 +32,7 @@ var ginWorkflowAPITable = map[string]gin.HandlerFunc{
 	"/api/0/workflow/student/bind":         studentBindingMainRelativeHandler,
 	"/api/0/workflow/student/unbind":       studentUnbindingAllRelativeHandler,
 	"/api/0/workflow/student/mediaquery":   studentMediaQueryHandler,
+	"/api/0/workflow/student/storyquery":   studentStoryQueryHandler,
 	"/api/0/workflow/relative/wxlogin":     relativeWeChatLoginHandler,
 	"/api/0/workflow/relative/findstudent": relativeFindBoundStudentHandler,
 	"/api/0/workflow/relative/extra/edit":  relativeExtraEditHandler,

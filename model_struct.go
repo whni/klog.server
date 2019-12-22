@@ -199,3 +199,11 @@ type Template struct {
 	TemplateName             string             `json:"template_name" bson:"template_name"`
 	TemplateTags             []string           `json:"template_tags" bson:"template_tags"`
 }
+
+// Story struct
+type Story struct {
+	PID           primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	StudentPID    primitive.ObjectID `json:"student_pid" bson:"student_pid"`
+	StoryTS       int64              `json:"story_ts" bson:"story_ts"`
+	StoryTemplate Template           `json:"story_template" bson:"story_template"`
+}

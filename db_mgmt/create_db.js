@@ -503,6 +503,99 @@ db.createCollection("template", {
 });
 db.template.createIndex({"template_name": 1}, {unique: true});
 
+db.createCollection("story", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["student_pid", "story_ts", "story_template"],
+            properties: {
+                student_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                story_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                story_template: {
+                    bsonType: "object",
+                    description: "story template result",
+                    required: [ "template_clip_number_needed", "template_clip_number_total", "template_clip_time_content","template_filter","template_json", "template_mp4_movie", "template_music", "template_name", "template_tags"],
+                    properties: {
+                        template_clip_number_needed: {
+                            bsonType: "int",
+                            description: "required int"
+                        },
+                        template_clip_number_total: {
+                            bsonType: "int",
+                            description: "required int"
+                        },
+                        template_clip_time_content: {
+                            bsonType: ["array"],
+                            items: {
+                                bsonType: "object",
+                                required: ["clip_content","clip_duration", "clip_sequence","type"],
+                                description: "required object with clip_duration/clip_sequence fields",
+                                properties: {
+                                    clip_content: {
+                                        bsonType: "string",
+                                        description: "clip content",
+                                    },
+                                    clip_duration: {
+                                        bsonType: "int",
+                                        description: "clip duration",
+                                    },
+                                    clip_sequence: {
+                                        bsonType: "int",
+                                        description: "clip sequence",
+                                    },
+                                    type: {
+                                        bsonType: "string",
+                                        description: "clip type",
+                                    }
+                                }
+                            },
+                            description: "template clip content array"
+                        },
+                        template_filter: {
+                            bsonType: "string",
+                            description: "required string"
+                        },
+                        template_json: {
+                            bsonType: "string",
+                            description: "required string"
+                        },
+                        template_mp4_movie: {
+                            bsonType: "string",
+                            description: "required string"
+                        },
+                        template_music: {
+                            bsonType: "string",
+                            description: "required string"
+                        }, 
+                        template_name: {
+                            bsonType: "string",
+                            minLength: 2,
+                            description: "required string (>= 2 length)"
+                        },
+                        template_tags: {
+                            bsonType: ["array"],
+                            items: {
+                                bsonType: "string",
+                                description: "required tag string"
+                            },
+                            description: "template desc tags"
+                        }     
+                    }
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+db.story.createIndex( { "student_pid": 1, "story_ts": 1 }, { unique: true } );
+
 // db info
 print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);
 

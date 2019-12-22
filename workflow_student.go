@@ -242,3 +242,46 @@ func studentMediaQueryHandler(ctx *gin.Context) {
 	response.Payload = cloudMediaRes
 	return
 }
+
+func studentStoryQueryHandler(ctx *gin.Context) {
+	params := ginContextRequestParameter(ctx)
+	response := GinResponse{
+		Status: http.StatusOK,
+	}
+	defer func() {
+		ginContextProcessResponse(ctx, &response)
+	}()
+
+	var storyReq StudentMediaQueryReq
+	var err error
+	if err = json.Unmarshal(params.Data, &storyReq); err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = fmt.Sprintf("[%s] - %s", serverErrorMessages[seInputJSONNotValid], err.Error())
+		return
+	}
+
+	// find student by PID
+	var findFilter bson.M
+	var students []*Student
+	students, err = findStudent(storyReq.StudentPID, findFilter)
+	if err != nil || len(students) == 0 {
+		response.Status = http.StatusConflict
+		response.Message = fmt.Sprintf("[%s] - No student found with PID %s", serverErrorMessages[seResourceNotFound], storyReq.StudentPID.Hex())
+		return
+	}
+	var storys []*Story
+	var pid primitive.ObjectID
+	pid = primitive.NilObjectID
+
+	findFilter = bson.M{"student_pid": storyReq.StudentPID, "store_ts": bson.M{"$gte": storyReq.StartTS, "$lte": storyReq.EndTS}}
+
+	storys, err = findStory(pid, findFilter)
+	if err != nil {
+		response.Status = http.StatusConflict
+		response.Message = err.Error()
+		return
+	}
+	response.Payload = storys
+
+	return
+}
