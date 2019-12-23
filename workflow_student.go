@@ -273,7 +273,7 @@ func studentStoryQueryHandler(ctx *gin.Context) {
 	var pid primitive.ObjectID
 	pid = primitive.NilObjectID
 
-	findFilter = bson.M{"student_pid": storyReq.StudentPID, "store_ts": bson.M{"$gte": storyReq.StartTS, "$lte": storyReq.EndTS}}
+	findFilter = bson.M{"student_pid": storyReq.StudentPID, "story_ts": bson.M{"$gte": storyReq.StartTS, "$lte": storyReq.EndTS}}
 
 	storys, err = findStory(pid, findFilter)
 	if err != nil {
