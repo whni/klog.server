@@ -15,22 +15,23 @@ host = host_url_maker(sys.argv)
 api_url = "{}/api/0/config/cloudmedia".format(host)
 method = HTTPMethod.POST
 
-media_names1 = ["student1_image1.gif", "student1_image2.gif", "student1_image3.gif", "student1_image4.gif", "student1_image5.gif"]
-media_names2 = ["student2_video1.mp4", "student2_video2.mp4", "student2_video3.mp4", "student2_video4.mp4"]
-media_name_array = [media_names1, media_names2]
-student_pids = ["102030405060708090000001", "102030405060708090000002"]
-course_record_pids = ["102030405060708090000001", "102030405060708090000003"]
+#media_names1 = ["student1_video1.mp4", "student1_video2.mp4", "student1_video3.mp4", "student1_video4.mp4", "student1_video5.mp4", "student1_video5.mp4"]
+#media_names2 = ["student2_video1.mp4", "student2_video2.mp4", "student2_video3.mp4", "student2_video4.mp4"]
+media_name_array = [10, 4, 10, 4]
+student_pids = ["102030405060708090000001", "102030405060708090000002","102030405060708090000003","102030405060708090000004"]
+course_record_pids = ["102030405060708090000001", "102030405060708090000003", "102030405060708090000005", "102030405060708090000006"]
 
 for i in range(len(media_name_array)):
-    for media_name in media_name_array[i]:
+    for j in range(1, media_name_array[i]+1):
+        media_name = "student{}_video{}.mp4".format(i+1,j)
         params = {
             "student_pid": student_pids[i],
             "course_record_pid": course_record_pids[i] if i == 0 else "000000000000000000000000",
-            "media_type": "image" if i == 0 else "video",
+            "media_type": "video",
             "media_name": media_name,
             "media_url": "https://klogresourcediag159.blob.core.windows.net/klog-cloud-media/{}".format(media_name),
-            "rank_score": random.uniform(50, 100),
-            "media_tags": ["sport", "running","thred", "exercise"]
+            "rank_score": 0,
+            "media_tags": []
         }
 
         print("[create cloudmedia for {}]".format(media_name))

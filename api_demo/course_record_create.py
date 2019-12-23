@@ -47,7 +47,23 @@ course_record_params = [
         "target_tag": "c2",
         "record_ts": int(time.time()),
         "is_makeup": False,
-    }
+    },
+    {
+        "pid": "102030405060708090000005",
+        "student_pid": "102030405060708090000003",
+        "course_pid": "102030405060708090000002",
+        "target_tag": "c2",
+        "record_ts": int(time.time()),
+        "is_makeup": False,
+    },
+    {
+        "pid": "102030405060708090000006",
+        "student_pid": "102030405060708090000004",
+        "course_pid": "102030405060708090000002",
+        "target_tag": "c2",
+        "record_ts": int(time.time()),
+        "is_makeup": False,
+    },
 ]
 
 for params in course_record_params:
