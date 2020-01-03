@@ -42,8 +42,8 @@ for student in students :
         if cloudMedia["media_type"] == "video" :
             # download media, update tags and rankscore here
             print(cloudMedia["media_url"])
-            # cloudMedia["rank_score"] = score1
-            # cloudMedia["media_tags"].append("tag1")
+            # tag ={"tag_name": "test1", "tag_score": 0.786} 
+            # cloudMedia["media_tags"].append(tag)
             # Update cloudMedia into db
             api_url = "{}/api/0/config/cloudmedia".format(host)
             method = HTTPMethod.PUT
