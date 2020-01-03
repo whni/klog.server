@@ -53,7 +53,7 @@ func teacherGetHandler(ctx *gin.Context) {
 			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
 			return
 		}
-		findFilter = append(findFilter, bson.E{"_id", pid})
+		//findFilter = append(findFilter, bson.E{"_id", pid})
 	}
 
 	// pid: nil objectid for all, others for specified one
@@ -173,7 +173,7 @@ func findTeacher(pid primitive.ObjectID, findFilter bson.D) ([]*Teacher, error) 
 		//findFilter = bson.D{{}}
 	} else {
 		findOptions.SetLimit(1)
-		//findFilter = bson.D{{"_id", pid}}
+		findFilter = bson.D{{"_id", pid}}
 	}
 
 	findCursor, err := dbPool.Collection(DBCollectionTeacher).Find(context.TODO(), findFilter, findOptions)

@@ -89,6 +89,12 @@ type CourseComment struct {
 	CommentBody       string             `json:"comment_body" bson:"comment_body"`
 }
 
+// MediaTag struct
+type MediaTag struct {
+	TagName  string  `json:"tag_name" bson:"tag_name"`
+	TagScore float64 `json:"tag_score" bson:"tag_score"`
+}
+
 // CloudMedia struct
 type CloudMedia struct {
 	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
@@ -97,8 +103,7 @@ type CloudMedia struct {
 	MediaType       string             `json:"media_type" bson:"media_type"`
 	MediaName       string             `json:"media_name" bson:"media_name"`
 	MediaURL        string             `json:"media_url" bson:"media_url"`
-	RankScore       float64            `json:"rank_score" bson:"rank_score"`
-	MediaTags       []string           `json:"media_tags" bson:"media_tags"`
+	MediaTags       []MediaTag         `json:"media_tags" bson:"media_tags"`
 	CreateTS        int64              `json:"create_ts" bson:"create_ts"`
 	ContentLength   int64              `json:"content_length" bson:"content_length"`
 }

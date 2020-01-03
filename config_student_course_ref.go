@@ -233,8 +233,8 @@ func createStudentCourseRef(reference *StudentCourseRef) (primitive.ObjectID, er
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	var findFilter bson.M
 
+	var findFilter bson.M
 	students, err := findStudent(reference.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No students found with PID %s", serverErrorMessages[seResourceNotFound], reference.StudentPID.Hex())
@@ -246,7 +246,9 @@ func createStudentCourseRef(reference *StudentCourseRef) (primitive.ObjectID, er
 		err = fmt.Errorf("[%s] - No course PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	courses, err := findCourse(reference.CoursePID)
+	var courseFilter bson.D
+	courseFilter = bson.D{{}}
+	courses, err := findCourse(reference.CoursePID, courseFilter)
 	if err != nil || len(courses) == 0 {
 		err = fmt.Errorf("[%s] - No courses found with PID %s", serverErrorMessages[seResourceNotFound], reference.CoursePID.Hex())
 		return primitive.NilObjectID, err
@@ -286,7 +288,6 @@ func updateStudentCourseRef(reference *StudentCourseRef) error {
 	}
 
 	var findFilter bson.M
-
 	students, err := findStudent(reference.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No students found with PID %s", serverErrorMessages[seResourceNotFound], reference.StudentPID.Hex())
@@ -298,7 +299,10 @@ func updateStudentCourseRef(reference *StudentCourseRef) error {
 		err = fmt.Errorf("[%s] - No course PID specified", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	courses, err := findCourse(reference.CoursePID)
+
+	var courseFilter bson.D
+	courseFilter = bson.D{{}}
+	courses, err := findCourse(reference.CoursePID, courseFilter)
 	if err != nil || len(courses) == 0 {
 		err = fmt.Errorf("[%s] - No courses found with PID %s", serverErrorMessages[seResourceNotFound], reference.CoursePID.Hex())
 		return err

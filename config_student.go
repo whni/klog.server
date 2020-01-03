@@ -41,7 +41,7 @@ func studentGetHandler(ctx *gin.Context) {
 	var err error
 	var pid primitive.ObjectID
 	var findFilter bson.M
-	//findFilter = bson.D{{}}
+
 	if params.PID == "all" {
 		pid = primitive.NilObjectID
 		if params.FKEY == "course_pid" {
@@ -191,6 +191,7 @@ func findStudent(pid primitive.ObjectID, findFilter bson.M) ([]*Student, error) 
 		//findFilter = bson.D{{}}
 	} else {
 		findOptions.SetLimit(1)
+		findFilter = bson.M{"_id": pid}
 		//findFilter = bson.D{{"_id", pid}}
 	}
 

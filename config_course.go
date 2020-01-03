@@ -32,8 +32,20 @@ func courseGetHandler(ctx *gin.Context) {
 	var courses []*Course
 	var err error
 	var pid primitive.ObjectID
+	var findFilter bson.D
+	findFilter = bson.D{{}}
 	if params.PID == "all" {
 		pid = primitive.NilObjectID
+		if params.FKEY == "teacher_pid" || params.FKEY == "assistant_pid" {
+			var fid primitive.ObjectID
+			fid, err = primitive.ObjectIDFromHex(params.FID)
+			if err != nil {
+				response.Status = http.StatusBadRequest
+				response.Message = fmt.Sprintf("[%s] - Please specifiy a valid FID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
+				return
+			}
+			findFilter = append(findFilter, bson.E{params.FKEY, fid})
+		}
 	} else {
 		pid, err = primitive.ObjectIDFromHex(params.PID)
 		if err != nil {
@@ -41,10 +53,11 @@ func courseGetHandler(ctx *gin.Context) {
 			response.Message = fmt.Sprintf("[%s] - Please specifiy a valid PID (mongoDB ObjectID)", serverErrorMessages[seInputParamNotValid])
 			return
 		}
+		//findFilter = append(findFilter, bson.E{"_id", pid})
 	}
 
 	// pid: nil objectid for all, others for specified one
-	courses, err = findCourse(pid)
+	courses, err = findCourse(pid, findFilter)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -146,7 +159,7 @@ func courseDeleteHandler(ctx *gin.Context) {
 }
 
 // find course, return course slice, error
-func findCourse(pid primitive.ObjectID) ([]*Course, error) {
+func findCourse(pid primitive.ObjectID, findFilter bson.D) ([]*Course, error) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -155,9 +168,9 @@ func findCourse(pid primitive.ObjectID) ([]*Course, error) {
 	}()
 
 	var findOptions = options.Find()
-	var findFilter bson.D
+	//var findFilter bson.D
 	if pid.IsZero() {
-		findFilter = bson.D{{}}
+		//findFilter = bson.D{{}}
 	} else {
 		findOptions.SetLimit(1)
 		findFilter = bson.D{{"_id", pid}}

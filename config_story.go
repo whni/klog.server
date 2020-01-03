@@ -214,8 +214,8 @@ func createStory(story *Story) (primitive.ObjectID, error) {
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	var findFilter bson.M
 
+	var findFilter bson.M
 	students, err := findStudent(story.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No associate student found with PID %s", serverErrorMessages[seResourceNotFound], story.StudentPID.Hex())
@@ -253,8 +253,8 @@ func updateStory(story *Story) error {
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return err
 	}
-	var findFilter bson.M
 
+	var findFilter bson.M
 	students, err := findStudent(story.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No associate student found with PID %s", serverErrorMessages[seResourceNotFound], story.StudentPID.Hex())

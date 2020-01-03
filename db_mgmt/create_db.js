@@ -315,7 +315,7 @@ db.createCollection("cloudmedia", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["student_pid", "course_record_pid", "media_type", "media_name", "media_url", "rank_score", "media_tags", "create_ts", "content_length"],
+            required: ["student_pid", "course_record_pid", "media_type", "media_name", "media_url", "media_tags"],
             properties: {
                 student_pid: {
                     bsonType: "objectId",
@@ -343,14 +343,21 @@ db.createCollection("cloudmedia", {
                 media_tags: {
                     bsonType: ["array"],
                     items: {
-                        bsonType: "string",
-                        description: "required tag string"
+                        bsonType: "object",
+                        required: ["tag_name","tag_score"],
+                        description: "required tag object with name and score",
+                        properties: {
+                            tag_name: {
+                                bsonType: "string",
+                                description: "tag name",
+                            },
+                            tag_score: {
+                                bsonType: "double",
+                                description: "tag score",
+                            }
+                        }
                     },
                     description: "media understanding tags"
-                },
-                rank_score: {
-                    bsonType: "double",
-                    description: "required double/float64"
                 },
                 create_ts: {
                     bsonType: "long",

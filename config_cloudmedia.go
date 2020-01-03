@@ -286,8 +286,8 @@ func createCloudMedia(cloudMedia *CloudMedia) (primitive.ObjectID, error) {
 		err = fmt.Errorf("[%s] - No student PID specified", serverErrorMessages[seResourceNotFound])
 		return primitive.NilObjectID, err
 	}
-	var findFilter bson.M
 
+	var findFilter bson.M
 	students, err := findStudent(cloudMedia.StudentPID, findFilter)
 	if err != nil || len(students) == 0 {
 		err = fmt.Errorf("[%s] - No associate student found with PID %s", serverErrorMessages[seResourceNotFound], cloudMedia.StudentPID.Hex())
@@ -388,8 +388,7 @@ func updateCloudMedia(cloudMedia *CloudMedia) error {
 	// NOTE: only update partial attributes
 	cloudMediaFound.StudentPID = cloudMedia.StudentPID
 	cloudMediaFound.CourseRecordPID = cloudMedia.CourseRecordPID
-	cloudMediaFound.RankScore = cloudMedia.RankScore
-	cloudMediaFound.MediaTags = []string{}
+	cloudMediaFound.MediaTags = []MediaTag{}
 	cloudMediaFound.MediaTags = append(cloudMediaFound.MediaTags, cloudMedia.MediaTags...)
 
 	var updateFilter = bson.D{{"_id", cloudMediaFound.PID}}

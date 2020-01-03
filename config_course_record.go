@@ -266,7 +266,9 @@ func createCourseRecord(courseRecord *CourseRecord) (primitive.ObjectID, error) 
 	}
 
 	// course target tags check
-	courses, err := findCourse(courseRecord.CoursePID)
+	var findFilter bson.D
+	findFilter = bson.D{{}}
+	courses, err := findCourse(courseRecord.CoursePID, findFilter)
 	if err != nil || len(courses) == 0 {
 		err = fmt.Errorf("[%s] - No courses found with PID %s", serverErrorMessages[seResourceNotFound], courseRecord.CoursePID.Hex())
 		return primitive.NilObjectID, err
@@ -332,7 +334,9 @@ func updateCourseRecord(courseRecord *CourseRecord) error {
 	}
 
 	// course target tags check
-	courses, err := findCourse(courseRecord.CoursePID)
+	var findFilter bson.D
+	findFilter = bson.D{{}}
+	courses, err := findCourse(courseRecord.CoursePID, findFilter)
 	if err != nil || len(courses) == 0 {
 		err = fmt.Errorf("[%s] - No courses found with PID %s", serverErrorMessages[seResourceNotFound], courseRecord.CoursePID.Hex())
 		return err
