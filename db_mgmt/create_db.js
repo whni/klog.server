@@ -359,6 +359,10 @@ db.createCollection("cloudmedia", {
                     },
                     description: "media understanding tags"
                 },
+                rank_score: {
+                    bsonType: "double",
+                    description: "required double/float64"
+                },
                 create_ts: {
                     bsonType: "long",
                     description: "required int64 (unix timestamp)"

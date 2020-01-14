@@ -105,6 +105,7 @@ type CloudMedia struct {
 	MediaURL        string             `json:"media_url" bson:"media_url"`
 	MediaTags       []MediaTag         `json:"media_tags" bson:"media_tags"`
 	CreateTS        int64              `json:"create_ts" bson:"create_ts"`
+	RankScore       float64            `json:"rank_score" bson:"rank_score"`
 	ContentLength   int64              `json:"content_length" bson:"content_length"`
 }
 

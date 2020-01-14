@@ -30,6 +30,7 @@ for i in range(len(media_name_array)):
             "media_type": "video",
             "media_name": media_name,
             "media_url": "https://klogresourcediag159.blob.core.windows.net/klog-cloud-media/{}".format(media_name),
+            "rank_score": random.uniform(50, 100),
             "media_tags": []
            # "media_tags": [{"tag_name":"test","tag_score":0.789}]
         }
