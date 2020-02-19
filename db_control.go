@@ -17,6 +17,7 @@ const (
 	DBCollectionCourseComment      = "course_comment"
 	DBCollectionRelative           = "relative"
 	DBCollectionStudent            = "student"
+	DBCollectionUser               = "user"
 	DBCollectionCloudMedia         = "cloudmedia"
 	DBCollectionTemplate           = "template"
 	DBCollectionStory              = "story"

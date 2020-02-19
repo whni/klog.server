@@ -213,3 +213,11 @@ type Story struct {
 	StoryTS       int64              `json:"story_ts" bson:"story_ts"`
 	StoryTemplate Template           `json:"story_template" bson:"story_template"`
 }
+
+// User struct
+type User struct {
+	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	UserEmail       string             `json:"user_email" bson:"user_email"`
+	UserDescription string             `json:"user_description" bson:"user_description"`
+	UpdatedTS       int64              `json:"updated_ts" bson:"updated_ts"`
+}

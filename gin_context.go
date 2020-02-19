@@ -19,6 +19,7 @@ var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/course_comment":             courseCommentConfigHandlerTable,
 	"/api/0/config/relative":                   relativeConfigHandlerTable,
 	"/api/0/config/student":                    studentConfigHandlerTable,
+	"/api/0/config/user":                       userConfigHandlerTable,
 	"/api/0/config/cloudmedia":                 cloudMediaConfigHandlerTable,
 	"/api/0/config/template":                   templateConfigHandlerTable,
 	"/api/0/config/story":                      storyConfigHandlerTable,

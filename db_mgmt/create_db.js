@@ -607,6 +607,32 @@ db.createCollection("story", {
 });
 db.story.createIndex( { "student_pid": 1, "story_ts": 1 }, { unique: true } );
 
+db.createCollection("user", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["user_email"],
+            properties: {
+                user_email: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                updated_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                user_description: {
+                    bsonType: "string",
+                    description: "required string"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+
+db.user.createIndex( { "user_email": 1 }, { unique: true } );
 // db info
 print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);
 
