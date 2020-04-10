@@ -214,10 +214,37 @@ type Story struct {
 	StoryTemplate Template           `json:"story_template" bson:"story_template"`
 }
 
-// User struct
-type User struct {
+// User DOB struct
+type UserDOB struct {
+	Year  int `json:"year" bson:"year"`
+	Month int `json:"month" bson:"month"`
+	Day   int `json:"day" bson:"day"`
+}
+
+//Sign Up User struct
+type SignUpUser struct {
 	PID             primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
 	UserEmail       string             `json:"user_email" bson:"user_email"`
 	UserDescription string             `json:"user_description" bson:"user_description"`
 	UpdatedTS       int64              `json:"updated_ts" bson:"updated_ts"`
+}
+
+//Register User struct
+type RegisterUser struct {
+	PID          primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	UserEmail    string             `json:"user_email" bson:"user_email"`
+	UserPassWord string             `json:"user_password" bson:"user_password"`
+	Dob          UserDOB            `json:"dob" bson:"dob"`
+	Address      AddressInfo        `json:"address" bson:"address"`
+	Gender       string             `json:"gender" bson:"gender"`
+	UpdatedTS    int64              `json:"updated_ts" bson:"updated_ts"`
+}
+
+// Chatroom struct
+type ChatRoom struct {
+	PID           primitive.ObjectID `json:"pid" bson:"_id,omitempty"`
+	PrimerUserPID primitive.ObjectID `json:"primer_pid" bson:"primer_pid"`
+	SecondUserPID primitive.ObjectID `json:"second_pid" bson:"second_pid"`
+	RoomTag       string             `json:"room_tag" bson:"room_tag"`
+	RecordTS      int64              `json:"record_ts" bson:"record_ts"`
 }

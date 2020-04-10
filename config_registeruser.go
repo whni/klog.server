@@ -12,14 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var signupuserConfigHandlerTable = map[string]gin.HandlerFunc{
-	"get":    signupuserGetHandler,
-	"post":   signupuserPostHandler,
-	"put":    signupuserPutHandler,
-	"delete": signupuserDeleteHandler,
+var registeruserConfigHandlerTable = map[string]gin.HandlerFunc{
+	"get":    registeruserGetHandler,
+	"post":   registeruserPostHandler,
+	"put":    registeruserPutHandler,
+	"delete": registeruserDeleteHandler,
 }
 
-func signupuserGetHandler(ctx *gin.Context) {
+func registeruserGetHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -28,7 +28,7 @@ func signupuserGetHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var users []*SignUpUser
+	var users []*RegisterUser
 	var err error
 	var pid primitive.ObjectID
 	var findFilter bson.M
@@ -46,7 +46,7 @@ func signupuserGetHandler(ctx *gin.Context) {
 	}
 
 	// pid: nil objectid for all, others for specified one
-	users, err = findUser(pid, findFilter)
+	users, err = findRegisterUser(pid, findFilter)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -56,7 +56,7 @@ func signupuserGetHandler(ctx *gin.Context) {
 	return
 }
 
-func signupuserPostHandler(ctx *gin.Context) {
+func registeruserPostHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -65,7 +65,7 @@ func signupuserPostHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var user SignUpUser
+	var user RegisterUser
 	var userPID primitive.ObjectID
 	var err error
 
@@ -75,7 +75,7 @@ func signupuserPostHandler(ctx *gin.Context) {
 		return
 	}
 
-	userPID, err = createUser(&user)
+	userPID, err = createRegisterUser(&user)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -85,7 +85,7 @@ func signupuserPostHandler(ctx *gin.Context) {
 	return
 }
 
-func signupuserPutHandler(ctx *gin.Context) {
+func registeruserPutHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -94,7 +94,7 @@ func signupuserPutHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var user SignUpUser
+	var user RegisterUser
 	var err error
 
 	if err = json.Unmarshal(params.Data, &user); err != nil {
@@ -103,7 +103,7 @@ func signupuserPutHandler(ctx *gin.Context) {
 		return
 	}
 
-	err = updateUser(&user)
+	err = updateRegisterUser(&user)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -113,7 +113,7 @@ func signupuserPutHandler(ctx *gin.Context) {
 	return
 }
 
-func signupuserDeleteHandler(ctx *gin.Context) {
+func registeruserDeleteHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -137,7 +137,7 @@ func signupuserDeleteHandler(ctx *gin.Context) {
 	}
 
 	// pid: nil objectid for all, others for specified one
-	deletedRows, err = deleteUser(pid)
+	deletedRows, err = deleteRegisterUser(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -148,32 +148,32 @@ func signupuserDeleteHandler(ctx *gin.Context) {
 }
 
 // find user, return user slice, error
-func findUser(pid primitive.ObjectID, findFilter bson.M) ([]*SignUpUser, error) {
+func findRegisterUser(pid primitive.ObjectID, findFilter bson.M) ([]*RegisterUser, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModRegisterUserMgmt, err.Error())
 		}
 	}()
 
 	var findOptions = options.Find()
 	//var findFilter bson.D
 	if pid.IsZero() {
-		//findFilter = bson.D{{}}
+
 	} else {
 		findOptions.SetLimit(1)
 		findFilter = bson.M{"_id": pid}
 	}
 
-	findUser, err := dbPool.Collection(DBCollectionSignUpUser).Find(context.TODO(), findFilter, findOptions)
+	findUser, err := dbPool.Collection(DBCollectionRegisterUser).Find(context.TODO(), findFilter, findOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
 
-	users := []*SignUpUser{}
+	users := []*RegisterUser{}
 	for findUser.Next(context.TODO()) {
-		var user SignUpUser
+		var user RegisterUser
 		err = findUser.Decode(&user)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -188,39 +188,37 @@ func findUser(pid primitive.ObjectID, findFilter bson.M) ([]*SignUpUser, error) 
 		return nil, err
 	}
 
-	logging.Debugmf(logModSignUpUserMgmt, "Found %d user results from DB (PID=%v)", len(users), pid.Hex())
+	logging.Debugmf(logModRegisterUserMgmt, "Found %d register user results from DB (PID=%v)", len(users), pid.Hex())
 	return users, nil
 }
 
 // create user, return PID, error
-func createUser(user *SignUpUser) (primitive.ObjectID, error) {
+func createRegisterUser(user *RegisterUser) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModRegisterUserMgmt, err.Error())
 		}
 	}()
-
-	insertResult, err := dbPool.Collection(DBCollectionSignUpUser).InsertOne(context.TODO(), user)
+	logging.Debugmf(logModRegisterUserMgmt, "%+v\n", user)
+	insertResult, err := dbPool.Collection(DBCollectionRegisterUser).InsertOne(context.TODO(), user)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return primitive.NilObjectID, err
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModSignUpUserMgmt, "Created user in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
-
-	// update user image name/url
+	logging.Debugmf(logModRegisterUserMgmt, "Created register user in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 
 	return lastInsertID, nil
 }
 
 // update user, return error
-func updateUser(user *SignUpUser) error {
+func updateRegisterUser(user *RegisterUser) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModRegisterUserMgmt, err.Error())
 		}
 	}()
 
@@ -230,68 +228,86 @@ func updateUser(user *SignUpUser) error {
 		return err
 	}
 
-	// user image name/url
-
 	// update user
 	var updateFilter = bson.D{{"_id", user.PID}}
 	var updateBSONDocument = bson.D{}
 	userBSONData, err := bson.Marshal(user)
 	if err != nil {
-		err = fmt.Errorf("[%s] - could not convert user (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], user.PID.Hex())
+		err = fmt.Errorf("[%s] - could not convert register user (PID %s) to bson data", serverErrorMessages[seInputBSONNotValid], user.PID.Hex())
 		return err
 	}
 	err = bson.Unmarshal(userBSONData, &updateBSONDocument)
 	if err != nil {
-		err = fmt.Errorf("[%s] - could not convert user (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], user.PID.Hex())
+		err = fmt.Errorf("[%s] - could not convert register user (PID %s) to bson document", serverErrorMessages[seInputBSONNotValid], user.PID.Hex())
 		return err
 	}
 	var updateOptions = bson.D{{"$set", updateBSONDocument}}
 
-	insertResult, err := dbPool.Collection(DBCollectionSignUpUser).UpdateOne(context.TODO(), updateFilter, updateOptions)
+	insertResult, err := dbPool.Collection(DBCollectionRegisterUser).UpdateOne(context.TODO(), updateFilter, updateOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModSignUpUserMgmt, "Update user (PID %s): matched %d modified %d",
+	logging.Debugmf(logModRegisterUserMgmt, "Update register user (PID %s): matched %d modified %d",
 		user.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
-		err = fmt.Errorf("[%s] - could not find user (PID %s)", serverErrorMessages[seResourceNotFound], user.PID.Hex())
+		err = fmt.Errorf("[%s] - could not find register user (PID %s)", serverErrorMessages[seResourceNotFound], user.PID.Hex())
 		return err
 	} else if insertResult.ModifiedCount == 0 {
-		err = fmt.Errorf("[%s] - user (PID %s) not changed", serverErrorMessages[seResourceNotChange], user.PID.Hex())
+		err = fmt.Errorf("[%s] - register user (PID %s) not changed", serverErrorMessages[seResourceNotChange], user.PID.Hex())
 		return err
 	}
 	return nil
 }
 
 // delete user, return #delete entries, error
-func deleteUser(pid primitive.ObjectID) (int, error) {
+func deleteRegisterUser(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModRegisterUserMgmt, err.Error())
 		}
 	}()
 
 	var findFilter bson.M
 
-	users, findErr := findUser(pid, findFilter)
+	users, findErr := findRegisterUser(pid, findFilter)
 	if findErr != nil {
-		err = fmt.Errorf("[%s] - could not delete user (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
+		err = fmt.Errorf("[%s] - could not delete register user (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
 		return 0, err
 	}
 
 	var deleteCnt int64
 	for i := range users {
 		deleteFilter := bson.D{{"_id", users[i].PID}}
-		deleteResult, err := dbPool.Collection(DBCollectionSignUpUser).DeleteMany(context.TODO(), deleteFilter)
+		deleteResult, err := dbPool.Collection(DBCollectionRegisterUser).DeleteMany(context.TODO(), deleteFilter)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return 0, err
 		}
 		deleteCnt += deleteResult.DeletedCount
 	}
-	logging.Debugmf(logModSignUpUserMgmt, "Deleted %d user results from DB", deleteCnt)
+	logging.Debugmf(logModRegisterUserMgmt, "Deleted %d register user results from DB", deleteCnt)
 	return int(deleteCnt), nil
+}
+
+func findRegisteruserByID(userEmail string) (*RegisterUser, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			logging.Errormf(logModRegisterUserMgmt, err.Error())
+		}
+	}()
+
+	var teacher RegisterUser
+	findFilter := bson.D{{"user_email", userEmail}}
+	err = dbPool.Collection(DBCollectionRegisterUser).FindOne(context.TODO(), findFilter).Decode(&teacher)
+	if err != nil {
+		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
+		return nil, err
+	}
+
+	logging.Debugmf(logModRegisterUserMgmt, "Found registeruser from DB (userEmail=%s)", userEmail)
+	return &teacher, nil
 }

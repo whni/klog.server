@@ -4,7 +4,7 @@ def host_url_maker(sys_arg):
     host_map = {
         "local": "http://127.0.0.1:80",
 	"remotehttp":"http://klogserver.westus2.cloudapp.azure.com:80",
-        "remote": "https://klogserver.westus2.cloudapp.azure.com:443",
+        "remote": "https://klogserver.westus2.cloudapp.azure.com:8443",
     }
     if len(sys_arg) == 1:
         host_type = "local"

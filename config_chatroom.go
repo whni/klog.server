@@ -12,14 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var signupuserConfigHandlerTable = map[string]gin.HandlerFunc{
-	"get":    signupuserGetHandler,
-	"post":   signupuserPostHandler,
-	"put":    signupuserPutHandler,
-	"delete": signupuserDeleteHandler,
+var chatroomConfigHandlerTable = map[string]gin.HandlerFunc{
+	"get":    chatroomGetHandler,
+	"post":   chatroomPostHandler,
+	"put":    chatroomPutHandler,
+	"delete": chatroomDeleteHandler,
 }
 
-func signupuserGetHandler(ctx *gin.Context) {
+func chatroomGetHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -28,7 +28,7 @@ func signupuserGetHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var users []*SignUpUser
+	var users []*ChatRoom
 	var err error
 	var pid primitive.ObjectID
 	var findFilter bson.M
@@ -46,7 +46,7 @@ func signupuserGetHandler(ctx *gin.Context) {
 	}
 
 	// pid: nil objectid for all, others for specified one
-	users, err = findUser(pid, findFilter)
+	users, err = findRoom(pid, findFilter)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -56,7 +56,7 @@ func signupuserGetHandler(ctx *gin.Context) {
 	return
 }
 
-func signupuserPostHandler(ctx *gin.Context) {
+func chatroomPostHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -65,7 +65,7 @@ func signupuserPostHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var user SignUpUser
+	var user ChatRoom
 	var userPID primitive.ObjectID
 	var err error
 
@@ -75,7 +75,7 @@ func signupuserPostHandler(ctx *gin.Context) {
 		return
 	}
 
-	userPID, err = createUser(&user)
+	userPID, err = createRoom(&user)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -85,7 +85,7 @@ func signupuserPostHandler(ctx *gin.Context) {
 	return
 }
 
-func signupuserPutHandler(ctx *gin.Context) {
+func chatroomPutHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -94,7 +94,7 @@ func signupuserPutHandler(ctx *gin.Context) {
 		ginContextProcessResponse(ctx, &response)
 	}()
 
-	var user SignUpUser
+	var user ChatRoom
 	var err error
 
 	if err = json.Unmarshal(params.Data, &user); err != nil {
@@ -103,7 +103,7 @@ func signupuserPutHandler(ctx *gin.Context) {
 		return
 	}
 
-	err = updateUser(&user)
+	err = updateRoom(&user)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -113,7 +113,7 @@ func signupuserPutHandler(ctx *gin.Context) {
 	return
 }
 
-func signupuserDeleteHandler(ctx *gin.Context) {
+func chatroomDeleteHandler(ctx *gin.Context) {
 	params := ginContextRequestParameter(ctx)
 	response := GinResponse{
 		Status: http.StatusOK,
@@ -137,7 +137,7 @@ func signupuserDeleteHandler(ctx *gin.Context) {
 	}
 
 	// pid: nil objectid for all, others for specified one
-	deletedRows, err = deleteUser(pid)
+	deletedRows, err = deleteRoom(pid)
 	if err != nil {
 		response.Status = http.StatusConflict
 		response.Message = err.Error()
@@ -148,11 +148,11 @@ func signupuserDeleteHandler(ctx *gin.Context) {
 }
 
 // find user, return user slice, error
-func findUser(pid primitive.ObjectID, findFilter bson.M) ([]*SignUpUser, error) {
+func findRoom(pid primitive.ObjectID, findFilter bson.M) ([]*ChatRoom, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModChatRoomMgmt, err.Error())
 		}
 	}()
 
@@ -165,15 +165,15 @@ func findUser(pid primitive.ObjectID, findFilter bson.M) ([]*SignUpUser, error) 
 		findFilter = bson.M{"_id": pid}
 	}
 
-	findUser, err := dbPool.Collection(DBCollectionSignUpUser).Find(context.TODO(), findFilter, findOptions)
+	findUser, err := dbPool.Collection(DBCollectionChatRoom).Find(context.TODO(), findFilter, findOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return nil, err
 	}
 
-	users := []*SignUpUser{}
+	users := []*ChatRoom{}
 	for findUser.Next(context.TODO()) {
-		var user SignUpUser
+		var user ChatRoom
 		err = findUser.Decode(&user)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
@@ -188,27 +188,27 @@ func findUser(pid primitive.ObjectID, findFilter bson.M) ([]*SignUpUser, error) 
 		return nil, err
 	}
 
-	logging.Debugmf(logModSignUpUserMgmt, "Found %d user results from DB (PID=%v)", len(users), pid.Hex())
+	logging.Debugmf(logModChatRoomMgmt, "Found %d user results from DB (PID=%v)", len(users), pid.Hex())
 	return users, nil
 }
 
 // create user, return PID, error
-func createUser(user *SignUpUser) (primitive.ObjectID, error) {
+func createRoom(user *ChatRoom) (primitive.ObjectID, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModChatRoomMgmt, err.Error())
 		}
 	}()
 
-	insertResult, err := dbPool.Collection(DBCollectionSignUpUser).InsertOne(context.TODO(), user)
+	insertResult, err := dbPool.Collection(DBCollectionChatRoom).InsertOne(context.TODO(), user)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return primitive.NilObjectID, err
 	}
 
 	lastInsertID := insertResult.InsertedID.(primitive.ObjectID)
-	logging.Debugmf(logModSignUpUserMgmt, "Created user in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
+	logging.Debugmf(logModChatRoomMgmt, "Created user in DB (LastInsertID,PID=%s)", lastInsertID.Hex())
 
 	// update user image name/url
 
@@ -216,11 +216,11 @@ func createUser(user *SignUpUser) (primitive.ObjectID, error) {
 }
 
 // update user, return error
-func updateUser(user *SignUpUser) error {
+func updateRoom(user *ChatRoom) error {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModChatRoomMgmt, err.Error())
 		}
 	}()
 
@@ -247,13 +247,13 @@ func updateUser(user *SignUpUser) error {
 	}
 	var updateOptions = bson.D{{"$set", updateBSONDocument}}
 
-	insertResult, err := dbPool.Collection(DBCollectionSignUpUser).UpdateOne(context.TODO(), updateFilter, updateOptions)
+	insertResult, err := dbPool.Collection(DBCollectionChatRoom).UpdateOne(context.TODO(), updateFilter, updateOptions)
 	if err != nil {
 		err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 		return err
 	}
 
-	logging.Debugmf(logModSignUpUserMgmt, "Update user (PID %s): matched %d modified %d",
+	logging.Debugmf(logModChatRoomMgmt, "Update user (PID %s): matched %d modified %d",
 		user.PID.Hex(), insertResult.MatchedCount, insertResult.ModifiedCount)
 	if insertResult.MatchedCount == 0 {
 		err = fmt.Errorf("[%s] - could not find user (PID %s)", serverErrorMessages[seResourceNotFound], user.PID.Hex())
@@ -266,17 +266,17 @@ func updateUser(user *SignUpUser) error {
 }
 
 // delete user, return #delete entries, error
-func deleteUser(pid primitive.ObjectID) (int, error) {
+func deleteRoom(pid primitive.ObjectID) (int, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			logging.Errormf(logModSignUpUserMgmt, err.Error())
+			logging.Errormf(logModChatRoomMgmt, err.Error())
 		}
 	}()
 
 	var findFilter bson.M
 
-	users, findErr := findUser(pid, findFilter)
+	users, findErr := findRoom(pid, findFilter)
 	if findErr != nil {
 		err = fmt.Errorf("[%s] - could not delete user (PID %s) due to DB query/find error occurs", serverErrorMessages[seDBResourceQuery], pid.Hex())
 		return 0, err
@@ -285,13 +285,13 @@ func deleteUser(pid primitive.ObjectID) (int, error) {
 	var deleteCnt int64
 	for i := range users {
 		deleteFilter := bson.D{{"_id", users[i].PID}}
-		deleteResult, err := dbPool.Collection(DBCollectionSignUpUser).DeleteMany(context.TODO(), deleteFilter)
+		deleteResult, err := dbPool.Collection(DBCollectionChatRoom).DeleteMany(context.TODO(), deleteFilter)
 		if err != nil {
 			err = fmt.Errorf("[%s] - %s", serverErrorMessages[seDBResourceQuery], err.Error())
 			return 0, err
 		}
 		deleteCnt += deleteResult.DeletedCount
 	}
-	logging.Debugmf(logModSignUpUserMgmt, "Deleted %d user results from DB", deleteCnt)
+	logging.Debugmf(logModChatRoomMgmt, "Deleted %d user results from DB", deleteCnt)
 	return int(deleteCnt), nil
 }

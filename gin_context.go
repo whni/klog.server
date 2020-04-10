@@ -19,7 +19,9 @@ var ginConfigAPITable = map[string]map[string]gin.HandlerFunc{
 	"/api/0/config/course_comment":             courseCommentConfigHandlerTable,
 	"/api/0/config/relative":                   relativeConfigHandlerTable,
 	"/api/0/config/student":                    studentConfigHandlerTable,
-	"/api/0/config/user":                       userConfigHandlerTable,
+	"/api/0/config/user":                       signupuserConfigHandlerTable,
+	"/api/0/config/registeruser":               registeruserConfigHandlerTable,
+	"/api/0/config/chatroom":                   chatroomConfigHandlerTable,
 	"/api/0/config/cloudmedia":                 cloudMediaConfigHandlerTable,
 	"/api/0/config/template":                   templateConfigHandlerTable,
 	"/api/0/config/story":                      storyConfigHandlerTable,
@@ -37,6 +39,8 @@ var ginWorkflowAPITable = map[string]gin.HandlerFunc{
 	"/api/0/workflow/relative/wxlogin":     relativeWeChatLoginHandler,
 	"/api/0/workflow/relative/findstudent": relativeFindBoundStudentHandler,
 	"/api/0/workflow/relative/extra/edit":  relativeExtraEditHandler,
+	"/api/0/workflow/registeruser/login":   registerUserLoginHandler,
+	"/api/0/workflow/registeruser/logout":  registerUserLogoutHandler,
 	// "/api/0/workflow/relative/extra/delete": relativeExtraDeleteHandler,
 }
 

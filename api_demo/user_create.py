@@ -26,7 +26,7 @@ user_params = [
         "pid": "102030405060708090000002",
         "user_email": "test2@gmail.com",
         "updated_ts": 1576388331,
-        "user_description": "source from fb"
+        "user_description": "source from twtr"
     }
 ]
 

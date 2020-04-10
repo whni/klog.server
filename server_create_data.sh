@@ -19,3 +19,7 @@ python3 api_demo/relative_student_query.py
 
 python3 api_demo/template_create.py
 python3 api_demo/story_create.py
+
+python3 api_demo/user_create.py
+python3 api_demo/registeruser_create.py
+python3 api_demo/chatroom_create.py

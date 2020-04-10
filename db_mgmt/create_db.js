@@ -607,7 +607,7 @@ db.createCollection("story", {
 });
 db.story.createIndex( { "student_pid": 1, "story_ts": 1 }, { unique: true } );
 
-db.createCollection("user", {
+db.createCollection("signupuser", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -632,7 +632,116 @@ db.createCollection("user", {
     validationAction: "error"
 });
 
-db.user.createIndex( { "user_email": 1 }, { unique: true } );
+db.signupuser.createIndex( { "user_email": 1 }, { unique: true } );
+
+db.createCollection("registeruser", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["user_email","user_password"],
+            properties: {
+                user_email: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                updated_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                },
+                user_password: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                gender: {
+                    bsonType: "string",
+                    description: "required string"
+                },
+                dob: {
+                    bsonType: "object",
+                    required: ["year"],
+                    description: "date of birth",
+                    properties: {
+                        year: {
+                            bsonType: "int",
+                            description: "year",
+                        },
+                        month: {
+                            bsonType: "int",
+                            description: "month",
+                        },
+                        day: {
+                            bsonType: "int",
+                            description: "day"
+                        }
+                    }
+                },
+                address: {
+                    bsonType: "object",
+                    required: ["city", "country"],
+                    description: "required object with country/state/city fields",
+                    properties: {
+                        street: {
+                            bsonType: "string",
+                            description: "optional string",
+                        },
+                        code: {
+                            bsonType: "string",
+                            description: "optional string",
+                        },
+                        city: {
+                            bsonType: "string",
+                            description: "required string (>= 2 length)"
+                        },
+                        state: {
+                            bsonType: "string",
+                            description: "required string (>= 2 length)"
+                        },
+                        country: {
+                            bsonType: "string",
+                            description: "required string (2~3 length)"
+                        }
+                    }
+                }
+
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+db.registeruser.createIndex( { "user_email": 1 }, { unique: true } );
+
+
+db.createCollection("chat_room", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["primer_pid", "second_pid"],
+            properties: {
+                primer_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                second_pid: {
+                    bsonType: "objectId",
+                    description: "required ObjectId"
+                },
+                room_tag: {
+                    bsonType: "string",
+                    description: "template desc tags"
+                }, 
+                record_ts: {
+                    bsonType: "long",
+                    description: "required int64 (unix timestamp)"
+                }
+            }
+        }
+    },
+    validationLevel: "strict",
+    validationAction: "error"
+});
+
+db.chat_room.createIndex( { "room_tag": 1, "primer_pid": 1 }, { unique: true } );
 // db info
 print(`[DB] ${db.getName()} [Collections] ${db.getCollectionNames()}`);
 
