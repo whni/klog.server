@@ -70,7 +70,7 @@ for params in user_params:
     http_req.send()
     http_req.print_resp()
 
-api_url = "{}//api/0/workflow/registeruser/login".format(host)
+api_url = "{}/api/0/workflow/registeruser/login".format(host)
 method = HTTPMethod.POST
 
 for params in user_params:
